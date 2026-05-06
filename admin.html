@@ -867,10 +867,13 @@
         </div>
         <div class="form-row">
           <div class="field">
-            <label>Duración check (minutos)</label>
+            <label>Duración TOTAL (minutos)</label>
+            <input type="number" id="evTotalMinutos" value="90" min="5" max="600">
+          </div>
+          <div class="field">
+            <label>Mín. participación (minutos)</label>
             <input type="number" id="evDuracion" value="40" min="5" max="300">
           </div>
-          <div class="field"></div>
         </div>
         <div class="field">
           <label>Lugar / Descripción</label>
@@ -1088,11 +1091,19 @@
 
       if (!nombre) { showAlert('alertEvento', 'Ingresa el nombre del evento.', 'error'); return; }
 
-      const duracion = parseInt(document.getElementById('evDuracion').value) || 40;
+      const duracionMin = parseInt(document.getElementById('evDuracion').value) || 40;
+      const duracionTotal = parseInt(document.getElementById('evTotalMinutos').value) || 90;
 
       const data = await sbFetch('eventos', {
         method: 'POST',
-        body: JSON.stringify({ nombre, fecha: fecha || null, lugar: lugar || null, tolerancia_metros: tolerancia, duracion_check_minutos: duracion })
+        body: JSON.stringify({ 
+          nombre, 
+          fecha: fecha || null, 
+          lugar: lugar || null, 
+          tolerancia_metros: tolerancia, 
+          duracion_check_minutos: duracionMin,
+          duracion_total_minutos: duracionTotal
+        })
       });
 
       if (!data || data.error) { showAlert('alertEvento', 'Error al crear el evento.', 'error'); return; }
