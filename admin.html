@@ -782,15 +782,17 @@
               <input type="email" id="addCorreo" placeholder="Correo @unajma.edu.pe">
               <select id="addCarrera">
                 <option value="">Selecciona carrera</option>
-                <option value="Ingeniería de Sistemas">Ingeniería de Sistemas</option>
-                <option value="Ingeniería Agroindustrial">Ingeniería Agroindustrial</option>
-                <option value="Ingeniería Ambiental">Ingeniería Ambiental</option>
-                <option value="Ingeniería Civil">Ingeniería Civil</option>
-                <option value="Administración de Empresas">Administración de Empresas</option>
-                <option value="Contabilidad">Contabilidad</option>
-                <option value="Educación Primaria Intercultural">Educación Primaria Intercultural</option>
-                <option value="Enfermería">Enfermería</option>
-                <option value="Psicología">Psicología</option>
+                <optgroup label="Facultad de Ingeniería">
+                  <option value="Ingeniería de Sistemas">Ingeniería de Sistemas</option>
+                  <option value="Ingeniería Agroindustrial">Ingeniería Agroindustrial</option>
+                  <option value="Ingeniería Ambiental">Ingeniería Ambiental</option>
+                  <option value="Ingeniería Civil">Ingeniería Civil</option>
+                </optgroup>
+                <optgroup label="Facultad de Ciencias de la Empresa">
+                  <option value="Administración de Empresas">Administración de Empresas</option>
+                  <option value="Contabilidad">Contabilidad</option>
+                  <option value="Educación Primaria Intercultural">Educación Primaria Intercultural</option>
+                </optgroup>
               </select>
               <select id="addEstado">
                 <option value="completado">✓ Completado</option>
@@ -816,6 +818,7 @@
                   <th>Estado</th>
                   <th>Check 1</th>
                   <th>Check 2</th>
+                  <th>Motivo</th>
                   <th>Alerta</th>
                   <th>Acciones</th>
                 </tr>
@@ -1189,6 +1192,7 @@
         <td><span class="badge ${r.estado}">${estadoLabel(r.estado)}</span></td>
         <td style="font-size:0.78rem">${r.check1_valido !== null ? (r.check1_valido ? '✅' : '❌') : '—'} ${r.check1_hora ? formatFecha(r.check1_hora) : ''}</td>
         <td style="font-size:0.78rem">${r.check2_valido !== null ? (r.check2_valido ? '✅' : '❌') : '—'} ${r.check2_hora ? formatFecha(r.check2_hora) : ''}</td>
+        <td style="font-size:0.78rem;color:var(--muted)">${r.razon_salida || '—'}</td>
         <td>${r.alerta_duplicado ? '<span class="alerta-badge">⚠ Duplicado</span>' : '—'}</td>
         <td><button class="btn-del" onclick="eliminarRegistro('${r.id}')" style="font-size:0.75rem;padding:4px 8px">🗑</button></td>
       </tr>
@@ -1448,21 +1452,9 @@
         await sbFetch('asistencias?id=eq.' + id, { method: 'DELETE' });
         showAlert('alertEvento', 'Registro eliminado.', 'success');
       } catch (e) {
-        showAlert('alertEvento', 'Error al eliminar registro.', 'error');
+        showAlert('alertEvento', 'Error al eliminar: ' + e.message, 'error');
       }
       cargarRegistros();
-    }
-
-    // ---- AUTO-REFRESH ----
-    let autoRefreshInterval = null;
-    function iniciarAutoRefresh() {
-      if (autoRefreshInterval) clearInterval(autoRefreshInterval);
-      autoRefreshInterval = setInterval(() => {
-        const evId = document.getElementById('selectorEventoRegistros').value;
-        if (evId && document.getElementById('pageRegistros').classList.contains('active')) {
-          cargarRegistros();
-        }
-      }, 15000);
     }
 
     // ---- AGREGAR REGISTRO MANUAL ----
@@ -1517,7 +1509,6 @@
 
     // ---- ARRANQUE ----
     cargarSelectorEventos();
-    iniciarAutoRefresh();
   </script>
 </body>
 
