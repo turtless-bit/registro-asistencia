@@ -558,14 +558,16 @@
         </div>
       </div>
 
-      <button class="btn-outline" id="btnSalidaAnticipada" onclick="mostrarFormularioSalida()">Quiero registrar mi
-        salida ahora</button>
+      <div style="display:flex; gap:10px; margin-bottom: 16px;">
+        <button class="btn" onclick="validarCompletaManual()" style="background:var(--success); margin:0;">Validar asistencia completa</button>
+      </div>
+      <button class="btn-outline" onclick="mostrarFormularioSalida()" style="margin-top:0;">Justificar salida anticipada</button>
+      
       <div id="formSalidaAnticipada" style="display:none; margin-top:16px;">
-        <p style="font-size:0.85rem; color:var(--warn); margin-bottom:12px;">⚠️ El evento requiere <span
-            id="tiempoRequerido">40</span> minutos de participación.</p>
-        <label style="font-size:0.8rem;">Opcional:</label>
+        <p style="font-size:0.85rem; color:var(--warn); margin-bottom:12px;">⚠️ Vas a retirarte antes de completar el tiempo mínimo de <span id="tiempoRequerido">40</span> minutos.</p>
+        <label style="font-size:0.8rem;">Opcional: Motivo de tu salida</label>
         <textarea id="razonSalida" rows="2" placeholder="Explica brevemente por qué te retiras antes..."></textarea>
-        <button class="btn" style="margin-top:12px; background: var(--warn);" onclick="ejecutarCheck2Manual()">Confirmar
+        <button class="btn" style="margin-top:12px; background: var(--warn);" onclick="ejecutarSalidaAnticipada()">Confirmar
           salida anticipada</button>
       </div>
     </div>
@@ -619,7 +621,8 @@
     let asistenciaId = null;
     let countdownInterval = null;
     let check1Timestamp = null;
-    let duracionMs = 40 * 60 * 1000; // default, se sobrescribe con evento
+    let duracionMs = 40 * 60 * 1000; // total duration
+    let minParticipacionMs = 40 * 60 * 1000; // min to mark as complete
 
     // ---- UTILIDADES ----
 
@@ -816,9 +819,14 @@
       if (eventoData.lugar) meta.push(eventoData.lugar);
       document.getElementById('eventoMeta').textContent = meta.join(' · ');
 
-      // Duración del evento desde BD o 40 min por defecto
-      duracionMs = (eventoData.duracion_check_minutos || 40) * 60 * 1000;
-      document.getElementById('tiempoRequerido').textContent = eventoData.duracion_check_minutos || 40;
+      // Duración del evento desde BD
+      const minP = eventoData.duracion_check_minutos || 40;
+      const totalP = eventoData.duracion_total_minutos || 90;
+      
+      duracionMs = totalP * 60 * 1000;
+      minParticipacionMs = minP * 60 * 1000;
+      
+      document.getElementById('tiempoRequerido').textContent = minP;
 
       // Siempre mostrar formulario, el usuario puede continuar con la sección de DNI
       showScreen('screenForm');
@@ -976,7 +984,6 @@
 
     function mostrarFormularioSalida() {
       document.getElementById('formSalidaAnticipada').style.display = 'block';
-      document.getElementById('btnSalidaAnticipada').style.display = 'none';
     }
 
     // ---- CHECK 2 AUTOMÁTICO ----
@@ -1020,9 +1027,59 @@
       mostrarFinal({ estado, parcial_tipo: patch.parcial_tipo });
     }
 
-    // ---- CHECK 2 MANUAL ----
+    // ---- CHECK 2 MANUAL (COMPLETA) ----
 
-    async function ejecutarCheck2Manual() {
+    async function validarCompletaManual() {
+      const transcurrido = Date.now() - check1Timestamp;
+      if (transcurrido < minParticipacionMs) {
+        const falta = Math.ceil((minParticipacionMs - transcurrido) / 60000);
+        alert(`Debes participar al menos ${eventoData.duracion_check_minutos || 40} minutos. Te faltan ${falta} min.`);
+        return;
+      }
+
+      clearInterval(countdownInterval);
+      showScreen('screenGPS2');
+
+      let gps;
+      try {
+        gps = await obtenerGPS();
+      } catch (e) {
+        await sbFetch('asistencias?id=eq.' + asistenciaId, {
+          method: 'PATCH',
+          body: JSON.stringify({
+            estado: 'parcial',
+            check2_valido: false,
+            check2_hora: new Date().toISOString()
+          })
+        });
+        mostrarFinal({ estado: 'parcial', check2_valido: false });
+        return;
+      }
+
+      const perimetro = eventoData?.perimetro || null;
+      const tolerancia = eventoData?.tolerancia_metros || 10;
+      const resultado = validarUbicacion(gps.lat, gps.lng, perimetro, tolerancia);
+
+      const patch = {
+        check2_lat: gps.lat,
+        check2_lng: gps.lng,
+        check2_hora: new Date().toISOString(),
+        check2_valido: resultado.valido,
+        estado: 'completado'
+      };
+
+      await sbFetch('asistencias?id=eq.' + asistenciaId, {
+        method: 'PATCH',
+        body: JSON.stringify(patch)
+      });
+
+      localStorage.removeItem('asistencia_sesion_' + eventoId);
+      mostrarFinal({ estado: 'completado', check2_valido: resultado.valido });
+    }
+
+    // ---- CHECK 2 MANUAL (SALIDA ANTICIPADA) ----
+
+    async function ejecutarSalidaAnticipada() {
       clearInterval(countdownInterval);
       const razon = document.getElementById('razonSalida').value.trim();
       showScreen('screenGPS2');
@@ -1035,13 +1092,12 @@
           method: 'PATCH',
           body: JSON.stringify({
             estado: 'parcial',
-            parcial_tipo: 'tiempo',
             razon_salida: razon || null,
             check2_valido: false,
             check2_hora: new Date().toISOString()
           })
         });
-        mostrarFinal({ estado: 'parcial', parcial_tipo: 'tiempo' });
+        mostrarFinal({ estado: 'parcial', check2_valido: false });
         return;
       }
 
@@ -1049,14 +1105,13 @@
       const tolerancia = eventoData?.tolerancia_metros || 10;
       const resultado = validarUbicacion(gps.lat, gps.lng, perimetro, tolerancia);
 
-      // Siempre parcial por tiempo si es manual
+      // Siempre parcial por tiempo si usa este botón
       const patch = {
         check2_lat: gps.lat,
         check2_lng: gps.lng,
         check2_hora: new Date().toISOString(),
         check2_valido: resultado.valido,
         estado: 'parcial',
-        parcial_tipo: 'tiempo',
         razon_salida: razon || null
       };
 
@@ -1066,7 +1121,7 @@
       });
 
       localStorage.removeItem('asistencia_sesion_' + eventoId);
-      mostrarFinal({ estado: 'parcial', parcial_tipo: 'tiempo' });
+      mostrarFinal({ estado: 'parcial', check2_valido: resultado.valido });
     }
 
     function mostrarFinal(reg) {
