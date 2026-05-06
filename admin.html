@@ -857,9 +857,13 @@
         </div>
         <div style="padding:16px 20px;border-top:1px solid var(--border)">
           <label style="margin-bottom:8px">Subir coordenadas manualmente</label>
-          <p style="font-size:0.78rem;color:var(--muted);margin-bottom:10px">Pega coordenadas en formato <code>lat, lng</code> (una por línea)</p>
-          <textarea id="coordsManual" rows="4" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:11px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:0.85rem;resize:vertical" placeholder="-13.657618, -73.384120&#10;-13.657800, -73.384300&#10;-13.658000, -73.383900"></textarea>
-          <button class="btn-secondary" onclick="subirCoordenadas()" style="margin-top:8px">📤 Agregar coordenadas</button>
+          <p style="font-size:0.78rem;color:var(--muted);margin-bottom:10px">Pega coordenadas en formato
+            <code>lat, lng</code> (una por línea)</p>
+          <textarea id="coordsManual" rows="4"
+            style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:11px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:0.85rem;resize:vertical"
+            placeholder="-13.657618, -73.384120&#10;-13.657800, -73.384300&#10;-13.658000, -73.383900"></textarea>
+          <button class="btn-secondary" onclick="subirCoordenadas()" style="margin-top:8px">📤 Agregar
+            coordenadas</button>
         </div>
       </div>
     </div>
@@ -1146,7 +1150,7 @@
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
           pos => map.setView([pos.coords.latitude, pos.coords.longitude], 16),
-          () => {},
+          () => { },
           { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
         );
       }
@@ -1243,12 +1247,22 @@
       actualizarListaPuntos();
     }
 
+    let miUbicacionMarker = null;
     async function usarMiUbicacion() {
       if (!navigator.geolocation) { alert('Tu navegador no soporta geolocalización'); return; }
       navigator.geolocation.getCurrentPosition(
         pos => {
           const { latitude, longitude } = pos.coords;
           map.setView([latitude, longitude], 18);
+          if (miUbicacionMarker) map.removeLayer(miUbicacionMarker);
+          miUbicacionMarker = L.marker([latitude, longitude], {
+            icon: L.divIcon({
+              className: '',
+              html: '<div style="width:16px;height:16px;background:#4f8ef7;border:3px solid #fff;border-radius:50%;box-shadow:0 0 8px rgba(79,142,247,0.6)"></div>',
+              iconSize: [16, 16],
+              iconAnchor: [8, 8]
+            })
+          }).addTo(map).bindPopup('📍 Tu ubicación');
         },
         err => { alert('No se pudo obtener tu ubicación: ' + err.message); },
         { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
@@ -1275,12 +1289,44 @@
 
     async function eliminarEvento(id) {
       if (!confirm('¿Estás seguro de eliminar este evento y TODOS sus registros de asistencia?')) return;
-      await sbFetch('asistencias?evento_id=eq.' + id, { method: 'DELETE' });
-      await sbFetch('eventos?id=eq.' + id, { method: 'DELETE' });
-      showAlert('alertEvento', 'Evento eliminado correctamente.', 'success');
-      cargarListaEventos();
-      cargarSelectorEventos();
-      cargarSelectorEventosPerimetro();
+      try {
+        await sbFetch('asistencias?evento_id=eq.' + id, { method: 'DELETE' });
+        const res = await sbFetch('eventos?id=eq.' + id, { method: 'DELETE' });
+        if (res && res.message) {
+          showAlert('alertEvento', 'Error: ' + res.message + '. Verifica permisos en Supabase (RLS).', 'error');
+        } else {
+          showAlert('alertEvento', 'Evento eliminado correctamente.', 'success');
+        }
+      } catch (e) {
+        showAlert('alertEvento', 'Error de conexión al eliminar: ' + e.message, 'error');
+      }
+      await cargarListaEventos();
+      await cargarSelectorEventos();
+      await cargarSelectorEventosPerimetro();
+    }
+
+    // Convierte DMS (13°39'03.4"S 73°21'55.3"W) a decimal
+    function dmsADecimal(grados, minutos, segundos, dir) {
+      let dec = parseFloat(grados) + parseFloat(minutos) / 60 + parseFloat(segundos) / 3600;
+      if (dir === 'S' || dir === 'W') dec = -dec;
+      return dec;
+    }
+
+    function parsearCoordenada(linea) {
+      // Formato DMS: 13°39'03.4"S 73°21'55.3"W
+      const dmsRegex = /(\d+)[°](\d+)[''′](\d+\.?\d*)["″]([NS])\s+(\d+)[°](\d+)[''′](\d+\.?\d*)["″]([EWO])/i;
+      const dmsMatch = linea.match(dmsRegex);
+      if (dmsMatch) {
+        const lat = dmsADecimal(dmsMatch[1], dmsMatch[2], dmsMatch[3], dmsMatch[4].toUpperCase());
+        const lng = dmsADecimal(dmsMatch[5], dmsMatch[6], dmsMatch[7], dmsMatch[8].toUpperCase() === 'O' ? 'W' : dmsMatch[8].toUpperCase());
+        return { lat, lng };
+      }
+      // Formato decimal: -13.657618, -73.384120
+      const partes = linea.split(',').map(s => parseFloat(s.trim()));
+      if (partes.length >= 2 && !isNaN(partes[0]) && !isNaN(partes[1])) {
+        return { lat: partes[0], lng: partes[1] };
+      }
+      return null;
     }
 
     function subirCoordenadas() {
@@ -1290,9 +1336,9 @@
       const lineas = text.split('\n').filter(l => l.trim());
       let agregados = 0;
       lineas.forEach(linea => {
-        const partes = linea.split(',').map(s => parseFloat(s.trim()));
-        if (partes.length >= 2 && !isNaN(partes[0]) && !isNaN(partes[1])) {
-          agregarPunto(partes[0], partes[1]);
+        const coord = parsearCoordenada(linea.trim());
+        if (coord) {
+          agregarPunto(coord.lat, coord.lng);
           agregados++;
         }
       });
@@ -1301,7 +1347,7 @@
         showAlert('alertPerimetro', agregados + ' punto(s) agregados correctamente.', 'success');
         if (puntos.length > 0) map.setView([puntos[0].lat, puntos[0].lng], 17);
       } else {
-        showAlert('alertPerimetro', 'No se encontraron coordenadas válidas. Usa formato: lat, lng', 'error');
+        showAlert('alertPerimetro', 'Formato no reconocido. Usa: lat, lng o DMS (13°39\'03.4"S 73°21\'55.3"W)', 'error');
       }
     }
 
