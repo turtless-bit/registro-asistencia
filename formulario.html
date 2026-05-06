@@ -458,13 +458,13 @@
 
       <div class="field">
         <label>Nombres</label>
-        <input type="text" id="nombres" autocomplete="given-name">
+        <input type="text" id="nombres" placeholder="Ej: Carlos Mauricio" autocomplete="given-name">
         <div class="field-error" id="err-nombres"></div>
       </div>
 
       <div class="field">
         <label>Apellidos (ambos obligatorios)</label>
-        <input type="text" id="apellidos" autocomplete="family-name">
+        <input type="text" id="apellidos" placeholder="Ej: Silvera Hurtado" autocomplete="family-name">
         <div class="field-error" id="err-apellidos"></div>
       </div>
 
@@ -531,6 +531,14 @@
       <div class="result-icon ok">✅</div>
       <div class="result-title">Asistencia registrada</div>
       <div class="result-msg">Tu primer registro fue validado correctamente dentro del área del evento.</div>
+
+      <div style="background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.25);border-radius:10px;padding:14px 16px;margin-bottom:18px;font-size:0.82rem;line-height:1.6;color:var(--warn)">
+        ⚠️ <strong>Importante:</strong><br>
+        • Debes permanecer en el área del evento para que tu registro sea exitoso.<br>
+        • No cierres esta pestaña.<br>
+        • El segundo registro se realizará automáticamente cuando el contador llegue a cero.<br>
+        • Si cierras esta pestaña, puedes volver a escanear el QR y completar tu registro con tu DNI.
+      </div>
 
       <div class="check2-waiting">
         <div class="dot-pulse"></div>

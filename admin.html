@@ -646,6 +646,50 @@
         grid-template-columns: 1fr;
       }
     }
+
+    /* FORMULARIO AGREGAR REGISTRO */
+    .add-form {
+      display: none;
+      padding: 20px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface2);
+    }
+    .add-form.visible { display: block; }
+    .add-form .add-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    .add-form input, .add-form select {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 9px 12px;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.85rem;
+      outline: none;
+      width: 100%;
+    }
+    .add-form input:focus, .add-form select:focus { border-color: var(--accent); }
+    .add-form .add-actions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    .btn-add {
+      padding: 8px 16px;
+      background: var(--success);
+      border: none;
+      border-radius: 8px;
+      color: #fff;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .btn-add:hover { opacity: 0.88; }
   </style>
 </head>
 
@@ -722,7 +766,43 @@
               <option value="pendiente">Pendiente</option>
               <option value="parcial">Parcial</option>
             </select>
+            <select id="filtroCarrera" onchange="filtrarTabla()">
+              <option value="">Todas las carreras</option>
+            </select>
             <button class="btn-export" onclick="exportarCSV()">⬇ Exportar CSV</button>
+            <button class="btn-secondary" onclick="toggleFormAgregar()" style="margin-left:0">➕ Agregar registro</button>
+          </div>
+          <div class="add-form" id="addForm">
+            <div class="add-row">
+              <input type="text" id="addNombre" placeholder="Nombres">
+              <input type="text" id="addApellidos" placeholder="Apellidos">
+              <input type="text" id="addDni" placeholder="DNI (8 dígitos)" maxlength="8" inputmode="numeric">
+            </div>
+            <div class="add-row">
+              <input type="email" id="addCorreo" placeholder="Correo @unajma.edu.pe">
+              <select id="addCarrera">
+                <option value="">Selecciona carrera</option>
+                <option value="Ingeniería de Sistemas">Ingeniería de Sistemas</option>
+                <option value="Ingeniería Agroindustrial">Ingeniería Agroindustrial</option>
+                <option value="Ingeniería Ambiental">Ingeniería Ambiental</option>
+                <option value="Ingeniería Civil">Ingeniería Civil</option>
+                <option value="Administración de Empresas">Administración de Empresas</option>
+                <option value="Contabilidad">Contabilidad</option>
+                <option value="Educación Primaria Intercultural">Educación Primaria Intercultural</option>
+                <option value="Enfermería">Enfermería</option>
+                <option value="Psicología">Psicología</option>
+              </select>
+              <select id="addEstado">
+                <option value="completado">✓ Completado</option>
+                <option value="pendiente">⏳ Pendiente</option>
+                <option value="parcial">⚠ Parcial</option>
+              </select>
+            </div>
+            <div class="add-actions">
+              <button class="btn-add" onclick="agregarRegistro()">Guardar registro</button>
+              <button class="btn-secondary" onclick="toggleFormAgregar()" style="margin:0">Cancelar</button>
+              <span id="addMsg" style="font-size:0.8rem;color:var(--error)"></span>
+            </div>
           </div>
           <div style="overflow-x: auto;">
             <table>
@@ -737,7 +817,7 @@
                   <th>Check 1</th>
                   <th>Check 2</th>
                   <th>Alerta</th>
-                  <th>Registro</th>
+                  <th>Acciones</th>
                 </tr>
               </thead>
               <tbody id="tablaBody"></tbody>
@@ -768,7 +848,7 @@
         <div class="form-row">
           <div class="field">
             <label>Fecha</label>
-            <input type="date" id="evFecha">
+            <input type="date" id="evFecha" min="2020-01-01" max="2099-12-31">
           </div>
           <div class="field">
             <label>Tolerancia GPS (metros)</label>
@@ -857,8 +937,7 @@
         </div>
         <div style="padding:16px 20px;border-top:1px solid var(--border)">
           <label style="margin-bottom:8px">Subir coordenadas manualmente</label>
-          <p style="font-size:0.78rem;color:var(--muted);margin-bottom:10px">Pega coordenadas en formato
-            <code>lat, lng</code> (una por línea)</p>
+          <p style="font-size:0.78rem;color:var(--muted);margin-bottom:10px">Una coordenada por línea (decimal o DMS)</p>
           <textarea id="coordsManual" rows="4"
             style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:11px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:0.85rem;resize:vertical"
             placeholder="-13.657618, -73.384120&#10;-13.657800, -73.384300&#10;-13.658000, -73.383900"></textarea>
@@ -1063,9 +1142,19 @@
 
       actualizarStats();
       renderTabla(todosLosRegistros);
+      actualizarFiltroCarreras();
       document.getElementById('loadingRegistros').style.display = 'none';
       document.getElementById('tableContent').style.display = 'block';
       document.getElementById('statsGrid').style.display = 'grid';
+    }
+
+    function actualizarFiltroCarreras() {
+      const sel = document.getElementById('filtroCarrera');
+      const val = sel.value;
+      const carreras = [...new Set(todosLosRegistros.map(r => r.carrera).filter(Boolean))].sort();
+      sel.innerHTML = '<option value="">Todas las carreras</option>';
+      carreras.forEach(c => { const o = document.createElement('option'); o.value = c; o.textContent = c; sel.appendChild(o); });
+      sel.value = val;
     }
 
     function actualizarStats() {
@@ -1101,7 +1190,7 @@
         <td style="font-size:0.78rem">${r.check1_valido !== null ? (r.check1_valido ? '✅' : '❌') : '—'} ${r.check1_hora ? formatFecha(r.check1_hora) : ''}</td>
         <td style="font-size:0.78rem">${r.check2_valido !== null ? (r.check2_valido ? '✅' : '❌') : '—'} ${r.check2_hora ? formatFecha(r.check2_hora) : ''}</td>
         <td>${r.alerta_duplicado ? '<span class="alerta-badge">⚠ Duplicado</span>' : '—'}</td>
-        <td style="font-size:0.78rem;color:var(--muted)">${formatFecha(r.creado_en)}</td>
+        <td><button class="btn-del" onclick="eliminarRegistro('${r.id}')" style="font-size:0.75rem;padding:4px 8px">🗑</button></td>
       </tr>
     `).join('');
     }
@@ -1113,10 +1202,12 @@
     function filtrarTabla() {
       const texto = document.getElementById('filtroNombre').value.toLowerCase();
       const estado = document.getElementById('filtroEstado').value;
+      const carrera = document.getElementById('filtroCarrera').value;
       const filtrados = todosLosRegistros.filter(r => {
         const coincideTexto = !texto || (r.nombre + r.apellidos + r.dni).toLowerCase().includes(texto);
         const coincideEstado = !estado || r.estado === estado;
-        return coincideTexto && coincideEstado;
+        const coincideCarrera = !carrera || r.carrera === carrera;
+        return coincideTexto && coincideEstado && coincideCarrera;
       });
       renderTabla(filtrados);
     }
@@ -1351,8 +1442,82 @@
       }
     }
 
+    async function eliminarRegistro(id) {
+      if (!confirm('¿Eliminar este registro de asistencia?')) return;
+      try {
+        await sbFetch('asistencias?id=eq.' + id, { method: 'DELETE' });
+        showAlert('alertEvento', 'Registro eliminado.', 'success');
+      } catch (e) {
+        showAlert('alertEvento', 'Error al eliminar registro.', 'error');
+      }
+      cargarRegistros();
+    }
+
+    // ---- AUTO-REFRESH ----
+    let autoRefreshInterval = null;
+    function iniciarAutoRefresh() {
+      if (autoRefreshInterval) clearInterval(autoRefreshInterval);
+      autoRefreshInterval = setInterval(() => {
+        const evId = document.getElementById('selectorEventoRegistros').value;
+        if (evId && document.getElementById('pageRegistros').classList.contains('active')) {
+          cargarRegistros();
+        }
+      }, 15000);
+    }
+
+    // ---- AGREGAR REGISTRO MANUAL ----
+    function toggleFormAgregar() {
+      document.getElementById('addForm').classList.toggle('visible');
+      document.getElementById('addMsg').textContent = '';
+    }
+
+    async function agregarRegistro() {
+      const evId = document.getElementById('selectorEventoRegistros').value;
+      if (!evId) { document.getElementById('addMsg').textContent = 'Selecciona un evento primero.'; return; }
+      const nombre = document.getElementById('addNombre').value.trim();
+      const apellidos = document.getElementById('addApellidos').value.trim();
+      const dni = document.getElementById('addDni').value.trim();
+      const correo = document.getElementById('addCorreo').value.trim();
+      const carrera = document.getElementById('addCarrera').value;
+      const estado = document.getElementById('addEstado').value;
+
+      if (!nombre || !apellidos || !dni || !correo || !carrera) {
+        document.getElementById('addMsg').textContent = 'Completa todos los campos.';
+        return;
+      }
+      if (!/^\d{8}$/.test(dni)) {
+        document.getElementById('addMsg').textContent = 'DNI debe tener 8 dígitos.';
+        return;
+      }
+
+      const now = new Date().toISOString();
+      const body = {
+        evento_id: evId, nombre, apellidos, dni, correo, carrera, estado,
+        check1_hora: now, check1_valido: true,
+        check2_hora: estado === 'completado' ? now : null,
+        check2_valido: estado === 'completado' ? true : null
+      };
+
+      try {
+        const res = await sbFetch('asistencias', { method: 'POST', body: JSON.stringify(body) });
+        if (res && res.length > 0) {
+          document.getElementById('addMsg').style.color = 'var(--success)';
+          document.getElementById('addMsg').textContent = '✓ Registro agregado';
+          ['addNombre','addApellidos','addDni','addCorreo'].forEach(id => document.getElementById(id).value = '');
+          document.getElementById('addCarrera').value = '';
+          cargarRegistros();
+          setTimeout(() => { document.getElementById('addMsg').textContent = ''; document.getElementById('addMsg').style.color = 'var(--error)'; }, 2000);
+        } else {
+          document.getElementById('addMsg').textContent = 'Error al guardar. DNI ya existe o error de BD.';
+        }
+      } catch(e) {
+        document.getElementById('addMsg').textContent = 'Error de conexión.';
+      }
+    }
+
     // ---- ARRANQUE ----
     cargarSelectorEventos();
+    iniciarAutoRefresh();
   </script>
 </body>
 
