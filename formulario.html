@@ -1,0 +1,939 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Registro de Asistencia</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Serif+Display&display=swap');
+
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface2: #22263a;
+    --accent: #4f8ef7;
+    --accent2: #7c3aed;
+    --success: #10b981;
+    --error: #ef4444;
+    --warn: #f59e0b;
+    --text: #e8eaf0;
+    --muted: #6b7280;
+    --border: #2d3148;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px 16px 48px;
+  }
+
+  .header {
+    text-align: center;
+    margin-bottom: 32px;
+    padding-top: 16px;
+  }
+
+  .header .logo {
+    width: 56px;
+    height: 56px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px;
+    font-size: 24px;
+  }
+
+  .header h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.7rem;
+    font-weight: 400;
+    line-height: 1.2;
+    margin-bottom: 6px;
+  }
+
+  .header p {
+    color: var(--muted);
+    font-size: 0.875rem;
+  }
+
+  .evento-banner {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 10px;
+    padding: 14px 18px;
+    margin-bottom: 24px;
+    width: 100%;
+    max-width: 480px;
+  }
+
+  .evento-banner .ev-nombre {
+    font-weight: 600;
+    font-size: 1rem;
+    margin-bottom: 4px;
+  }
+
+  .evento-banner .ev-meta {
+    font-size: 0.8rem;
+    color: var(--muted);
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px 24px;
+    width: 100%;
+    max-width: 480px;
+  }
+
+  .field {
+    margin-bottom: 18px;
+  }
+
+  label {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 7px;
+  }
+
+  input, select {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 13px 16px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem;
+    outline: none;
+    transition: border-color 0.2s;
+    appearance: none;
+  }
+
+  input:focus, select:focus {
+    border-color: var(--accent);
+  }
+
+  input.error, select.error {
+    border-color: var(--error);
+  }
+
+  .field-error {
+    font-size: 0.75rem;
+    color: var(--error);
+    margin-top: 5px;
+    display: none;
+  }
+
+  .field-error.visible {
+    display: block;
+  }
+
+  .select-wrap {
+    position: relative;
+  }
+
+  .select-wrap::after {
+    content: '▾';
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--muted);
+    pointer-events: none;
+  }
+
+  select option {
+    background: var(--surface2);
+    color: var(--text);
+  }
+
+  optgroup {
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  .btn {
+    width: 100%;
+    padding: 15px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border: none;
+    border-radius: 12px;
+    color: #fff;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.1s;
+    margin-top: 8px;
+  }
+
+  .btn:hover { opacity: 0.9; }
+  .btn:active { transform: scale(0.98); }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  /* Estados de la pantalla */
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  /* Pantalla de carga GPS */
+  .gps-status {
+    text-align: center;
+    padding: 32px 0;
+  }
+
+  .spinner {
+    width: 48px;
+    height: 48px;
+    border: 3px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 20px;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .gps-status h2 {
+    font-size: 1.1rem;
+    margin-bottom: 8px;
+  }
+
+  .gps-status p {
+    color: var(--muted);
+    font-size: 0.875rem;
+  }
+
+  /* Resultado */
+  .result-icon {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    margin: 0 auto 20px;
+  }
+
+  .result-icon.ok { background: rgba(16,185,129,0.15); }
+  .result-icon.error { background: rgba(239,68,68,0.15); }
+  .result-icon.warn { background: rgba(245,158,11,0.15); }
+
+  .result-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.4rem;
+    text-align: center;
+    margin-bottom: 10px;
+  }
+
+  .result-msg {
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.9rem;
+    line-height: 1.6;
+    margin-bottom: 24px;
+  }
+
+  /* Countdown */
+  .countdown-box {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 24px;
+    text-align: center;
+    margin-bottom: 20px;
+  }
+
+  .countdown-label {
+    font-size: 0.75rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 12px;
+  }
+
+  .countdown-time {
+    font-family: 'DM Serif Display', serif;
+    font-size: 3rem;
+    color: var(--accent);
+    letter-spacing: 0.05em;
+    line-height: 1;
+    margin-bottom: 10px;
+  }
+
+  .countdown-sub {
+    font-size: 0.8rem;
+    color: var(--muted);
+  }
+
+  .progress-bar {
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    margin-top: 16px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    border-radius: 2px;
+    transition: width 1s linear;
+  }
+
+  /* DNI recovery */
+  .recovery-box {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+  }
+
+  .recovery-box p {
+    font-size: 0.85rem;
+    color: var(--muted);
+    margin-bottom: 12px;
+  }
+
+  .recovery-row {
+    display: flex;
+    gap: 8px;
+  }
+
+  .recovery-row input {
+    flex: 1;
+  }
+
+  .btn-sm {
+    padding: 13px 18px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  .alert {
+    padding: 12px 16px;
+    border-radius: 10px;
+    font-size: 0.85rem;
+    margin-bottom: 16px;
+    display: none;
+  }
+
+  .alert.visible { display: block; }
+  .alert.success { background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.3); color: #10b981; }
+  .alert.error { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); color: #ef4444; }
+  .alert.warn { background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.3); color: #f59e0b; }
+
+  .check2-waiting {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    background: rgba(79,142,247,0.08);
+    border: 1px solid rgba(79,142,247,0.2);
+    border-radius: 10px;
+    font-size: 0.85rem;
+    color: var(--accent);
+    margin-bottom: 16px;
+  }
+
+  .dot-pulse {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+    animation: pulse 1.5s ease-in-out infinite;
+    flex-shrink: 0;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.7); }
+  }
+
+  .final-ok {
+    text-align: center;
+    padding: 16px 0;
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+  }
+
+  .badge.ok { background: rgba(16,185,129,0.15); color: #10b981; }
+  .badge.parcial { background: rgba(245,158,11,0.15); color: #f59e0b; }
+  .badge.fuera { background: rgba(239,68,68,0.15); color: #ef4444; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">📋</div>
+  <h1>Registro de Asistencia</h1>
+  <p>UNAJMA — Sistema de verificación GPS</p>
+</div>
+
+<div class="evento-banner" id="eventoBanner">
+  <div class="ev-nombre" id="eventoNombre">Cargando evento...</div>
+  <div class="ev-meta" id="eventoMeta"></div>
+</div>
+
+<div class="card">
+
+  <!-- PANTALLA 1: FORMULARIO -->
+  <div class="screen active" id="screenForm">
+    <div class="alert" id="alertForm"></div>
+
+    <div class="field">
+      <label>Nombres</label>
+      <input type="text" id="nombres" placeholder="Tus nombres" autocomplete="given-name">
+      <div class="field-error" id="err-nombres">Ingresa tus nombres</div>
+    </div>
+
+    <div class="field">
+      <label>Apellidos</label>
+      <input type="text" id="apellidos" placeholder="Tus apellidos" autocomplete="family-name">
+      <div class="field-error" id="err-apellidos">Ingresa tus apellidos</div>
+    </div>
+
+    <div class="field">
+      <label>DNI</label>
+      <input type="text" id="dni" placeholder="8 dígitos" maxlength="8" inputmode="numeric">
+      <div class="field-error" id="err-dni">DNI debe tener 8 dígitos</div>
+    </div>
+
+    <div class="field">
+      <label>Correo institucional</label>
+      <input type="email" id="correo" placeholder="usuario@unajma.edu.pe" inputmode="email">
+      <div class="field-error" id="err-correo">Debe ser un correo @unajma.edu.pe</div>
+    </div>
+
+    <div class="field">
+      <label>Carrera</label>
+      <div class="select-wrap">
+        <select id="carrera">
+          <option value="">Selecciona tu carrera</option>
+          <optgroup label="Facultad de Ingeniería">
+            <option value="Ingeniería de Sistemas">Ingeniería de Sistemas</option>
+            <option value="Ingeniería Agroindustrial">Ingeniería Agroindustrial</option>
+            <option value="Ingeniería Ambiental">Ingeniería Ambiental</option>
+            <option value="Ingeniería Civil">Ingeniería Civil</option>
+          </optgroup>
+          <optgroup label="Facultad de Ciencias de la Empresa">
+            <option value="Administración de Empresas">Administración de Empresas</option>
+            <option value="Contabilidad">Contabilidad</option>
+            <option value="Educación Primaria Intercultural">Educación Primaria Intercultural</option>
+            <option value="Enfermería">Enfermería</option>
+            <option value="Psicología">Psicología</option>
+          </optgroup>
+        </select>
+      </div>
+      <div class="field-error" id="err-carrera">Selecciona tu carrera</div>
+    </div>
+
+    <button class="btn" id="btnRegistrar" onclick="iniciarRegistro()">
+      Registrar asistencia
+    </button>
+  </div>
+
+  <!-- PANTALLA 2: OBTENIENDO GPS -->
+  <div class="screen" id="screenGPS">
+    <div class="gps-status">
+      <div class="spinner"></div>
+      <h2 id="gpsMsg">Obteniendo tu ubicación...</h2>
+      <p id="gpsSub">Acepta el permiso de ubicación cuando el navegador lo solicite</p>
+    </div>
+  </div>
+
+  <!-- PANTALLA 3: CONTADOR CHECK 2 -->
+  <div class="screen" id="screenWaiting">
+    <div class="result-icon ok">✅</div>
+    <div class="result-title">Asistencia registrada</div>
+    <div class="result-msg">Tu primer registro fue validado correctamente dentro del área del evento.</div>
+
+    <div class="check2-waiting">
+      <div class="dot-pulse"></div>
+      <span>Segunda verificación en progreso</span>
+    </div>
+
+    <div class="countdown-box">
+      <div class="countdown-label">Segunda verificación en</div>
+      <div class="countdown-time" id="countdownDisplay">40:00</div>
+      <div class="countdown-sub">Mantén esta página abierta o vuelve antes de que termine</div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="progressFill" style="width:100%"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PANTALLA 4: OBTENIENDO GPS CHECK 2 -->
+  <div class="screen" id="screenGPS2">
+    <div class="gps-status">
+      <div class="spinner"></div>
+      <h2>Verificación final</h2>
+      <p>Obteniendo tu ubicación para confirmar tu asistencia completa...</p>
+    </div>
+  </div>
+
+  <!-- PANTALLA 5: RESULTADO FINAL -->
+  <div class="screen" id="screenFinal">
+    <div class="final-ok" id="finalContent"></div>
+  </div>
+
+  <!-- PANTALLA 6: RECUPERAR SESIÓN -->
+  <div class="screen" id="screenRecovery">
+    <div class="result-icon warn">⚠️</div>
+    <div class="result-title">Sesión no encontrada</div>
+    <div class="result-msg">Ingresa tu DNI para retomar tu registro y continuar con el contador.</div>
+    <div class="alert" id="alertRecovery"></div>
+    <div class="recovery-row">
+      <input type="text" id="dniRecovery" placeholder="Tu DNI" maxlength="8" inputmode="numeric">
+      <button class="btn-sm" onclick="recuperarSesion()">Buscar</button>
+    </div>
+  </div>
+
+  <!-- PANTALLA 7: FUERA DE PERÍMETRO -->
+  <div class="screen" id="screenFuera">
+    <div class="result-icon error">📍</div>
+    <div class="result-title">Fuera del área</div>
+    <div class="result-msg" id="fueraMsg">Tu ubicación no está dentro del área del evento. Acércate al lugar y vuelve a intentarlo.</div>
+    <button class="btn" onclick="reintentar()" style="margin-top:8px">Volver a intentar</button>
+  </div>
+
+  <!-- PANTALLA 8: SIN EVENTO -->
+  <div class="screen" id="screenNoEvento">
+    <div class="result-icon error">❌</div>
+    <div class="result-title">Evento no encontrado</div>
+    <div class="result-msg">El enlace no es válido o el evento no existe. Contacta al organizador.</div>
+  </div>
+
+</div>
+
+<script>
+  const SUPABASE_URL = 'https://ccvluulbkjofghzpttfb.supabase.co';
+  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNjdmx1dWxia2pvZmdoenB0dGZiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgwMjI1ODksImV4cCI6MjA5MzU5ODU4OX0.Na9TJ5g3Xr22E7h-28Eol0Bv-ikXsYWvuRsoKkmRrfI';
+  const DURACION_MS = 40 * 60 * 1000;
+
+  let eventoId = null;
+  let eventoData = null;
+  let asistenciaId = null;
+  let countdownInterval = null;
+  let registroActual = null;
+
+  // ---- UTILIDADES ----
+
+  async function sbFetch(path, opts = {}) {
+    const res = await fetch(SUPABASE_URL + '/rest/v1/' + path, {
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': 'Bearer ' + SUPABASE_KEY,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=representation',
+        ...opts.headers
+      },
+      ...opts
+    });
+    const text = await res.text();
+    return text ? JSON.parse(text) : [];
+  }
+
+  function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+  }
+
+  function showAlert(elId, msg, tipo) {
+    const el = document.getElementById(elId);
+    el.textContent = msg;
+    el.className = 'alert visible ' + tipo;
+  }
+
+  function getFingerprint() {
+    const nav = navigator;
+    const raw = [nav.userAgent, screen.width, screen.height, screen.colorDepth,
+      Intl.DateTimeFormat().resolvedOptions().timeZone, nav.language,
+      nav.hardwareConcurrency || 0].join('|');
+    let hash = 0;
+    for (let i = 0; i < raw.length; i++) {
+      hash = ((hash << 5) - hash) + raw.charCodeAt(i);
+      hash |= 0;
+    }
+    return Math.abs(hash).toString(36);
+  }
+
+  // ---- GEOMETRÍA ----
+
+  function puntoEnPoligono(lat, lng, poligono) {
+    let dentro = false;
+    const n = poligono.length;
+    for (let i = 0, j = n - 1; i < n; j = i++) {
+      const xi = poligono[i].lat, yi = poligono[i].lng;
+      const xj = poligono[j].lat, yj = poligono[j].lng;
+      if (((yi > lng) !== (yj > lng)) && (lat < (xj - xi) * (lng - yi) / (yj - yi) + xi)) {
+        dentro = !dentro;
+      }
+    }
+    return dentro;
+  }
+
+  function distanciaAlPoligono(lat, lng, poligono) {
+    let minDist = Infinity;
+    const R = 6371000;
+    const toRad = x => x * Math.PI / 180;
+    for (let i = 0; i < poligono.length; i++) {
+      const p = poligono[i];
+      const dLat = toRad(lat - p.lat);
+      const dLng = toRad(lng - p.lng);
+      const a = Math.sin(dLat/2)**2 + Math.cos(toRad(lat)) * Math.cos(toRad(p.lat)) * Math.sin(dLng/2)**2;
+      const d = 2 * R * Math.asin(Math.sqrt(a));
+      if (d < minDist) minDist = d;
+    }
+    return minDist;
+  }
+
+  function validarUbicacion(lat, lng, perimetro, tolerancia) {
+    if (!perimetro || perimetro.length < 3) return { valido: true, motivo: 'sin_perimetro' };
+    const dentro = puntoEnPoligono(lat, lng, perimetro);
+    if (dentro) return { valido: true, motivo: 'dentro' };
+    const dist = distanciaAlPoligono(lat, lng, perimetro);
+    if (dist <= tolerancia) return { valido: true, motivo: 'tolerancia', distancia: dist };
+    return { valido: false, motivo: 'fuera', distancia: dist };
+  }
+
+  // ---- GPS ----
+
+  function obtenerGPS() {
+    return new Promise((resolve, reject) => {
+      if (!navigator.geolocation) { reject(new Error('GPS no disponible')); return; }
+      navigator.geolocation.getCurrentPosition(
+        pos => resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude, accuracy: pos.coords.accuracy }),
+        err => reject(err),
+        { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+      );
+    });
+  }
+
+  // ---- VALIDACIÓN FORMULARIO ----
+
+  function validarCampos() {
+    let ok = true;
+    const campos = [
+      { id: 'nombres', errId: 'err-nombres', check: v => v.trim().length >= 2 },
+      { id: 'apellidos', errId: 'err-apellidos', check: v => v.trim().length >= 2 },
+      { id: 'dni', errId: 'err-dni', check: v => /^\d{8}$/.test(v.trim()) },
+      { id: 'correo', errId: 'err-correo', check: v => v.trim().toLowerCase().endsWith('@unajma.edu.pe') },
+      { id: 'carrera', errId: 'err-carrera', check: v => v !== '' },
+    ];
+    campos.forEach(c => {
+      const el = document.getElementById(c.id);
+      const errEl = document.getElementById(c.errId);
+      if (!c.check(el.value)) {
+        el.classList.add('error');
+        errEl.classList.add('visible');
+        ok = false;
+      } else {
+        el.classList.remove('error');
+        errEl.classList.remove('visible');
+      }
+    });
+    return ok;
+  }
+
+  // ---- INICIO ----
+
+  async function cargarEvento() {
+    const params = new URLSearchParams(window.location.search);
+    eventoId = params.get('evento');
+
+    if (!eventoId) { showScreen('screenNoEvento'); return; }
+
+    // Revisar sesión guardada
+    const sesionGuardada = localStorage.getItem('asistencia_sesion_' + eventoId);
+    if (sesionGuardada) {
+      registroActual = JSON.parse(sesionGuardada);
+      // Verificar en Supabase que existe
+      const rows = await sbFetch('asistencias?id=eq.' + registroActual.id + '&select=*');
+      if (rows && rows.length > 0) {
+        asistenciaId = registroActual.id;
+        const reg = rows[0];
+        if (reg.estado === 'completado' || reg.estado === 'parcial') {
+          mostrarFinal(reg);
+          await cargarDatosEvento();
+          return;
+        }
+        if (reg.check1_hora && !reg.check2_hora) {
+          await cargarDatosEvento();
+          iniciarContador(new Date(reg.check1_hora).getTime());
+          return;
+        }
+      }
+    }
+
+    // Sin sesión — mostrar formulario
+    await cargarDatosEvento();
+  }
+
+  async function cargarDatosEvento() {
+    if (!eventoId) return;
+    const rows = await sbFetch('eventos?id=eq.' + eventoId + '&select=*');
+    if (!rows || rows.length === 0) { showScreen('screenNoEvento'); return; }
+    eventoData = rows[0];
+    document.getElementById('eventoNombre').textContent = eventoData.nombre;
+    const meta = [];
+    if (eventoData.fecha) meta.push(eventoData.fecha);
+    if (eventoData.lugar) meta.push(eventoData.lugar);
+    document.getElementById('eventoMeta').textContent = meta.join(' · ');
+  }
+
+  // ---- REGISTRO ----
+
+  async function iniciarRegistro() {
+    if (!validarCampos()) return;
+
+    const dni = document.getElementById('dni').value.trim();
+    const fp = getFingerprint();
+
+    // Verificar DNI duplicado
+    const existeDNI = await sbFetch('asistencias?dni=eq.' + dni + '&evento_id=eq.' + eventoId + '&select=id,estado,check1_hora,check2_hora');
+    if (existeDNI && existeDNI.length > 0) {
+      const reg = existeDNI[0];
+      if (reg.estado === 'completado' || reg.estado === 'parcial') {
+        showAlert('alertForm', 'Ya tienes un registro completado para este evento.', 'warn');
+        return;
+      }
+      if (reg.check1_hora && !reg.check2_hora) {
+        // Retomar sesión
+        asistenciaId = reg.id;
+        localStorage.setItem('asistencia_sesion_' + eventoId, JSON.stringify({ id: reg.id }));
+        await cargarDatosEvento();
+        iniciarContador(new Date(reg.check1_hora).getTime());
+        return;
+      }
+    }
+
+    // Verificar fingerprint duplicado
+    const existeFP = await sbFetch('asistencias?device_fingerprint=eq.' + fp + '&evento_id=eq.' + eventoId + '&select=id');
+    const alertaFP = existeFP && existeFP.length > 0;
+
+    document.getElementById('btnRegistrar').disabled = true;
+    showScreen('screenGPS');
+
+    let gps;
+    try {
+      gps = await obtenerGPS();
+    } catch (e) {
+      showScreen('screenForm');
+      showAlert('alertForm', 'No se pudo obtener tu ubicación. Activa el GPS e intenta de nuevo.', 'error');
+      document.getElementById('btnRegistrar').disabled = false;
+      return;
+    }
+
+    const perimetro = eventoData?.perimetro || null;
+    const tolerancia = eventoData?.tolerancia_metros || 10;
+    const resultado = validarUbicacion(gps.lat, gps.lng, perimetro, tolerancia);
+
+    if (!resultado.valido) {
+      const dist = resultado.distancia ? Math.round(resultado.distancia) + 'm del área' : '';
+      document.getElementById('fueraMsg').textContent = `Tu ubicación está fuera del área del evento (${dist}). Acércate al lugar y vuelve a intentarlo.`;
+      showScreen('screenFuera');
+      document.getElementById('btnRegistrar').disabled = false;
+      return;
+    }
+
+    // Guardar check 1
+    const payload = {
+      evento_id: eventoId,
+      nombre: document.getElementById('nombres').value.trim(),
+      apellidos: document.getElementById('apellidos').value.trim(),
+      dni: dni,
+      correo: document.getElementById('correo').value.trim().toLowerCase(),
+      carrera: document.getElementById('carrera').value,
+      device_fingerprint: fp,
+      check1_lat: gps.lat,
+      check1_lng: gps.lng,
+      check1_hora: new Date().toISOString(),
+      check1_valido: resultado.valido,
+      estado: 'pendiente',
+      alerta_duplicado: alertaFP
+    };
+
+    const inserted = await sbFetch('asistencias', {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    });
+
+    if (!inserted || inserted.error) {
+      showScreen('screenForm');
+      showAlert('alertForm', 'Error al guardar el registro. Intenta de nuevo.', 'error');
+      document.getElementById('btnRegistrar').disabled = false;
+      return;
+    }
+
+    asistenciaId = inserted[0].id;
+    localStorage.setItem('asistencia_sesion_' + eventoId, JSON.stringify({ id: asistenciaId }));
+    iniciarContador(new Date(inserted[0].check1_hora).getTime());
+  }
+
+  // ---- CONTADOR ----
+
+  function iniciarContador(check1Timestamp) {
+    showScreen('screenWaiting');
+    const total = DURACION_MS;
+
+    function actualizar() {
+      const transcurrido = Date.now() - check1Timestamp;
+      const restante = total - transcurrido;
+
+      if (restante <= 0) {
+        clearInterval(countdownInterval);
+        document.getElementById('countdownDisplay').textContent = '00:00';
+        document.getElementById('progressFill').style.width = '0%';
+        ejecutarCheck2();
+        return;
+      }
+
+      const mins = Math.floor(restante / 60000);
+      const segs = Math.floor((restante % 60000) / 1000);
+      document.getElementById('countdownDisplay').textContent =
+        String(mins).padStart(2, '0') + ':' + String(segs).padStart(2, '0');
+      document.getElementById('progressFill').style.width = (restante / total * 100) + '%';
+    }
+
+    actualizar();
+    countdownInterval = setInterval(actualizar, 1000);
+  }
+
+  // ---- CHECK 2 ----
+
+  async function ejecutarCheck2() {
+    showScreen('screenGPS2');
+
+    let gps;
+    try {
+      gps = await obtenerGPS();
+    } catch (e) {
+      // GPS falló — marcar como parcial
+      await sbFetch('asistencias?id=eq.' + asistenciaId, {
+        method: 'PATCH',
+        body: JSON.stringify({ estado: 'parcial', check2_valido: false, check2_hora: new Date().toISOString() })
+      });
+      mostrarFinal({ estado: 'parcial', check2_valido: false });
+      return;
+    }
+
+    const perimetro = eventoData?.perimetro || null;
+    const tolerancia = eventoData?.tolerancia_metros || 10;
+    const resultado = validarUbicacion(gps.lat, gps.lng, perimetro, tolerancia);
+
+    const estado = resultado.valido ? 'completado' : 'parcial';
+    const patch = {
+      check2_lat: gps.lat,
+      check2_lng: gps.lng,
+      check2_hora: new Date().toISOString(),
+      check2_valido: resultado.valido,
+      estado: estado
+    };
+
+    await sbFetch('asistencias?id=eq.' + asistenciaId, {
+      method: 'PATCH',
+      body: JSON.stringify(patch)
+    });
+
+    localStorage.removeItem('asistencia_sesion_' + eventoId);
+    mostrarFinal({ estado, check2_valido: resultado.valido });
+  }
+
+  function mostrarFinal(reg) {
+    showScreen('screenFinal');
+    const container = document.getElementById('finalContent');
+
+    if (reg.estado === 'completado') {
+      container.innerHTML = `
+        <div class="result-icon ok">🎉</div>
+        <div class="result-title">¡Asistencia completa!</div>
+        <div class="result-msg">Ambas verificaciones fueron exitosas. Tu participación ha sido registrada correctamente.</div>
+        <span class="badge ok">✓ Asistencia validada</span>
+      `;
+    } else if (reg.estado === 'parcial') {
+      container.innerHTML = `
+        <div class="result-icon warn">⚠️</div>
+        <div class="result-title">Asistencia parcial</div>
+        <div class="result-msg">Una de las verificaciones no pudo completarse correctamente. Contacta al organizador si crees que es un error.</div>
+        <span class="badge parcial">Verificación parcial</span>
+      `;
+    } else {
+      container.innerHTML = `
+        <div class="result-icon ok">✅</div>
+        <div class="result-title">Registro existente</div>
+        <div class="result-msg">Ya tienes un registro para este evento.</div>
+      `;
+    }
+  }
+
+  function reintentar() {
+    showScreen('screenForm');
+    document.getElementById('btnRegistrar').disabled = false;
+  }
+
+  // ---- RECUPERAR SESIÓN POR DNI ----
+
+  async function recuperarSesion() {
+    const dni = document.getElementById('dniRecovery').value.trim();
+    if (!/^\d{8}$/.test(dni)) {
+      showAlert('alertRecovery', 'Ingresa un DNI válido de 8 dígitos.', 'error');
+      return;
+    }
+
+    const rows = await sbFetch('asistencias?dni=eq.' + dni + '&evento_id=eq.' + eventoId + '&select=*');
+    if (!rows || rows.length === 0) {
+      showAlert('alertRecovery', 'No se encontró ningún registro con ese DNI para este evento.', 'error');
+      return;
+    }
+
+    const reg = rows[0];
+    asistenciaId = reg.id;
+    localStorage.setItem('asistencia_sesion_' + eventoId, JSON.stringify({ id: reg.id }));
+
+    if (reg.estado === 'completado' || reg.estado === 'parcial') {
+      mostrarFinal(reg);
+      return;
+    }
+
+    if (reg.check1_hora && !reg.check2_hora) {
+      iniciarContador(new Date(reg.check1_hora).getTime());
+      return;
+    }
+
+    showAlert('alertRecovery', 'No se pudo retomar la sesión. Contacta al organizador.', 'error');
+  }
+
+  // ---- ARRANQUE ----
+  cargarEvento();
+</script>
+</body>
+</html>
