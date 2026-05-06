@@ -422,18 +422,156 @@
     }
 
     @keyframes pulse {
-
-      0%,
-      100% {
-        opacity: 1;
-        transform: scale(1);
-      }
-
-      50% {
-        opacity: 0.4;
-        transform: scale(0.7);
-      }
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.7); }
     }
+
+    /* MODAL TIEMPO MÍNIMO */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.65);
+      backdrop-filter: blur(6px);
+      z-index: 999;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      animation: fadeInOverlay 0.2s ease;
+    }
+    .modal-overlay.visible {
+      display: flex;
+    }
+    @keyframes fadeInOverlay {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+    .modal-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 32px 28px 28px;
+      max-width: 360px;
+      width: 100%;
+      text-align: center;
+      animation: slideUpModal 0.25s cubic-bezier(0.34,1.56,0.64,1);
+      position: relative;
+    }
+    @keyframes slideUpModal {
+      from { opacity: 0; transform: translateY(24px) scale(0.96); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .modal-clock {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      background: rgba(245,158,11,0.12);
+      border: 2px solid rgba(245,158,11,0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      margin: 0 auto 20px;
+    }
+    .modal-title {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.25rem;
+      font-weight: 400;
+      color: var(--text);
+      margin-bottom: 10px;
+    }
+    .modal-body {
+      font-size: 0.875rem;
+      color: var(--muted);
+      line-height: 1.65;
+      margin-bottom: 8px;
+    }
+    .modal-tiempo {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(245,158,11,0.1);
+      border: 1px solid rgba(245,158,11,0.25);
+      border-radius: 10px;
+      padding: 10px 18px;
+      margin: 14px 0 22px;
+      font-size: 0.95rem;
+      color: var(--warn);
+      font-weight: 600;
+    }
+    .modal-falta-num {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.6rem;
+      color: var(--warn);
+      line-height: 1;
+    }
+    .modal-falta-label {
+      font-size: 0.78rem;
+      color: var(--warn);
+      opacity: 0.8;
+      text-align: left;
+      line-height: 1.3;
+    }
+    .modal-btn {
+      width: 100%;
+      padding: 13px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border: none;
+      border-radius: 12px;
+      color: #fff;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    .modal-btn:hover { opacity: 0.88; }
+
+    /* BOTÓN CHECK 2 MANUAL MEJORADO */
+    .btn-check2 {
+      width: 100%;
+      padding: 15px;
+      background: linear-gradient(135deg, #059669, #10b981);
+      border: none;
+      border-radius: 12px;
+      color: #fff;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      transition: opacity 0.2s, transform 0.1s;
+      position: relative;
+      overflow: hidden;
+    }
+    .btn-check2::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: rgba(255,255,255,0.08);
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    .btn-check2:hover::before { opacity: 1; }
+    .btn-check2:active { transform: scale(0.98); }
+    .btn-check2-icon {
+      width: 28px;
+      height: 28px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      flex-shrink: 0;
+    }
+    .btn-check2-text { text-align: left; }
+    .btn-check2-text strong { display: block; font-size: 0.95rem; }
+    .btn-check2-text span { font-size: 0.75rem; opacity: 0.85; font-weight: 400; }
   </style>
 </head>
 
@@ -559,7 +697,13 @@
       </div>
 
       <div style="display:flex; gap:10px; margin-bottom: 16px;">
-        <button class="btn" onclick="validarCompletaManual()" style="background:var(--success); margin:0;">Validar asistencia completa</button>
+        <button class="btn-check2" onclick="validarCompletaManual()">
+          <div class="btn-check2-icon">✓</div>
+          <div class="btn-check2-text">
+            <strong>Ya terminó el evento, registrar mi salida</strong>
+            <span>Confirma que seguiste en el área hasta el final</span>
+          </div>
+        </button>
       </div>
       <button class="btn-outline" onclick="mostrarFormularioSalida()" style="margin-top:0;">Justificar salida anticipada</button>
       
@@ -610,6 +754,21 @@
       <div class="result-msg">El enlace no es válido o el evento no existe. Contacta al organizador.</div>
     </div>
 
+  </div>
+
+  <!-- MODAL: TIEMPO MÍNIMO NO CUMPLIDO -->
+  <div class="modal-overlay" id="modalTiempo">
+    <div class="modal-card">
+      <div class="modal-clock">⏳</div>
+      <div class="modal-title">Aún no puedes registrar tu salida</div>
+      <div class="modal-body">Debes permanecer en el evento al menos <strong id="modalMinReq">40</strong> minutos para que tu asistencia sea válida.</div>
+      <div class="modal-tiempo">
+        <div class="modal-falta-num" id="modalFaltaMins">—</div>
+        <div class="modal-falta-label">minutos<br>restantes</div>
+      </div>
+      <div class="modal-body" style="margin-bottom:20px">Cuando se cumpla el tiempo, el sistema lo registrará automáticamente. Si necesitas irte antes, usa "Justificar salida anticipada".</div>
+      <button class="modal-btn" onclick="document.getElementById('modalTiempo').classList.remove('visible')">Entendido, me quedo</button>
+    </div>
   </div>
 
   <script>
@@ -819,13 +978,7 @@
       eventoId = params.get('evento');
       if (!eventoId) { showScreen('screenNoEvento'); return; }
 
-      let rows;
-      try {
-        rows = await sbFetch('eventos?id=eq.' + eventoId + '&select=*');
-      } catch (e) {
-        showScreen('screenNoEvento');
-        return;
-      }
+      const rows = await sbFetch('eventos?id=eq.' + eventoId + '&select=*');
       if (!rows || rows.length === 0) { showScreen('screenNoEvento'); return; }
       eventoData = rows[0];
       document.getElementById('eventoNombre').textContent = eventoData.nombre;
@@ -860,13 +1013,7 @@
         return;
       }
 
-      let rows;
-      try {
-        rows = await sbFetch('asistencias?dni=eq.' + encodeURIComponent(dni) + '&evento_id=eq.' + encodeURIComponent(eventoId) + '&select=*');
-      } catch (e) {
-        showAlert('alertForm', 'Error de conexión: ' + e.message, 'error');
-        return;
-      }
+      const rows = await sbFetch('asistencias?dni=eq.' + dni + '&evento_id=eq.' + eventoId + '&select=*');
       if (!rows || rows.length === 0) {
         showAlert('alertForm', 'No se encontró ningún registro con ese DNI. Completa el formulario de arriba.', 'error');
         return;
@@ -896,7 +1043,7 @@
       const fp = getFingerprint();
 
       // Bloqueo real de DNI duplicado
-      const existeDNI = await sbFetch('asistencias?dni=eq.' + encodeURIComponent(dni) + '&evento_id=eq.' + encodeURIComponent(eventoId) + '&select=id,estado,check1_hora,check2_hora');
+      const existeDNI = await sbFetch('asistencias?dni=eq.' + dni + '&evento_id=eq.' + eventoId + '&select=id,estado,check1_hora,check2_hora');
       if (existeDNI && existeDNI.length > 0) {
         const reg = existeDNI[0];
         if (reg.estado === 'completado' || reg.estado === 'parcial') {
@@ -914,7 +1061,7 @@
       }
 
       // Verificar fingerprint duplicado (alerta visible)
-      const existeFP = await sbFetch('asistencias?device_fingerprint=eq.' + encodeURIComponent(fp) + '&evento_id=eq.' + encodeURIComponent(eventoId) + '&select=id');
+      const existeFP = await sbFetch('asistencias?device_fingerprint=eq.' + fp + '&evento_id=eq.' + eventoId + '&select=id');
       const alertaFP = existeFP && existeFP.length > 0;
 
       document.getElementById('btnRegistrar').disabled = true;
@@ -959,15 +1106,14 @@
         alerta_duplicado: alertaFP
       };
 
-      let inserted;
-      try {
-        inserted = await sbFetch('asistencias', {
-          method: 'POST',
-          body: JSON.stringify(payload)
-        });
-      } catch (e) {
+      const inserted = await sbFetch('asistencias', {
+        method: 'POST',
+        body: JSON.stringify(payload)
+      });
+
+      if (!inserted || inserted.error) {
         showScreen('screenForm');
-        showAlert('alertForm', 'Error al guardar el registro: ' + e.message, 'error');
+        showAlert('alertForm', 'Error al guardar el registro. Intenta de nuevo.', 'error');
         document.getElementById('btnRegistrar').disabled = false;
         return;
       }
@@ -1021,12 +1167,10 @@
       try {
         gps = await obtenerGPS();
       } catch (e) {
-        try {
-          await sbFetch('asistencias?id=eq.' + asistenciaId, {
-            method: 'PATCH',
-            body: JSON.stringify({ estado: 'parcial', parcial_tipo: 'ubicacion', check2_valido: false, check2_hora: new Date().toISOString() })
-          });
-        } catch (_) { /* registrar aunque falle la red */ }
+        await sbFetch('asistencias?id=eq.' + asistenciaId, {
+          method: 'PATCH',
+          body: JSON.stringify({ estado: 'parcial', parcial_tipo: 'ubicacion', check2_valido: false, check2_hora: new Date().toISOString() })
+        });
         mostrarFinal({ estado: 'parcial', parcial_tipo: 'ubicacion' });
         return;
       }
@@ -1045,12 +1189,10 @@
         parcial_tipo: resultado.valido ? null : 'ubicacion'
       };
 
-      try {
-        await sbFetch('asistencias?id=eq.' + asistenciaId, {
-          method: 'PATCH',
-          body: JSON.stringify(patch)
-        });
-      } catch (e) { /* continuar aunque falle - mostrar resultado igual */ }
+      await sbFetch('asistencias?id=eq.' + asistenciaId, {
+        method: 'PATCH',
+        body: JSON.stringify(patch)
+      });
 
       localStorage.removeItem('asistencia_sesion_' + eventoId);
       mostrarFinal({ estado, parcial_tipo: patch.parcial_tipo });
@@ -1062,7 +1204,10 @@
       const transcurrido = Date.now() - check1Timestamp;
       if (transcurrido < minParticipacionMs) {
         const falta = Math.ceil((minParticipacionMs - transcurrido) / 60000);
-        alert(`Debes participar al menos ${eventoData.duracion_check_minutos || 40} minutos. Te faltan ${falta} min.`);
+        const minReq = eventoData.duracion_check_minutos || 40;
+        document.getElementById('modalMinReq').textContent = minReq;
+        document.getElementById('modalFaltaMins').textContent = falta;
+        document.getElementById('modalTiempo').classList.add('visible');
         return;
       }
 
@@ -1073,16 +1218,14 @@
       try {
         gps = await obtenerGPS();
       } catch (e) {
-        try {
-          await sbFetch('asistencias?id=eq.' + asistenciaId, {
-            method: 'PATCH',
-            body: JSON.stringify({
-              estado: 'parcial',
-              check2_valido: false,
-              check2_hora: new Date().toISOString()
-            })
-          });
-        } catch (_) { /* continuar aunque falle */ }
+        await sbFetch('asistencias?id=eq.' + asistenciaId, {
+          method: 'PATCH',
+          body: JSON.stringify({
+            estado: 'parcial',
+            check2_valido: false,
+            check2_hora: new Date().toISOString()
+          })
+        });
         mostrarFinal({ estado: 'parcial', check2_valido: false });
         return;
       }
@@ -1100,12 +1243,10 @@
         parcial_tipo: resultado.valido ? null : 'ubicacion'
       };
 
-      try {
-        await sbFetch('asistencias?id=eq.' + asistenciaId, {
-          method: 'PATCH',
-          body: JSON.stringify(patch)
-        });
-      } catch (_) { /* continuar aunque falle */ }
+      await sbFetch('asistencias?id=eq.' + asistenciaId, {
+        method: 'PATCH',
+        body: JSON.stringify(patch)
+      });
 
       localStorage.removeItem('asistencia_sesion_' + eventoId);
       mostrarFinal({ estado: patch.estado, check2_valido: resultado.valido, parcial_tipo: patch.parcial_tipo });
@@ -1122,17 +1263,15 @@
       try {
         gps = await obtenerGPS();
       } catch (e) {
-        try {
-          await sbFetch('asistencias?id=eq.' + asistenciaId, {
-            method: 'PATCH',
-            body: JSON.stringify({
-              estado: 'parcial',
-              razon_salida: razon || null,
-              check2_valido: false,
-              check2_hora: new Date().toISOString()
-            })
-          });
-        } catch (_) { /* continuar aunque falle */ }
+        await sbFetch('asistencias?id=eq.' + asistenciaId, {
+          method: 'PATCH',
+          body: JSON.stringify({
+            estado: 'parcial',
+            razon_salida: razon || null,
+            check2_valido: false,
+            check2_hora: new Date().toISOString()
+          })
+        });
         mostrarFinal({ estado: 'parcial', check2_valido: false });
         return;
       }
@@ -1151,12 +1290,10 @@
         razon_salida: razon || null
       };
 
-      try {
-        await sbFetch('asistencias?id=eq.' + asistenciaId, {
-          method: 'PATCH',
-          body: JSON.stringify(patch)
-        });
-      } catch (_) { /* continuar aunque falle */ }
+      await sbFetch('asistencias?id=eq.' + asistenciaId, {
+        method: 'PATCH',
+        body: JSON.stringify(patch)
+      });
 
       localStorage.removeItem('asistencia_sesion_' + eventoId);
       mostrarFinal({ estado: 'parcial', check2_valido: resultado.valido });
@@ -1186,12 +1323,23 @@
         <div class="result-msg">No te encontrabas dentro del área en la segunda verificación. Contacta al organizador si crees que es un error.</div>
         <span class="badge parcial">Fuera de perímetro</span>
       `;
+      } else if (reg.razon_salida) {
+        container.innerHTML = `
+        <div class="result-icon ok" style="background:rgba(79,142,247,0.15)">📋</div>
+        <div class="result-title">Asistencia registrada con justificación</div>
+        <div class="result-msg" style="margin-bottom:14px">Tu asistencia quedó registrada correctamente. Se adjuntó tu motivo de retiro anticipado para que el organizador lo evalúe.</div>
+        <div style="background:var(--surface2);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:10px;padding:12px 14px;font-size:0.82rem;color:var(--muted);line-height:1.6;margin-bottom:14px;text-align:left">
+          <div style="font-size:0.72rem;text-transform:uppercase;letter-spacing:0.06em;color:var(--accent);margin-bottom:6px">Motivo registrado</div>
+          "${reg.razon_salida}"
+        </div>
+        <span class="badge parcial">📋 Con justificación</span>
+      `;
       } else {
         container.innerHTML = `
-        <div class="result-icon warn">⚠️</div>
-        <div class="result-title">Asistencia parcial</div>
-        <div class="result-msg">Una de las verificaciones no pudo completarse correctamente.</div>
-        <span class="badge parcial">Verificación parcial</span>
+        <div class="result-icon ok" style="background:rgba(79,142,247,0.15)">📋</div>
+        <div class="result-title">Asistencia registrada</div>
+        <div class="result-msg">Tu participación quedó guardada en el sistema. El organizador podrá revisar los detalles de tu registro.</div>
+        <span class="badge parcial">Registro guardado</span>
       `;
       }
     }
