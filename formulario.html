@@ -621,8 +621,8 @@
     let asistenciaId = null;
     let countdownInterval = null;
     let check1Timestamp = null;
-    let duracionMs = 40 * 60 * 1000; // total duration
-    let minParticipacionMs = 40 * 60 * 1000; // min to mark as complete
+    let duracionMs = 90 * 60 * 1000;       // tiempo total del contador (default 90 min)
+    let minParticipacionMs = 40 * 60 * 1000; // mínimo para marcar como completo (default 40 min)
 
     // ---- UTILIDADES ----
 
@@ -638,7 +638,12 @@
         ...opts
       });
       const text = await res.text();
-      return text ? JSON.parse(text) : [];
+      const parsed = text ? JSON.parse(text) : [];
+      if (!res.ok) {
+        const msg = parsed?.message || parsed?.error || `HTTP ${res.status}`;
+        throw new Error(msg);
+      }
+      return parsed;
     }
 
     function showScreen(id) {
@@ -650,6 +655,10 @@
       const el = document.getElementById(elId);
       el.textContent = msg;
       el.className = 'alert visible ' + tipo;
+      // Auto-cerrar alertas de éxito/warn; las de error persisten hasta acción del usuario
+      if (tipo !== 'error') {
+        setTimeout(() => el.classList.remove('visible'), 5000);
+      }
     }
 
     function getFingerprint() {
@@ -810,7 +819,13 @@
       eventoId = params.get('evento');
       if (!eventoId) { showScreen('screenNoEvento'); return; }
 
-      const rows = await sbFetch('eventos?id=eq.' + eventoId + '&select=*');
+      let rows;
+      try {
+        rows = await sbFetch('eventos?id=eq.' + eventoId + '&select=*');
+      } catch (e) {
+        showScreen('screenNoEvento');
+        return;
+      }
       if (!rows || rows.length === 0) { showScreen('screenNoEvento'); return; }
       eventoData = rows[0];
       document.getElementById('eventoNombre').textContent = eventoData.nombre;
@@ -835,13 +850,23 @@
     // ---- CONTINUACIÓN POR DNI ----
 
     async function continuarPorDNI() {
+      if (!eventoId) {
+        showAlert('alertForm', 'El evento aún se está cargando. Espera un momento e intenta de nuevo.', 'warn');
+        return;
+      }
       const dni = document.getElementById('dniContinuar').value.trim();
       if (!/^\d{8}$/.test(dni)) {
         showAlert('alertForm', 'Ingresa un DNI válido de 8 dígitos.', 'error');
         return;
       }
 
-      const rows = await sbFetch('asistencias?dni=eq.' + dni + '&evento_id=eq.' + eventoId + '&select=*');
+      let rows;
+      try {
+        rows = await sbFetch('asistencias?dni=eq.' + encodeURIComponent(dni) + '&evento_id=eq.' + encodeURIComponent(eventoId) + '&select=*');
+      } catch (e) {
+        showAlert('alertForm', 'Error de conexión: ' + e.message, 'error');
+        return;
+      }
       if (!rows || rows.length === 0) {
         showAlert('alertForm', 'No se encontró ningún registro con ese DNI. Completa el formulario de arriba.', 'error');
         return;
@@ -871,7 +896,7 @@
       const fp = getFingerprint();
 
       // Bloqueo real de DNI duplicado
-      const existeDNI = await sbFetch('asistencias?dni=eq.' + dni + '&evento_id=eq.' + eventoId + '&select=id,estado,check1_hora,check2_hora');
+      const existeDNI = await sbFetch('asistencias?dni=eq.' + encodeURIComponent(dni) + '&evento_id=eq.' + encodeURIComponent(eventoId) + '&select=id,estado,check1_hora,check2_hora');
       if (existeDNI && existeDNI.length > 0) {
         const reg = existeDNI[0];
         if (reg.estado === 'completado' || reg.estado === 'parcial') {
@@ -889,7 +914,7 @@
       }
 
       // Verificar fingerprint duplicado (alerta visible)
-      const existeFP = await sbFetch('asistencias?device_fingerprint=eq.' + fp + '&evento_id=eq.' + eventoId + '&select=id');
+      const existeFP = await sbFetch('asistencias?device_fingerprint=eq.' + encodeURIComponent(fp) + '&evento_id=eq.' + encodeURIComponent(eventoId) + '&select=id');
       const alertaFP = existeFP && existeFP.length > 0;
 
       document.getElementById('btnRegistrar').disabled = true;
@@ -934,14 +959,15 @@
         alerta_duplicado: alertaFP
       };
 
-      const inserted = await sbFetch('asistencias', {
-        method: 'POST',
-        body: JSON.stringify(payload)
-      });
-
-      if (!inserted || inserted.error) {
+      let inserted;
+      try {
+        inserted = await sbFetch('asistencias', {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+      } catch (e) {
         showScreen('screenForm');
-        showAlert('alertForm', 'Error al guardar el registro. Intenta de nuevo.', 'error');
+        showAlert('alertForm', 'Error al guardar el registro: ' + e.message, 'error');
         document.getElementById('btnRegistrar').disabled = false;
         return;
       }
@@ -995,10 +1021,12 @@
       try {
         gps = await obtenerGPS();
       } catch (e) {
-        await sbFetch('asistencias?id=eq.' + asistenciaId, {
-          method: 'PATCH',
-          body: JSON.stringify({ estado: 'parcial', parcial_tipo: 'ubicacion', check2_valido: false, check2_hora: new Date().toISOString() })
-        });
+        try {
+          await sbFetch('asistencias?id=eq.' + asistenciaId, {
+            method: 'PATCH',
+            body: JSON.stringify({ estado: 'parcial', parcial_tipo: 'ubicacion', check2_valido: false, check2_hora: new Date().toISOString() })
+          });
+        } catch (_) { /* registrar aunque falle la red */ }
         mostrarFinal({ estado: 'parcial', parcial_tipo: 'ubicacion' });
         return;
       }
@@ -1017,10 +1045,12 @@
         parcial_tipo: resultado.valido ? null : 'ubicacion'
       };
 
-      await sbFetch('asistencias?id=eq.' + asistenciaId, {
-        method: 'PATCH',
-        body: JSON.stringify(patch)
-      });
+      try {
+        await sbFetch('asistencias?id=eq.' + asistenciaId, {
+          method: 'PATCH',
+          body: JSON.stringify(patch)
+        });
+      } catch (e) { /* continuar aunque falle - mostrar resultado igual */ }
 
       localStorage.removeItem('asistencia_sesion_' + eventoId);
       mostrarFinal({ estado, parcial_tipo: patch.parcial_tipo });
@@ -1043,14 +1073,16 @@
       try {
         gps = await obtenerGPS();
       } catch (e) {
-        await sbFetch('asistencias?id=eq.' + asistenciaId, {
-          method: 'PATCH',
-          body: JSON.stringify({
-            estado: 'parcial',
-            check2_valido: false,
-            check2_hora: new Date().toISOString()
-          })
-        });
+        try {
+          await sbFetch('asistencias?id=eq.' + asistenciaId, {
+            method: 'PATCH',
+            body: JSON.stringify({
+              estado: 'parcial',
+              check2_valido: false,
+              check2_hora: new Date().toISOString()
+            })
+          });
+        } catch (_) { /* continuar aunque falle */ }
         mostrarFinal({ estado: 'parcial', check2_valido: false });
         return;
       }
@@ -1064,16 +1096,19 @@
         check2_lng: gps.lng,
         check2_hora: new Date().toISOString(),
         check2_valido: resultado.valido,
-        estado: 'completado'
+        estado: resultado.valido ? 'completado' : 'parcial',
+        parcial_tipo: resultado.valido ? null : 'ubicacion'
       };
 
-      await sbFetch('asistencias?id=eq.' + asistenciaId, {
-        method: 'PATCH',
-        body: JSON.stringify(patch)
-      });
+      try {
+        await sbFetch('asistencias?id=eq.' + asistenciaId, {
+          method: 'PATCH',
+          body: JSON.stringify(patch)
+        });
+      } catch (_) { /* continuar aunque falle */ }
 
       localStorage.removeItem('asistencia_sesion_' + eventoId);
-      mostrarFinal({ estado: 'completado', check2_valido: resultado.valido });
+      mostrarFinal({ estado: patch.estado, check2_valido: resultado.valido, parcial_tipo: patch.parcial_tipo });
     }
 
     // ---- CHECK 2 MANUAL (SALIDA ANTICIPADA) ----
@@ -1087,15 +1122,17 @@
       try {
         gps = await obtenerGPS();
       } catch (e) {
-        await sbFetch('asistencias?id=eq.' + asistenciaId, {
-          method: 'PATCH',
-          body: JSON.stringify({
-            estado: 'parcial',
-            razon_salida: razon || null,
-            check2_valido: false,
-            check2_hora: new Date().toISOString()
-          })
-        });
+        try {
+          await sbFetch('asistencias?id=eq.' + asistenciaId, {
+            method: 'PATCH',
+            body: JSON.stringify({
+              estado: 'parcial',
+              razon_salida: razon || null,
+              check2_valido: false,
+              check2_hora: new Date().toISOString()
+            })
+          });
+        } catch (_) { /* continuar aunque falle */ }
         mostrarFinal({ estado: 'parcial', check2_valido: false });
         return;
       }
@@ -1114,10 +1151,12 @@
         razon_salida: razon || null
       };
 
-      await sbFetch('asistencias?id=eq.' + asistenciaId, {
-        method: 'PATCH',
-        body: JSON.stringify(patch)
-      });
+      try {
+        await sbFetch('asistencias?id=eq.' + asistenciaId, {
+          method: 'PATCH',
+          body: JSON.stringify(patch)
+        });
+      } catch (_) { /* continuar aunque falle */ }
 
       localStorage.removeItem('asistencia_sesion_' + eventoId);
       mostrarFinal({ estado: 'parcial', check2_valido: resultado.valido });

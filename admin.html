@@ -962,10 +962,7 @@
 
   </div>
 
-  <!-- Leaflet -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
-
+  <!-- Leaflet se carga dinámicamente al acceder a la sección Perímetro -->
   <!-- QR -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
@@ -998,7 +995,13 @@
         ...opts
       });
       const text = await res.text();
-      return text ? JSON.parse(text) : [];
+      const parsed = text ? JSON.parse(text) : [];
+      if (!res.ok) {
+        // Supabase devuelve { message, code, details } en errores
+        const msg = parsed?.message || parsed?.error || `HTTP ${res.status}`;
+        throw new Error(msg);
+      }
+      return parsed;
     }
 
     function showPage(pageId) {
@@ -1076,7 +1079,7 @@
         <td>${ev.lugar || '—'}</td>
         <td>${ev.perimetro && ev.perimetro.length >= 3 ? '<span class="badge completado">✓ Definido (' + ev.perimetro.length + ' pts)</span>' : '<span class="badge parcial">Sin definir</span>'}</td>
         <td>
-          <button class="btn-secondary" onclick="mostrarQREvento('${ev.id}', '${ev.nombre.replace(/'/g, '')}')" style="margin-bottom:4px">Ver QR</button>
+        <button class="btn-secondary" onclick="mostrarQREvento(this)" data-id="${ev.id}" data-nombre="${ev.nombre.replace(/"/g, '&quot;').replace(/'/g, '&#39;')}" style="margin-bottom:4px">Ver QR</button>
           <button class="btn-del" onclick="eliminarEvento('${ev.id}')" style="font-size:0.78rem;padding:6px 10px">🗑 Eliminar</button>
         </td>
       </tr>
@@ -1094,19 +1097,24 @@
       const duracionMin = parseInt(document.getElementById('evDuracion').value) || 40;
       const duracionTotal = parseInt(document.getElementById('evTotalMinutos').value) || 90;
 
-      const data = await sbFetch('eventos', {
-        method: 'POST',
-        body: JSON.stringify({ 
-          nombre, 
-          fecha: fecha || null, 
-          lugar: lugar || null, 
-          tolerancia_metros: tolerancia, 
-          duracion_check_minutos: duracionMin,
-          duracion_total_minutos: duracionTotal
-        })
-      });
+      let data;
+      try {
+        data = await sbFetch('eventos', {
+          method: 'POST',
+          body: JSON.stringify({ 
+            nombre, 
+            fecha: fecha || null, 
+            lugar: lugar || null, 
+            tolerancia_metros: tolerancia, 
+            duracion_check_minutos: duracionMin,
+            duracion_total_minutos: duracionTotal
+          })
+        });
+      } catch(e) {
+        showAlert('alertEvento', 'Error al crear el evento: ' + e.message, 'error'); return;
+      }
 
-      if (!data || data.error) { showAlert('alertEvento', 'Error al crear el evento.', 'error'); return; }
+      if (!data || !data[0]) { showAlert('alertEvento', 'Error al crear el evento.', 'error'); return; }
 
       showAlert('alertEvento', 'Evento creado correctamente.', 'success');
       generarQR(data[0].id, nombre);
@@ -1114,7 +1122,7 @@
     }
 
     function generarQR(eventoId, nombre) {
-      const url = `${window.location.origin}${window.location.pathname.replace('admin.html', '')}formulario.html?evento=${eventoId}`;
+      const url = `${FORMULARIO_BASE_URL}?evento=${eventoId}`;
       document.getElementById('qrUrl').textContent = url;
       document.getElementById('qrBox').innerHTML = '';
       document.getElementById('qrSection').style.display = 'flex';
@@ -1129,7 +1137,9 @@
       });
     }
 
-    function mostrarQREvento(id, nombre) {
+    function mostrarQREvento(btn) {
+      const id = btn.dataset.id;
+      const nombre = btn.dataset.nombre;
       showPage('pageEventos');
       setTimeout(() => generarQR(id, nombre), 100);
     }
@@ -1192,6 +1202,16 @@
       document.getElementById('statAlertas').textContent = alertas;
     }
 
+    function escHTML(str) {
+      if (str == null) return '—';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
     function renderTabla(registros) {
       const tbody = document.getElementById('tablaBody');
       if (registros.length === 0) {
@@ -1202,17 +1222,17 @@
       document.getElementById('emptyMsg').style.display = 'none';
       tbody.innerHTML = registros.map(r => `
       <tr>
-        <td>${r.nombre}</td>
-        <td>${r.apellidos}</td>
-        <td style="font-family:monospace">${r.dni}</td>
-        <td style="font-size:0.8rem">${r.correo}</td>
-        <td style="font-size:0.8rem">${r.carrera}</td>
-        <td><span class="badge ${r.estado}">${estadoLabel(r.estado)}</span></td>
+        <td>${escHTML(r.nombre)}</td>
+        <td>${escHTML(r.apellidos)}</td>
+        <td style="font-family:monospace">${escHTML(r.dni)}</td>
+        <td style="font-size:0.8rem">${escHTML(r.correo)}</td>
+        <td style="font-size:0.8rem">${escHTML(r.carrera)}</td>
+        <td><span class="badge ${escHTML(r.estado)}">${estadoLabel(r.estado)}</span></td>
         <td style="font-size:0.78rem">${r.check1_valido !== null ? (r.check1_valido ? '✅' : '❌') : '—'} ${r.check1_hora ? formatFecha(r.check1_hora) : ''}</td>
         <td style="font-size:0.78rem">${r.check2_valido !== null ? (r.check2_valido ? '✅' : '❌') : '—'} ${r.check2_hora ? formatFecha(r.check2_hora) : ''}</td>
-        <td style="font-size:0.78rem;color:var(--muted)">${r.razon_salida || '—'}</td>
+        <td style="font-size:0.78rem;color:var(--muted)">${escHTML(r.razon_salida)}</td>
         <td>${r.alerta_duplicado ? '<span class="alerta-badge">⚠ Duplicado</span>' : '—'}</td>
-        <td><button class="btn-del" onclick="eliminarRegistro('${r.id}')" style="font-size:0.75rem;padding:4px 8px">🗑</button></td>
+        <td><button class="btn-del" onclick="eliminarRegistro('${escHTML(r.id)}')" style="font-size:0.75rem;padding:4px 8px">🗑</button></td>
       </tr>
     `).join('');
     }
@@ -1226,7 +1246,7 @@
       const estado = document.getElementById('filtroEstado').value;
       const carrera = document.getElementById('filtroCarrera').value;
       const filtrados = todosLosRegistros.filter(r => {
-        const coincideTexto = !texto || (r.nombre + r.apellidos + r.dni).toLowerCase().includes(texto);
+        const coincideTexto = !texto || (r.nombre + ' ' + r.apellidos + ' ' + r.dni).toLowerCase().includes(texto);
         const coincideEstado = !estado || r.estado === estado;
         const coincideCarrera = !carrera || r.carrera === carrera;
         return coincideTexto && coincideEstado && coincideCarrera;
@@ -1236,8 +1256,18 @@
 
     function exportarCSV() {
       const eventoId = document.getElementById('selectorEventoRegistros').value;
+      // Exportar los registros actualmente visibles (filtrados), no todos
+      const texto = document.getElementById('filtroNombre').value.toLowerCase();
+      const estado = document.getElementById('filtroEstado').value;
+      const carrera = document.getElementById('filtroCarrera').value;
+      const registrosExportar = todosLosRegistros.filter(r => {
+        const coincideTexto = !texto || (r.nombre + ' ' + r.apellidos + ' ' + r.dni).toLowerCase().includes(texto);
+        const coincideEstado = !estado || r.estado === estado;
+        const coincideCarrera = !carrera || r.carrera === carrera;
+        return coincideTexto && coincideEstado && coincideCarrera;
+      });
       const headers = ['Nombre', 'Apellidos', 'DNI', 'Correo', 'Carrera', 'Estado', 'Check1 Válido', 'Check1 Hora', 'Check2 Válido', 'Check2 Hora', 'Alerta Duplicado', 'Registro'];
-      const rows = todosLosRegistros.map(r => [
+      const rows = registrosExportar.map(r => [
         r.nombre, r.apellidos, r.dni, r.correo, r.carrera, r.estado,
         r.check1_valido ?? '', r.check1_hora ?? '', r.check2_valido ?? '', r.check2_hora ?? '',
         r.alerta_duplicado ? 'SÍ' : 'NO', r.creado_en
@@ -1253,7 +1283,24 @@
 
     // ---- MAPA PERÍMETRO ----
 
+    function cargarLeaflet(callback) {
+      if (window.L) { callback(); return; }
+      const link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css';
+      document.head.appendChild(link);
+      const script = document.createElement('script');
+      script.src = 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js';
+      script.onload = callback;
+      document.head.appendChild(script);
+    }
+
+    let mapaInicializando = false;
+
     function iniciarMapa() {
+      if (mapaInicializando) return;
+      mapaInicializando = true;
+      cargarLeaflet(() => {
       map = L.map('map').setView([0, 0], 2);
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '© OpenStreetMap'
@@ -1274,6 +1321,7 @@
       });
 
       document.getElementById('mapInstructions').textContent = 'Selecciona un evento para empezar';
+      }); // fin cargarLeaflet
     }
 
     function cargarEventoPerimetro() {
@@ -1282,6 +1330,12 @@
 
       const ev = eventosCache.find(e => e.id === eventoPerimetroId);
       if (!ev) return;
+
+      // Si el mapa aún no está listo, reintentar cuando esté
+      if (!map) {
+        setTimeout(cargarEventoPerimetro, 300);
+        return;
+      }
 
       // Limpiar estado anterior
       puntos = [];
@@ -1386,17 +1440,16 @@
       if (!eventoPerimetroId) return;
       if (puntos.length < 3) { showAlert('alertPerimetro', 'Necesitas al menos 3 puntos para definir el perímetro.', 'error'); return; }
 
-      const res = await sbFetch('eventos?id=eq.' + eventoPerimetroId, {
-        method: 'PATCH',
-        body: JSON.stringify({ perimetro: puntos })
-      });
-
-      if (res && !res.error) {
+      try {
+        await sbFetch('eventos?id=eq.' + eventoPerimetroId, {
+          method: 'PATCH',
+          body: JSON.stringify({ perimetro: puntos })
+        });
         showAlert('alertPerimetro', 'Perímetro guardado correctamente.', 'success');
         const ev = eventosCache.find(e => e.id === eventoPerimetroId);
-        if (ev) ev.perimetro = puntos;
-      } else {
-        showAlert('alertPerimetro', 'Error al guardar. Intenta de nuevo.', 'error');
+        if (ev) ev.perimetro = [...puntos];
+      } catch (e) {
+        showAlert('alertPerimetro', 'Error al guardar: ' + e.message, 'error');
       }
     }
 
@@ -1404,18 +1457,27 @@
       if (!confirm('¿Estás seguro de eliminar este evento y TODOS sus registros de asistencia?')) return;
       try {
         await sbFetch('asistencias?evento_id=eq.' + id, { method: 'DELETE' });
-        const res = await sbFetch('eventos?id=eq.' + id, { method: 'DELETE' });
-        if (res && res.message) {
-          showAlert('alertEvento', 'Error: ' + res.message + '. Verifica permisos en Supabase (RLS).', 'error');
-        } else {
-          showAlert('alertEvento', 'Evento eliminado correctamente.', 'success');
-        }
+        await sbFetch('eventos?id=eq.' + id, { method: 'DELETE' });
+        showAlert('alertEvento', 'Evento eliminado correctamente.', 'success');
       } catch (e) {
-        showAlert('alertEvento', 'Error de conexión al eliminar: ' + e.message, 'error');
+        showAlert('alertEvento', 'Error al eliminar: ' + e.message + '. Verifica permisos RLS en Supabase.', 'error');
       }
-      await cargarListaEventos();
-      await cargarSelectorEventos();
-      await cargarSelectorEventosPerimetro();
+      // Un solo fetch compartido para actualizar los tres selectores/listas
+      await cargarEventos();
+      cargarListaEventos();
+      const selR = document.getElementById('selectorEventoRegistros');
+      const selP = document.getElementById('selectorEventoPerimetro');
+      [selR, selP].forEach(sel => {
+        const val = sel.value;
+        sel.innerHTML = '<option value="">— Selecciona un evento —</option>';
+        eventosCache.forEach(ev => {
+          const opt = document.createElement('option');
+          opt.value = ev.id;
+          opt.textContent = ev.nombre + (ev.fecha && sel === selR ? ' · ' + ev.fecha : '');
+          sel.appendChild(opt);
+        });
+        if (val && eventosCache.find(e => e.id === val)) sel.value = val;
+      });
     }
 
     // Convierte DMS (13°39'03.4"S 73°21'55.3"W) a decimal
@@ -1510,18 +1572,19 @@
 
       try {
         const res = await sbFetch('asistencias', { method: 'POST', body: JSON.stringify(body) });
-        if (res && res.length > 0) {
+        if (res && !res.error && !res.message && (Array.isArray(res) ? res.length > 0 : true)) {
           document.getElementById('addMsg').style.color = 'var(--success)';
           document.getElementById('addMsg').textContent = '✓ Registro agregado';
           ['addNombre','addApellidos','addDni','addCorreo'].forEach(id => document.getElementById(id).value = '');
           document.getElementById('addCarrera').value = '';
+          document.getElementById('addEstado').value = 'pendiente';
           cargarRegistros();
           setTimeout(() => { document.getElementById('addMsg').textContent = ''; document.getElementById('addMsg').style.color = 'var(--error)'; }, 2000);
         } else {
           document.getElementById('addMsg').textContent = 'Error al guardar. DNI ya existe o error de BD.';
         }
       } catch(e) {
-        document.getElementById('addMsg').textContent = 'Error de conexión.';
+        document.getElementById('addMsg').textContent = 'Error: ' + e.message;
       }
     }
 
