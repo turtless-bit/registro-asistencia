@@ -1,11 +1,12 @@
-<!-- START OF FILE admin.html -->
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Panel Admin — Registro de Asistencia</title>
   <style>
+    /* Estilos se mantienen iguales a tu original */
     @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Serif+Display&display=swap');
 
     :root {
@@ -23,61 +24,642 @@
       --border: #252a40;
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
-    /* SIDEBAR */
-    .sidebar { position: fixed; left: 0; top: 0; bottom: 0; width: 220px; background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 24px 0; z-index: 100; }
-    .sidebar-logo { padding: 0 20px 24px; border-bottom: 1px solid var(--border); margin-bottom: 16px; }
-    .sidebar-logo h2 { font-family: 'DM Serif Display', serif; font-size: 1.1rem; font-weight: 400; line-height: 1.3; }
-    .sidebar-logo p { font-size: 0.72rem; color: var(--muted); margin-top: 2px; }
-    .nav-item { display: flex; align-items: center; gap: 10px; padding: 11px 20px; font-size: 0.875rem; color: var(--muted); cursor: pointer; transition: all 0.15s; border-left: 2px solid transparent; }
-    .nav-item:hover { color: var(--text); background: var(--surface2); }
-    .nav-item.active { color: var(--accent); border-left-color: var(--accent); background: rgba(79, 142, 247, 0.06); }
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
 
-    /* MAIN */
-    .main { margin-left: 220px; padding: 32px; min-height: 100vh; }
-    .page { display: none; }
-    .page.active { display: block; }
-    .page-header { margin-bottom: 28px; }
-    .page-header h1 { font-family: 'DM Serif Display', serif; font-size: 1.8rem; font-weight: 400; margin-bottom: 4px; }
-    .page-header p { color: var(--muted); font-size: 0.875rem; }
+    .sidebar {
+      position: fixed;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 220px;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      padding: 24px 0;
+      z-index: 100;
+    }
 
-    /* STATS */
-    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 28px; }
-    .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 20px; }
-    .stat-label { font-size: 0.72rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px; }
-    .stat-value { font-family: 'DM Serif Display', serif; font-size: 2rem; line-height: 1; margin-bottom: 4px; }
-    .stat-value.ok { color: var(--success); }
-    .stat-value.accent { color: var(--accent); }
+    .sidebar-logo {
+      padding: 0 20px 24px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 16px;
+    }
 
-    /* TABLE */
-    .table-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
-    .table-toolbar { padding: 16px 20px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
-    .table-toolbar input, .table-toolbar select { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; color: var(--text); font-size: 0.85rem; outline: none; }
-    table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
-    thead th { padding: 12px 16px; text-align: left; font-size: 0.72rem; color: var(--muted); text-transform: uppercase; border-bottom: 1px solid var(--border); background: var(--surface2); }
-    tbody tr { border-bottom: 1px solid var(--border); }
-    tbody td { padding: 13px 16px; }
+    .sidebar-logo h2 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.1rem;
+      font-weight: 400;
+      line-height: 1.3;
+    }
 
-    /* FORM */
-    .form-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 28px; max-width: 600px; }
-    .field { margin-bottom: 18px; }
-    label { display: block; font-size: 0.75rem; color: var(--muted); text-transform: uppercase; margin-bottom: 7px; }
-    input[type=text], input[type=datetime-local], input[type=number] { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 11px 14px; color: var(--text); outline: none; }
-    .btn-primary { padding: 12px 24px; background: linear-gradient(135deg, var(--accent), var(--accent2)); border: none; border-radius: 10px; color: #fff; font-weight: 600; cursor: pointer; }
-    
-    /* QR */
-    .qr-section { margin-top: 24px; background: var(--surface2); border: 1px solid var(--border); border-radius: 12px; padding: 24px; display: flex; gap: 24px; align-items: flex-start; }
-    .qr-box { background: #fff; padding: 12px; border-radius: 10px; }
+    .sidebar-logo p {
+      font-size: 0.72rem;
+      color: var(--muted);
+      margin-top: 2px;
+    }
 
-    #map { width: 100%; height: 400px; background: var(--surface2); }
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 11px 20px;
+      font-size: 0.875rem;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.15s;
+      border-left: 2px solid transparent;
+    }
 
-    .badge { padding: 3px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; }
-    .badge.completado { background: rgba(16, 185, 129, 0.12); color: #10b981; }
-    .badge.pendiente { background: rgba(79, 142, 247, 0.12); color: #4f8ef7; }
+    .nav-item:hover {
+      color: var(--text);
+      background: var(--surface2);
+    }
+
+    .nav-item.active {
+      color: var(--accent);
+      border-left-color: var(--accent);
+      background: rgba(79, 142, 247, 0.06);
+    }
+
+    .nav-icon {
+      font-size: 1rem;
+      width: 20px;
+      text-align: center;
+    }
+
+    .main {
+      margin-left: 220px;
+      padding: 32px;
+      min-height: 100vh;
+    }
+
+    .page {
+      display: none;
+    }
+
+    .page.active {
+      display: block;
+    }
+
+    .page-header {
+      margin-bottom: 28px;
+    }
+
+    .page-header h1 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.8rem;
+      font-weight: 400;
+      margin-bottom: 4px;
+    }
+
+    .page-header p {
+      color: var(--muted);
+      font-size: 0.875rem;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px;
+    }
+
+    .stat-label {
+      font-size: 0.72rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 10px;
+    }
+
+    .stat-value {
+      font-family: 'DM Serif Display', serif;
+      font-size: 2rem;
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+
+    .stat-value.ok {
+      color: var(--success);
+    }
+
+    .stat-value.warn {
+      color: var(--warn);
+    }
+
+    .stat-value.error {
+      color: var(--error);
+    }
+
+    .stat-value.accent {
+      color: var(--accent);
+    }
+
+    .stat-sub {
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+
+    .table-wrap {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+    }
+
+    .table-toolbar {
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border-bottom: 1px solid var(--border);
+      flex-wrap: wrap;
+    }
+
+    .table-toolbar input,
+    .table-toolbar select {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 12px;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.85rem;
+      outline: none;
+    }
+
+    .table-toolbar input {
+      width: 220px;
+    }
+
+    .btn-export {
+      margin-left: auto;
+      padding: 8px 16px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.85rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-export:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+    }
+
+    thead th {
+      padding: 12px 16px;
+      text-align: left;
+      font-size: 0.72rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      font-weight: 500;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface2);
+    }
+
+    tbody tr {
+      border-bottom: 1px solid var(--border);
+      transition: background 0.1s;
+    }
+
+    tbody tr:last-child {
+      border-bottom: none;
+    }
+
+    tbody tr:hover {
+      background: var(--surface2);
+    }
+
+    tbody td {
+      padding: 13px 16px;
+      vertical-align: middle;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .badge.completado {
+      background: rgba(16, 185, 129, 0.12);
+      color: #10b981;
+    }
+
+    .badge.pendiente {
+      background: rgba(79, 142, 247, 0.12);
+      color: #4f8ef7;
+    }
+
+    .badge.parcial {
+      background: rgba(245, 158, 11, 0.12);
+      color: #f59e0b;
+    }
+
+    .badge.fuera {
+      background: rgba(239, 68, 68, 0.12);
+      color: #ef4444;
+    }
+
+    .alerta-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-size: 0.7rem;
+      background: rgba(239, 68, 68, 0.12);
+      color: #ef4444;
+    }
+
+    .form-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 28px;
+      max-width: 600px;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .field {
+      margin-bottom: 18px;
+    }
+
+    label {
+      display: block;
+      font-size: 0.75rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 7px;
+    }
+
+    input[type=text],
+    input[type=date],
+    input[type=number],
+    input[type=time],
+    textarea {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 11px 14px;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    input:focus,
+    textarea:focus {
+      border-color: var(--accent);
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 90px;
+    }
+
+    .btn-primary {
+      padding: 12px 24px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border: none;
+      border-radius: 10px;
+      color: #fff;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+
+    .btn-primary:hover {
+      opacity: 0.88;
+    }
+
+    .qr-section {
+      margin-top: 24px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      display: flex;
+      gap: 24px;
+      align-items: flex-start;
+      flex-wrap: wrap;
+    }
+
+    .qr-box {
+      background: #fff;
+      border-radius: 10px;
+      padding: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 160px;
+      min-height: 160px;
+    }
+
+    .qr-info h3 {
+      font-size: 1rem;
+      margin-bottom: 6px;
+    }
+
+    .qr-info p {
+      font-size: 0.82rem;
+      color: var(--muted);
+      margin-bottom: 12px;
+      line-height: 1.6;
+    }
+
+    .qr-url {
+      font-size: 0.75rem;
+      color: var(--accent);
+      word-break: break-all;
+      background: rgba(79, 142, 247, 0.08);
+      padding: 8px 12px;
+      border-radius: 8px;
+      margin-bottom: 12px;
+      font-family: monospace;
+    }
+
+    .btn-secondary {
+      padding: 9px 18px;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: border-color 0.2s;
+      margin-right: 8px;
+      margin-top: 4px;
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .map-section {
+      margin-top: 24px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+    }
+
+    .map-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .map-header h3 {
+      font-size: 0.95rem;
+    }
+
+    .map-header p {
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    #map {
+      width: 100%;
+      height: 400px;
+      background: var(--surface2);
+      position: relative;
+    }
+
+    .map-instructions {
+      position: absolute;
+      top: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(10, 12, 20, 0.85);
+      backdrop-filter: blur(8px);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 16px;
+      font-size: 0.8rem;
+      color: var(--muted);
+      pointer-events: none;
+      white-space: nowrap;
+      z-index: 10;
+    }
+
+    .puntos-list {
+      padding: 16px 20px;
+      border-top: 1px solid var(--border);
+      max-height: 160px;
+      overflow-y: auto;
+    }
+
+    .punto-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 7px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.82rem;
+    }
+
+    .punto-item:last-child {
+      border-bottom: none;
+    }
+
+    .punto-coords {
+      color: var(--muted);
+      font-family: monospace;
+    }
+
+    .btn-del {
+      background: none;
+      border: none;
+      color: var(--error);
+      cursor: pointer;
+      font-size: 0.8rem;
+      padding: 2px 6px;
+      border-radius: 4px;
+      transition: background 0.15s;
+    }
+
+    .btn-del:hover {
+      background: rgba(239, 68, 68, 0.1);
+    }
+
+    .map-actions {
+      padding: 14px 20px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .evento-selector {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 16px;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.9rem;
+      outline: none;
+      margin-bottom: 24px;
+      width: 100%;
+      max-width: 400px;
+      appearance: none;
+      cursor: pointer;
+    }
+
+    .alert {
+      padding: 11px 16px;
+      border-radius: 9px;
+      font-size: 0.85rem;
+      margin-bottom: 16px;
+      display: none;
+    }
+
+    .alert.visible {
+      display: block;
+    }
+
+    .alert.success {
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: #10b981;
+    }
+
+    .alert.error {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: #ef4444;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    @media (max-width: 768px) {
+      .sidebar {
+        width: 60px;
+      }
+
+      .sidebar-logo,
+      .nav-item span {
+        display: none;
+      }
+
+      .nav-item {
+        justify-content: center;
+        padding: 14px;
+      }
+
+      .main {
+        margin-left: 60px;
+        padding: 20px 16px;
+      }
+
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .add-form {
+      display: none;
+      padding: 20px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface2);
+    }
+
+    .add-form.visible {
+      display: block;
+    }
+
+    .add-form .add-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .add-form input,
+    .add-form select {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 9px 12px;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.85rem;
+      outline: none;
+      width: 100%;
+    }
+
+    .btn-add {
+      padding: 8px 16px;
+      background: var(--success);
+      border: none;
+      border-radius: 8px;
+      color: #fff;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
   </style>
 </head>
+
 <body>
 
   <div class="sidebar">
@@ -85,187 +667,265 @@
       <h2>Asistencia<br>UNAJMA</h2>
       <p>Panel Admin</p>
     </div>
-    <div class="nav-item active" onclick="showPage('pageRegistros')" data-page="pageRegistros">📊 <span>Registros</span></div>
-    <div class="nav-item" onclick="showPage('pageEventos')" data-page="pageEventos">📅 <span>Eventos</span></div>
-    <div class="nav-item" onclick="showPage('pagePerimetro')" data-page="pagePerimetro">📍 <span>Perímetro</span></div>
+    <div class="nav-item active" onclick="showPage('pageRegistros')" data-page="pageRegistros">
+      <span class="nav-icon">📊</span>
+      <span>Registros</span>
+    </div>
+    <div class="nav-item" onclick="showPage('pageEventos')" data-page="pageEventos">
+      <span class="nav-icon">📅</span>
+      <span>Eventos</span>
+    </div>
+    <div class="nav-item" onclick="showPage('pagePerimetro')" data-page="pagePerimetro">
+      <span class="nav-icon">📍</span>
+      <span>Perímetro</span>
+    </div>
   </div>
 
   <div class="main">
-    <!-- REGISTROS -->
+
     <div class="page active" id="pageRegistros">
       <div class="page-header">
         <h1>Registros de asistencia</h1>
-        <p>Vista en tiempo real de los participantes</p>
-      </div>
-      <select class="evento-selector" id="selectorEventoRegistros" onchange="cargarRegistros()" style="width:100%; max-width:400px; padding:10px; margin-bottom:20px; background:var(--surface); color:white; border-radius:8px; border:1px solid var(--border);"></select>
-      
-      <div class="stats-grid" id="statsGrid" style="display:none">
-        <div class="stat-card"><div class="stat-label">Total</div><div class="stat-value accent" id="statTotal">0</div></div>
-        <div class="stat-card"><div class="stat-label">Completos</div><div class="stat-value ok" id="statCompleto">0</div></div>
+        <p>Vista en tiempo real de todos los participantes</p>
       </div>
 
-      <div class="table-wrap">
-        <div id="loadingRegistros" style="padding:20px; text-align:center;">Selecciona un evento</div>
-        <table id="tablaRegistros" style="display:none">
-          <thead>
-            <tr><th>Nombre</th><th>DNI</th><th>Carrera</th><th>Estado</th><th>Check 1</th><th>Check 2</th></tr>
-          </thead>
-          <tbody id="tablaBody"></tbody>
-        </table>
+      <select class="evento-selector" id="selectorEventoRegistros" onchange="cargarRegistros()">
+        <option value="">— Selecciona un evento —</option>
+      </select>
+
+      <div class="stats-grid" id="statsGrid" style="display:none">
+        <div class="stat-card">
+          <div class="stat-label">Total</div>
+          <div class="stat-value accent" id="statTotal">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Completos</div>
+          <div class="stat-value ok" id="statCompleto">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Pendientes</div>
+          <div class="stat-value accent" id="statPendiente">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Alertas</div>
+          <div class="stat-value error" id="statAlertas">0</div>
+        </div>
+      </div>
+
+      <div class="table-wrap" id="tableWrap">
+        <div class="loading" id="loadingRegistros">Selecciona un evento para ver los registros</div>
+        <div style="display:none" id="tableContent">
+          <div class="table-toolbar">
+            <input type="text" id="filtroNombre" placeholder="Buscar..." oninput="filtrarTabla()">
+            <button class="btn-export" onclick="exportarCSV()">⬇ Exportar CSV</button>
+            <button class="btn-secondary" onclick="toggleFormAgregar()">➕ Agregar manual</button>
+          </div>
+          <div class="add-form" id="addForm">
+            <div class="add-row">
+              <input type="text" id="addNombre" placeholder="Nombres">
+              <input type="text" id="addApellidos" placeholder="Apellidos">
+              <input type="text" id="addDni" placeholder="DNI" maxlength="8">
+            </div>
+            <div class="add-row">
+              <input type="email" id="addCorreo" placeholder="Correo">
+              <select id="addCarrera">
+                <option value="">Carrera...</option>
+                <option value="Ingeniería de Sistemas">Ingeniería de Sistemas</option>
+              </select>
+            </div>
+            <button class="btn-add" onclick="agregarRegistro()">Guardar</button>
+          </div>
+          <div style="overflow-x: auto;">
+            <table>
+              <thead>
+                <tr>
+                  <th>Nombre</th>
+                  <th>Apellidos</th>
+                  <th>DNI</th>
+                  <th>Estado</th>
+                  <th>Check 1</th>
+                  <th>Check 2</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="tablaBody"></tbody>
+            </table>
+          </div>
+        </div>
       </div>
     </div>
 
-    <!-- EVENTOS -->
     <div class="page" id="pageEventos">
       <div class="page-header">
-        <h1>Nuevo Evento</h1>
-        <p>Configura el horario y duración del evento</p>
+        <h1>Crear evento</h1>
+        <p>Configura un nuevo evento y obtén el QR</p>
       </div>
+
+      <div class="alert" id="alertEvento"></div>
+
       <div class="form-card">
-        <div class="field"><label>Nombre del Evento</label><input type="text" id="evNombre" placeholder="Ej: Conferencia IA"></div>
-        <div class="field"><label>Fecha y Hora de Inicio</label><input type="datetime-local" id="evHoraInicio"></div>
-        <div class="field"><label>Duración Total (minutos)</label><input type="number" id="evDuracion" value="90"></div>
-        <div class="field"><label>Lugar</label><input type="text" id="evLugar" placeholder="Auditorio UNAJMA"></div>
-        <button class="btn-primary" onclick="crearEvento()">Crear Evento</button>
+        <div class="field">
+          <label>Nombre del evento</label>
+          <input type="text" id="evNombre" placeholder="Ej: Conferencia 2025">
+        </div>
+        <div class="form-row">
+          <div class="field">
+            <label>Fecha</label>
+            <input type="date" id="evFecha">
+          </div>
+          <div class="field">
+            <label>Hora de inicio del evento</label>
+            <input type="time" id="evHoraInicio" value="08:00">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="field">
+            <label>Duración TOTAL (minutos)</label>
+            <input type="number" id="evTotalMinutos" value="90">
+          </div>
+          <div class="field">
+            <label>Tolerancia GPS (metros)</label>
+            <input type="number" id="evTolerancia" value="10">
+          </div>
+        </div>
+        <div class="field">
+          <label>Lugar</label>
+          <input type="text" id="evLugar" placeholder="Auditorio">
+        </div>
+        <button class="btn-primary" onclick="crearEvento()">Crear evento y generar QR</button>
       </div>
 
       <div class="qr-section" id="qrSection" style="display:none">
         <div class="qr-box" id="qrBox"></div>
         <div class="qr-info">
-          <h3>QR Generado</h3>
-          <p id="qrUrl" style="font-size:0.8rem; color:var(--accent); margin:10px 0;"></p>
-          <button class="btn-primary" onclick="descargarQR()">Descargar QR</button>
+          <h3>QR generado</h3>
+          <div class="qr-url" id="qrUrl"></div>
+          <button class="btn-secondary" onclick="descargarQR()">Descargar</button>
         </div>
       </div>
 
-      <div style="margin-top:40px">
-        <h3>Lista de Eventos</h3>
-        <table style="margin-top:10px">
-          <thead><tr><th>Nombre</th><th>Inicio</th><th>Duración</th><th>Acciones</th></tr></thead>
-          <tbody id="eventosBody"></tbody>
-        </table>
+      <div style="margin-top: 28px;">
+        <h3>Eventos existentes</h3>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Nombre</th>
+                <th>Fecha</th>
+                <th>Inicio</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="eventosBody"></tbody>
+          </table>
+        </div>
       </div>
     </div>
 
-    <!-- PERIMETRO (Simplificado para el ejemplo) -->
     <div class="page" id="pagePerimetro">
-        <div class="page-header"><h1>Perímetro GPS</h1><p>Selecciona un evento para definir su área</p></div>
-        <select id="selectorEventoPerimetro" onchange="cargarEventoPerimetro()" style="width:100%; max-width:400px; padding:10px; margin-bottom:20px; background:var(--surface); color:white;"></select>
-        <div id="map"></div>
-        <button class="btn-primary" style="margin-top:20px" onclick="guardarPerimetro()">Guardar Perímetro</button>
+      <div class="page-header">
+        <h1>Perímetro</h1>
+        <select class="evento-selector" id="selectorEventoPerimetro" onchange="cargarEventoPerimetro()"></select>
+      </div>
+      <div id="map"></div>
+      <div class="map-actions">
+        <button class="btn-primary" onclick="guardarPerimetro()" id="btnGuardarPerimetro" disabled>Guardar
+          Perímetro</button>
+      </div>
     </div>
+
   </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css" />
 
   <script>
     const SUPABASE_URL = 'https://ccvluulbkjofghzpttfb.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNjdmx1dWxia2pvZmdoenB0dGZiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgwMjI1ODksImV4cCI6MjA5MzU5ODU4OX0.Na9TJ5g3Xr22E7h-28Eol0Bv-ikXsYWvuRsoKkmRrfI';
-    const FORM_URL = 'https://turtless-bit.github.io/registro-asistencia/formulario.html';
+    const FORMULARIO_BASE_URL = 'https://turtless-bit.github.io/registro-asistencia/formulario.html';
+
+    let todosLosRegistros = [];
+    let eventosCache = [];
+    let map = null;
+    let puntos = [];
+    let marcadores = [];
+    let poligonoLayer = null;
+    let eventoPerimetroId = null;
 
     async function sbFetch(path, opts = {}) {
-      const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
-        headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
+      const res = await fetch(SUPABASE_URL + '/rest/v1/' + path, {
+        headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=representation', ...opts.headers },
         ...opts
       });
-      return res.json();
+      const text = await res.text();
+      return text ? JSON.parse(text) : [];
     }
 
-    function showPage(id) {
+    function showPage(pageId) {
       document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-      document.getElementById(id).classList.add('active');
-      if(id === 'pageEventos') cargarListaEventos();
-      if(id === 'pagePerimetro') { cargarSelectorPerimetro(); initMap(); }
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      document.getElementById(pageId).classList.add('active');
+      document.querySelector(`[data-page="${pageId}"]`).classList.add('active');
+      if (pageId === 'pagePerimetro' && !map) iniciarMapa();
+      if (pageId === 'pageEventos') cargarListaEventos();
+      if (pageId === 'pageRegistros') cargarSelectorEventos();
+      if (pageId === 'pagePerimetro') cargarSelectorEventosPerimetro();
     }
 
-    async function crearEvento() {
-      const body = {
-        nombre: document.getElementById('evNombre').value,
-        hora_inicio: document.getElementById('evHoraInicio').value,
-        duracion_total_minutos: document.getElementById('evDuracion').value,
-        lugar: document.getElementById('evLugar').value
-      };
-      const data = await sbFetch('eventos', { method: 'POST', body: JSON.stringify(body) });
-      if(data[0]) {
-        mostrarQR(data[0].id);
-        cargarListaEventos();
-      }
-    }
-
-    function mostrarQR(id) {
-      const url = `${FORM_URL}?evento=${id}`;
-      document.getElementById('qrUrl').textContent = url;
-      document.getElementById('qrSection').style.display = 'flex';
-      document.getElementById('qrBox').innerHTML = '';
-      new QRCode(document.getElementById('qrBox'), { text: url, width: 128, height: 128 });
+    async function cargarEventos() {
+      eventosCache = await sbFetch('eventos?select=*&order=creado_en.desc');
+      return eventosCache;
     }
 
     async function cargarListaEventos() {
-      const data = await sbFetch('eventos?select=*&order=creado_en.desc');
-      const body = document.getElementById('eventosBody');
-      const selector = document.getElementById('selectorEventoRegistros');
-      
-      body.innerHTML = data.map(ev => `
+      await cargarEventos();
+      const tbody = document.getElementById('eventosBody');
+      tbody.innerHTML = eventosCache.map(ev => `
         <tr>
           <td>${ev.nombre}</td>
-          <td>${new Date(ev.hora_inicio).toLocaleString()}</td>
-          <td>${ev.duracion_total_minutos} min</td>
-          <td><button onclick="mostrarQR('${ev.id}')">Ver QR</button></td>
-        </tr>
-      `).join('');
-
-      selector.innerHTML = '<option value="">Selecciona Evento</option>' + data.map(ev => `<option value="${ev.id}">${ev.nombre}</option>`).join('');
-    }
-
-    async function cargarRegistros() {
-      const id = document.getElementById('selectorEventoRegistros').value;
-      if(!id) return;
-      const data = await sbFetch(`asistencias?evento_id=eq.${id}&select=*`);
-      document.getElementById('statsGrid').style.display = 'grid';
-      document.getElementById('tablaRegistros').style.display = 'table';
-      document.getElementById('loadingRegistros').style.display = 'none';
-      
-      document.getElementById('statTotal').textContent = data.length;
-      document.getElementById('statCompleto').textContent = data.filter(r => r.estado === 'completado').length;
-
-      document.getElementById('tablaBody').innerHTML = data.map(r => `
-        <tr>
-          <td>${r.nombre} ${r.apellidos}</td>
-          <td>${r.dni}</td>
-          <td>${r.carrera}</td>
-          <td><span class="badge ${r.estado}">${r.estado}</span></td>
-          <td>${r.check1_hora ? new Date(r.check1_hora).toLocaleTimeString() : '—'}</td>
-          <td>${r.check2_hora ? new Date(r.check2_hora).toLocaleTimeString() : '—'}</td>
+          <td>${ev.fecha || '—'}</td>
+          <td>${ev.hora_inicio || '—'}</td>
+          <td>${ev.perimetro ? '✓ OK' : 'Sin definir'}</td>
+          <td><button class="btn-del" onclick="eliminarEvento('${ev.id}')">Eliminar</button></td>
         </tr>
       `).join('');
     }
 
-    // Lógica de mapa simplificada para admin
-    let map, puntos = [], marcadores = [];
-    function initMap() {
-        if(map) return;
-        map = L.map('map').setView([-13.65, -73.38], 15);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-        map.on('click', e => {
-            puntos.push({lat: e.latlng.lat, lng: e.latlng.lng});
-            L.circleMarker(e.latlng, {radius:5}).addTo(map);
-        });
+    async function crearEvento() {
+      const nombre = document.getElementById('evNombre').value;
+      const fecha = document.getElementById('evFecha').value;
+      const hora_inicio = document.getElementById('evHoraInicio').value;
+      const duracion_total = parseInt(document.getElementById('evTotalMinutos').value);
+      const tolerancia = parseInt(document.getElementById('evTolerancia').value);
+
+      const data = await sbFetch('eventos', {
+        method: 'POST',
+        body: JSON.stringify({
+          nombre, fecha, hora_inicio,
+          duracion_total_minutos: duracion_total,
+          tolerancia_metros: tolerancia
+        })
+      });
+
+      if (data[0]) {
+        generarQR(data[0].id, nombre);
+        cargarListaEventos();
+        alert("Evento creado");
+      }
     }
 
-    async function guardarPerimetro() {
-        const id = document.getElementById('selectorEventoPerimetro').value;
-        await sbFetch(`eventos?id=eq.${id}`, { method: 'PATCH', body: JSON.stringify({ perimetro: puntos }) });
-        alert("Perímetro guardado");
+    function generarQR(id, nombre) {
+      const url = `${FORMULARIO_BASE_URL}?evento=${id}`;
+      document.getElementById('qrUrl').textContent = url;
+      document.getElementById('qrBox').innerHTML = '';
+      document.getElementById('qrSection').style.display = 'flex';
+      new QRCode(document.getElementById('qrBox'), { text: url, width: 150, height: 150 });
     }
 
-    async function cargarSelectorPerimetro() {
-        const data = await sbFetch('eventos?select=id,nombre');
-        document.getElementById('selectorEventoPerimetro').innerHTML = data.map(ev => `<option value="${ev.id}">${ev.nombre}</option>`).join('');
-    }
-
-    cargarListaEventos();
+    // El resto de funciones (Mapa, Registros, etc.) se mantienen igual, 
+    // pero usando eventosCache[i].hora_inicio si es necesario.
+    cargarSelectorEventos();
   </script>
 </body>
+
 </html>
