@@ -16,7 +16,6 @@
       --accent2: #7c3aed;
       --success: #10b981;
       --error: #ef4444;
-      --warn: #f59e0b;
       --text: #e8eaf0;
       --muted: #6b7280;
       --border: #2d3148;
@@ -32,134 +31,64 @@
       font-family: 'DM Sans', sans-serif;
       background: var(--bg);
       color: var(--text);
-      min-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 24px 16px 48px;
+      padding: 20px;
     }
 
     .header {
       text-align: center;
-      margin-bottom: 32px;
-      padding-top: 16px;
-    }
-
-    .header .logo {
-      width: 56px;
-      height: 56px;
-      background: linear-gradient(135deg, var(--accent), var(--accent2));
-      border-radius: 16px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 0 auto 16px;
-      font-size: 24px;
+      margin-bottom: 25px;
     }
 
     .header h1 {
       font-family: 'DM Serif Display', serif;
-      font-size: 1.7rem;
-      margin-bottom: 6px;
-    }
-
-    .header p {
-      color: var(--muted);
-      font-size: 0.875rem;
-    }
-
-    .evento-banner {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-left: 3px solid var(--accent);
-      border-radius: 10px;
-      padding: 14px 18px;
-      margin-bottom: 24px;
-      width: 100%;
-      max-width: 480px;
-    }
-
-    .evento-banner .ev-nombre {
-      font-weight: 600;
-      font-size: 1rem;
-      margin-bottom: 4px;
-    }
-
-    .evento-banner .ev-meta {
-      font-size: 0.8rem;
-      color: var(--muted);
+      font-size: 1.6rem;
     }
 
     .card {
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: 16px;
-      padding: 28px 24px;
+      padding: 25px;
       width: 100%;
-      max-width: 480px;
+      max-width: 450px;
     }
 
     .field {
-      margin-bottom: 18px;
+      margin-bottom: 15px;
     }
 
     label {
       display: block;
-      font-size: 0.8rem;
-      font-weight: 500;
+      font-size: 0.75rem;
       color: var(--muted);
       text-transform: uppercase;
-      letter-spacing: 0.05em;
-      margin-bottom: 7px;
+      margin-bottom: 5px;
     }
 
     input,
-    select,
-    textarea {
+    select {
       width: 100%;
       background: var(--surface2);
       border: 1px solid var(--border);
       border-radius: 10px;
-      padding: 13px 16px;
+      padding: 12px;
       color: var(--text);
-      font-family: 'DM Sans', sans-serif;
-      font-size: 0.95rem;
       outline: none;
-    }
-
-    .field-error {
-      font-size: 0.75rem;
-      color: var(--error);
-      margin-top: 5px;
-      display: none;
-    }
-
-    .field-error.visible {
-      display: block;
     }
 
     .btn {
       width: 100%;
-      padding: 15px;
+      padding: 14px;
       background: linear-gradient(135deg, var(--accent), var(--accent2));
       border: none;
       border-radius: 12px;
       color: #fff;
       font-weight: 600;
       cursor: pointer;
-      transition: opacity 0.2s;
-      margin-top: 8px;
-    }
-
-    .btn-outline {
-      width: 100%;
-      padding: 14px;
-      background: transparent;
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      color: var(--text);
-      cursor: pointer;
-      margin-top: 8px;
+      margin-top: 10px;
     }
 
     .screen {
@@ -170,19 +99,14 @@
       display: block;
     }
 
-    .gps-status {
-      text-align: center;
-      padding: 32px 0;
-    }
-
     .spinner {
-      width: 48px;
-      height: 48px;
+      width: 40px;
+      height: 40px;
       border: 3px solid var(--border);
       border-top-color: var(--accent);
       border-radius: 50%;
       animation: spin 0.8s linear infinite;
-      margin: 0 auto 20px;
+      margin: 20px auto;
     }
 
     @keyframes spin {
@@ -192,195 +116,56 @@
     }
 
     .result-icon {
-      width: 72px;
-      height: 72px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 32px;
-      margin: 0 auto 20px;
-    }
-
-    .result-icon.ok {
-      background: rgba(16, 185, 129, 0.15);
-    }
-
-    .result-icon.warn {
-      background: rgba(245, 158, 11, 0.15);
-    }
-
-    .result-title {
-      font-family: 'DM Serif Display', serif;
-      font-size: 1.4rem;
+      font-size: 40px;
       text-align: center;
-      margin-bottom: 10px;
-    }
-
-    .result-msg {
-      text-align: center;
-      color: var(--muted);
-      font-size: 0.9rem;
-      line-height: 1.6;
-      margin-bottom: 24px;
-    }
-
-    .countdown-box {
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 24px;
-      text-align: center;
-      margin-bottom: 20px;
-    }
-
-    .countdown-label {
-      font-size: 0.75rem;
-      color: var(--muted);
-      text-transform: uppercase;
-      margin-bottom: 12px;
-    }
-
-    .countdown-time {
-      font-family: 'DM Serif Display', serif;
-      font-size: 3rem;
-      color: var(--accent);
-    }
-
-    .progress-bar {
-      height: 4px;
-      background: var(--border);
-      border-radius: 2px;
-      margin-top: 16px;
-      overflow: hidden;
-    }
-
-    .progress-fill {
-      height: 100%;
-      background: linear-gradient(90deg, var(--accent), var(--accent2));
-      transition: width 1s linear;
-    }
-
-    .divider {
-      border: none;
-      border-top: 1px solid var(--border);
-      margin: 24px 0;
-    }
-
-    .alert {
-      padding: 12px 16px;
-      border-radius: 10px;
-      font-size: 0.85rem;
-      margin-bottom: 16px;
-      display: none;
-    }
-
-    .alert.visible {
-      display: block;
-    }
-
-    .alert.error {
-      background: rgba(239, 68, 68, 0.1);
-      border: 1px solid rgba(239, 68, 68, 0.3);
-      color: #ef4444;
+      margin-bottom: 15px;
     }
   </style>
 </head>
 
 <body>
-
   <div class="header">
-    <div class="logo">📋</div>
-    <h1>Registro de Asistencia</h1>
-    <p>UNAJMA — Sistema de verificación GPS</p>
-  </div>
-
-  <div class="evento-banner" id="eventoBanner">
-    <div class="ev-nombre" id="eventoNombre">Cargando evento...</div>
-    <div class="ev-meta" id="eventoMeta"></div>
+    <h1>Registro UNAJMA</h1>
+    <p id="eventoNombre">Cargando evento...</p>
   </div>
 
   <div class="card">
-
     <div class="screen active" id="screenForm">
-      <div class="alert" id="alertForm"></div>
-      <div class="field">
-        <label>Nombres</label>
-        <input type="text" id="nombres" placeholder="Ej: Carlos Mauricio">
-        <div class="field-error" id="err-nombres"></div>
-      </div>
-      <div class="field">
-        <label>Apellidos</label>
-        <input type="text" id="apellidos" placeholder="Ej: Silvera Hurtado">
-        <div class="field-error" id="err-apellidos"></div>
-      </div>
-      <div class="field">
-        <label>DNI</label>
-        <input type="text" id="dni" placeholder="8 dígitos" maxlength="8">
-        <div class="field-error" id="err-dni">DNI debe tener 8 dígitos</div>
-      </div>
-      <div class="field">
-        <label>Correo</label>
-        <input type="email" id="correo" placeholder="usuario@unajma.edu.pe">
-        <div class="field-error" id="err-correo">Correo inválido</div>
-      </div>
-      <div class="field">
-        <label>Carrera</label>
-        <select id="carrera">
-          <option value="">Selecciona tu carrera</option>
-          <option value="Ingeniería de Sistemas">Ingeniería de Sistemas</option>
-          <option value="Administración de Empresas">Administración de Empresas</option>
-          <option value="Enfermería">Enfermería</option>
-        </select>
-        <div class="field-error" id="err-carrera">Selecciona tu carrera</div>
-      </div>
-
-      <button class="btn" id="btnRegistrar" onclick="iniciarRegistro()">Registrar ingreso</button>
-
-      <hr class="divider">
-      <button class="btn-outline" onclick="continuarPorDNI()">Ya registré mi ingreso (Continuar)</button>
+      <div class="field"><label>Nombres</label><input type="text" id="nombres"></div>
+      <div class="field"><label>Apellidos</label><input type="text" id="apellidos"></div>
+      <div class="field"><label>DNI</label><input type="text" id="dni" maxlength="8"></div>
+      <button class="btn" onclick="iniciarRegistro()">Registrar Ingreso</button>
     </div>
 
     <div class="screen" id="screenGPS">
-      <div class="gps-status">
-        <div class="spinner"></div>
-        <h2>Obteniendo ubicación...</h2>
-      </div>
+      <div class="spinner"></div>
+      <p style="text-align:center">Verificando ubicación GPS...</p>
     </div>
 
     <div class="screen" id="screenWaiting">
-      <div class="result-icon ok">✅</div>
-      <div class="result-title">Ingreso registrado</div>
-
-      <div class="countdown-box">
-        <div class="countdown-label">Tiempo restante del evento</div>
-        <div class="countdown-time" id="countdownDisplay">--:--</div>
-        <div class="progress-bar">
-          <div class="progress-fill" id="progressFill" style="width:100%"></div>
-        </div>
-      </div>
-
-      <p class="result-msg">Recuerda registrar tu salida antes de retirarte para completar la asistencia.</p>
-
-      <button class="btn" onclick="ejecutarCheck2Final()">Finalizar registro de asistencia</button>
+      <div class="result-icon">✅</div>
+      <h2 style="text-align:center">Ingreso Exitoso</h2>
+      <p style="text-align:center; color:var(--muted); margin: 15px 0">Mantén esta ventana abierta. Al finalizar el
+        evento, presiona el botón de abajo.</p>
+      <button class="btn" onclick="ejecutarCheck2Final()">Registrar Salida</button>
     </div>
 
     <div class="screen" id="screenFinal">
-      <div id="finalContent"></div>
+      <div class="result-icon">🎉</div>
+      <h2 style="text-align:center">¡Asistencia Completa!</h2>
+      <p style="text-align:center; color:var(--muted)">Ya puedes cerrar esta ventana.</p>
     </div>
-
   </div>
 
   <script>
     const SUPABASE_URL = 'https://ccvluulbkjofghzpttfb.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNjdmx1dWxia2pvZmdoenB0dGZiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgwMjI1ODksImV4cCI6MjA5MzU5ODU4OX0.Na9TJ5g3Xr22E7h-28Eol0Bv-ikXsYWvuRsoKkmRrfI';
 
-    let eventoId, eventoData, asistenciaId, countdownInterval;
-    let horaFinEventoMs = 0;
+    let eventoId, asistenciaId;
 
-    async function sbFetch(path, opts = {}) {
-      const res = await fetch(SUPABASE_URL + '/rest/v1/' + path, {
-        headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=representation', ...opts.headers },
+    async function sb(path, opts = {}) {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
+        headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
         ...opts
       });
       return res.ok ? await res.json() : null;
@@ -394,94 +179,57 @@
     async function cargarEvento() {
       const params = new URLSearchParams(window.location.search);
       eventoId = params.get('evento');
-      if (!eventoId) return;
-
-      const rows = await sbFetch('eventos?id=eq.' + eventoId);
-      if (!rows || rows.length === 0) return;
-      eventoData = rows[0];
-
-      document.getElementById('eventoNombre').textContent = eventoData.nombre;
-      document.getElementById('eventoMeta').textContent = `${eventoData.fecha || ''} · ${eventoData.lugar || ''}`;
-
-      // Calcular hora de fin: hora_inicio + duracion_total
-      const inicio = new Date(`${eventoData.fecha}T${eventoData.hora_inicio}`);
-      const duracionMin = eventoData.duracion_total_minutos || 90;
-      horaFinEventoMs = inicio.getTime() + (duracionMin * 60000);
-    }
-
-    function iniciarContador() {
-      showScreen('screenWaiting');
-      const totalDuracion = eventoData.duracion_total_minutos * 60000;
-
-      function actualizar() {
-        const ahora = Date.now();
-        const restante = horaFinEventoMs - ahora;
-
-        if (restante <= 0) {
-          document.getElementById('countdownDisplay').textContent = "00:00";
-          document.getElementById('progressFill').style.width = "0%";
-          return;
-        }
-
-        const mins = Math.floor(restante / 60000);
-        const segs = Math.floor((restante % 60000) / 1000);
-        document.getElementById('countdownDisplay').textContent = `${String(mins).padStart(2, '0')}:${String(segs).padStart(2, '0')}`;
-        document.getElementById('progressFill').style.width = `${(restante / totalDuracion) * 100}%`;
-      }
-
-      actualizar();
-      countdownInterval = setInterval(actualizar, 1000);
+      if (!eventoId) return alert("Enlace inválido");
+      const data = await sb(`eventos?id=eq.${eventoId}`);
+      if (data) document.getElementById('eventoNombre').textContent = data[0].nombre;
     }
 
     async function iniciarRegistro() {
-      // Validaciones básicas de campos aquí...
+      const nombres = document.getElementById('nombres').value;
+      const dni = document.getElementById('dni').value;
+      if (!nombres || dni.length !== 8) return alert("Datos incompletos");
+
       showScreen('screenGPS');
       const gps = await obtenerGPS();
 
-      const payload = {
-        evento_id: eventoId,
-        nombre: document.getElementById('nombres').value,
-        apellidos: document.getElementById('apellidos').value,
-        dni: document.getElementById('dni').value,
-        correo: document.getElementById('correo').value,
-        carrera: document.getElementById('carrera').value,
-        check1_lat: gps.lat, check1_lng: gps.lng,
-        check1_hora: new Date().toISOString(),
-        estado: 'pendiente'
-      };
+      const res = await sb('asistencias', {
+        method: 'POST',
+        body: JSON.stringify({
+          evento_id: eventoId,
+          nombre: nombres,
+          apellidos: document.getElementById('apellidos').value,
+          dni: dni,
+          check1_lat: gps.lat, check1_lng: gps.lng,
+          check1_hora: new Date().toISOString(),
+          estado: 'pendiente'
+        })
+      });
 
-      const res = await sbFetch('asistencias', { method: 'POST', body: JSON.stringify(payload) });
       if (res) {
         asistenciaId = res[0].id;
-        iniciarContador();
+        showScreen('screenWaiting');
       }
     }
 
     async function ejecutarCheck2Final() {
-      clearInterval(countdownInterval);
       showScreen('screenGPS');
       const gps = await obtenerGPS();
 
-      const patch = {
-        check2_lat: gps.lat, check2_lng: gps.lng,
-        check2_hora: new Date().toISOString(),
-        estado: 'completado'
-      };
-
-      await sbFetch('asistencias?id=eq.' + asistenciaId, { method: 'PATCH', body: JSON.stringify(patch) });
-
+      await sb(`asistencias?id=eq.${asistenciaId}`, {
+        method: 'PATCH',
+        body: JSON.stringify({
+          check2_lat: gps.lat, check2_lng: gps.lng,
+          check2_hora: new Date().toISOString(),
+          estado: 'completado'
+        })
+      });
       showScreen('screenFinal');
-      document.getElementById('finalContent').innerHTML = `
-        <div class="result-icon ok">🎉</div>
-        <div class="result-title">¡Asistencia completada!</div>
-        <p class="result-msg">Tu participación ha sido registrada con éxito.</p>
-      `;
     }
 
     function obtenerGPS() {
-      return new Promise((resolve) => {
+      return new Promise(resolve => {
         navigator.geolocation.getCurrentPosition(
-          pos => resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+          p => resolve({ lat: p.coords.latitude, lng: p.coords.longitude }),
           () => resolve({ lat: 0, lng: 0 }),
           { enableHighAccuracy: true }
         );
