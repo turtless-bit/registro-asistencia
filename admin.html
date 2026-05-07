@@ -1,19 +1,16 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Panel Admin — Registro de Asistencia</title>
   <style>
-    /* MANTENGO TUS ESTILOS ORIGINALES INTACTOS */
     @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Serif+Display&display=swap');
 
     :root {
       --bg: #0a0c14;
       --surface: #12151f;
       --surface2: #1a1e2e;
-      --surface3: #222840;
       --accent: #4f8ef7;
       --accent2: #7c3aed;
       --success: #10b981;
@@ -24,328 +21,149 @@
       --border: #252a40;
     }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
-    body {
-      font-family: 'DM Sans', sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-    }
+    body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
 
     .sidebar {
-      position: fixed;
-      left: 0;
-      top: 0;
-      bottom: 0;
-      width: 220px;
-      background: var(--surface);
-      border-right: 1px solid var(--border);
-      display: flex;
-      flex-direction: column;
-      padding: 24px 0;
-      z-index: 100;
+      position: fixed; left: 0; top: 0; bottom: 0; width: 220px;
+      background: var(--surface); border-right: 1px solid var(--border);
+      display: flex; flex-direction: column; padding: 24px 0; z-index: 100;
     }
 
-    .sidebar-logo {
-      padding: 0 20px 24px;
-      border-bottom: 1px solid var(--border);
-      margin-bottom: 16px;
-    }
-
-    .sidebar-logo h2 {
-      font-family: 'DM Serif Display', serif;
-      font-size: 1.1rem;
-      font-weight: 400;
-      line-height: 1.3;
-    }
-
-    .sidebar-logo p {
-      font-size: 0.72rem;
-      color: var(--muted);
-      margin-top: 2px;
-    }
+    .sidebar-logo { padding: 0 20px 24px; border-bottom: 1px solid var(--border); margin-bottom: 16px; }
+    .sidebar-logo h2 { font-family: 'DM Serif Display', serif; font-size: 1.1rem; font-weight: 400; line-height: 1.3; }
+    .sidebar-logo p { font-size: 0.72rem; color: var(--muted); margin-top: 2px; }
 
     .nav-item {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 11px 20px;
-      font-size: 0.875rem;
-      color: var(--muted);
-      cursor: pointer;
-      transition: all 0.15s;
-      border-left: 2px solid transparent;
+      display: flex; align-items: center; gap: 10px; padding: 11px 20px;
+      font-size: 0.875rem; color: var(--muted); cursor: pointer;
+      transition: all 0.15s; border-left: 2px solid transparent;
     }
+    .nav-item:hover { color: var(--text); background: var(--surface2); }
+    .nav-item.active { color: var(--accent); border-left-color: var(--accent); background: rgba(79,142,247,0.06); }
+    .nav-icon { font-size: 1rem; width: 20px; text-align: center; }
 
-    .nav-item:hover {
-      color: var(--text);
-      background: var(--surface2);
+    .main { margin-left: 220px; padding: 32px; min-height: 100vh; }
+    .page { display: none; }
+    .page.active { display: block; }
+
+    .page-header { margin-bottom: 28px; }
+    .page-header h1 { font-family: 'DM Serif Display', serif; font-size: 1.8rem; font-weight: 400; margin-bottom: 4px; }
+    .page-header p { color: var(--muted); font-size: 0.875rem; }
+
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 16px; margin-bottom: 28px; }
+    .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 20px; }
+    .stat-label { font-size: 0.72rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px; }
+    .stat-value { font-family: 'DM Serif Display', serif; font-size: 2rem; line-height: 1; margin-bottom: 4px; }
+    .stat-value.ok { color: var(--success); }
+    .stat-value.accent { color: var(--accent); }
+    .stat-value.warn { color: var(--warn); }
+    .stat-sub { font-size: 0.75rem; color: var(--muted); }
+
+    .table-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
+    .table-toolbar { padding: 16px 20px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+    .table-toolbar input {
+      background: var(--surface2); border: 1px solid var(--border); border-radius: 8px;
+      padding: 8px 12px; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 0.85rem; outline: none; width: 220px;
     }
-
-    .nav-item.active {
-      color: var(--accent);
-      border-left-color: var(--accent);
-      background: rgba(79, 142, 247, 0.06);
-    }
-
-    .nav-icon {
-      font-size: 1rem;
-      width: 20px;
-      text-align: center;
-    }
-
-    .main {
-      margin-left: 220px;
-      padding: 32px;
-      min-height: 100vh;
-    }
-
-    .page {
-      display: none;
-    }
-
-    .page.active {
-      display: block;
-    }
-
-    .page-header {
-      margin-bottom: 28px;
-    }
-
-    .page-header h1 {
-      font-family: 'DM Serif Display', serif;
-      font-size: 1.8rem;
-      font-weight: 400;
-      margin-bottom: 4px;
-    }
-
-    .page-header p {
-      color: var(--muted);
-      font-size: 0.875rem;
-    }
-
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 16px;
-      margin-bottom: 28px;
-    }
-
-    .stat-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 20px;
-    }
-
-    .stat-label {
-      font-size: 0.72rem;
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      margin-bottom: 10px;
-    }
-
-    .stat-value {
-      font-family: 'DM Serif Display', serif;
-      font-size: 2rem;
-      line-height: 1;
-      margin-bottom: 4px;
-    }
-
-    .stat-value.ok {
-      color: var(--success);
-    }
-
-    .stat-value.accent {
-      color: var(--accent);
-    }
-
-    .stat-value.warn {
-      color: var(--warn);
-    }
-
-    .stat-value.error {
-      color: var(--error);
-    }
-
-    .stat-sub {
-      font-size: 0.75rem;
-      color: var(--muted);
-    }
-
-    .table-wrap {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      overflow: hidden;
-    }
-
-    .table-toolbar {
-      padding: 16px 20px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      border-bottom: 1px solid var(--border);
-      flex-wrap: wrap;
-    }
-
-    .table-toolbar input,
-    .table-toolbar select {
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 8px 12px;
-      color: var(--text);
-      font-family: 'DM Sans', sans-serif;
-      font-size: 0.85rem;
-      outline: none;
-    }
-
     .btn-export {
-      margin-left: auto;
-      padding: 8px 16px;
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      color: var(--text);
-      font-family: 'DM Sans', sans-serif;
-      font-size: 0.85rem;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 6px;
+      margin-left: auto; padding: 8px 16px; background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 8px; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 0.85rem; cursor: pointer;
     }
+    .btn-export:hover { border-color: var(--accent); color: var(--accent); }
 
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.85rem;
-    }
-
+    table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
     thead th {
-      padding: 12px 16px;
-      text-align: left;
-      font-size: 0.72rem;
-      color: var(--muted);
-      text-transform: uppercase;
-      border-bottom: 1px solid var(--border);
-      background: var(--surface2);
+      padding: 12px 16px; text-align: left; font-size: 0.72rem; color: var(--muted);
+      text-transform: uppercase; letter-spacing: 0.07em; border-bottom: 1px solid var(--border); background: var(--surface2);
     }
+    tbody tr { border-bottom: 1px solid var(--border); transition: background 0.1s; }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: var(--surface2); }
+    tbody td { padding: 13px 16px; vertical-align: middle; }
 
-    tbody tr {
-      border-bottom: 1px solid var(--border);
-      transition: background 0.1s;
-    }
+    .badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; }
+    .badge.completado { background: rgba(16,185,129,0.12); color: #10b981; }
+    .badge.pendiente  { background: rgba(79,142,247,0.12);  color: #4f8ef7; }
+    .badge.parcial    { background: rgba(245,158,11,0.12);  color: #f59e0b; }
 
-    tbody tr:hover {
-      background: var(--surface2);
-    }
+    .form-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 28px; max-width: 560px; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .field { margin-bottom: 18px; }
 
-    tbody td {
-      padding: 13px 16px;
-    }
+    label { display: block; font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 7px; }
 
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      padding: 3px 10px;
-      border-radius: 20px;
-      font-size: 0.75rem;
-      font-weight: 600;
+    input[type=text], input[type=date], input[type=time], input[type=number], input[type=email] {
+      width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: 10px;
+      padding: 11px 14px; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 0.9rem;
+      outline: none; transition: border-color 0.2s;
     }
-
-    .badge.completado {
-      background: rgba(16, 185, 129, 0.12);
-      color: #10b981;
-    }
-
-    .badge.pendiente {
-      background: rgba(79, 142, 247, 0.12);
-      color: #4f8ef7;
-    }
-
-    .badge.parcial {
-      background: rgba(245, 158, 11, 0.12);
-      color: #f59e0b;
-    }
-
-    .form-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 28px;
-      max-width: 600px;
-    }
-
-    .field {
-      margin-bottom: 18px;
-    }
-
-    label {
-      display: block;
-      font-size: 0.75rem;
-      color: var(--muted);
-      text-transform: uppercase;
-      margin-bottom: 7px;
-    }
-
-    input,
-    select,
-    textarea {
-      width: 100%;
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 11px 14px;
-      color: var(--text);
-      outline: none;
-      font-family: 'DM Sans', sans-serif;
-    }
+    input:focus { border-color: var(--accent); }
 
     .btn-primary {
-      padding: 12px 24px;
-      background: linear-gradient(135deg, var(--accent), var(--accent2));
-      border: none;
-      border-radius: 10px;
-      color: #fff;
-      font-weight: 600;
-      cursor: pointer;
+      padding: 12px 24px; background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border: none; border-radius: 10px; color: #fff; font-family: 'DM Sans', sans-serif;
+      font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: opacity 0.2s;
     }
+    .btn-primary:hover { opacity: 0.88; }
+    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .btn-secondary {
+      padding: 9px 18px; background: transparent; border: 1px solid var(--border); border-radius: 8px;
+      color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 0.85rem; cursor: pointer;
+      transition: border-color 0.2s; margin-right: 8px;
+    }
+    .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+
+    .btn-del { background: none; border: none; color: var(--error); cursor: pointer; font-size: 0.8rem; padding: 4px 8px; border-radius: 4px; }
+    .btn-del:hover { background: rgba(239,68,68,0.1); }
 
     .qr-section {
-      margin-top: 24px;
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 24px;
-      display: flex;
-      gap: 24px;
-      align-items: flex-start;
+      margin-top: 24px; background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 12px; padding: 24px; display: flex; gap: 24px; align-items: flex-start; flex-wrap: wrap;
+    }
+    .qr-box { background: #fff; border-radius: 10px; padding: 12px; min-width: 160px; min-height: 160px; display: flex; align-items: center; justify-content: center; }
+    .qr-url { font-size: 0.75rem; color: var(--accent); word-break: break-all; background: rgba(79,142,247,0.08); padding: 8px 12px; border-radius: 8px; margin-bottom: 12px; font-family: monospace; }
+
+    .map-section { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; margin-top: 8px; }
+    .map-header { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+    .map-header h3 { font-size: 0.95rem; }
+    .map-header p { font-size: 0.8rem; color: var(--muted); }
+    #map { width: 100%; height: 420px; background: var(--surface2); }
+
+    .map-actions { padding: 14px 20px; border-top: 1px solid var(--border); display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+
+    .puntos-list { padding: 12px 20px; border-top: 1px solid var(--border); max-height: 140px; overflow-y: auto; }
+    .punto-item { display: flex; align-items: center; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--border); font-size: 0.82rem; }
+    .punto-item:last-child { border-bottom: none; }
+    .punto-coords { color: var(--muted); font-family: monospace; }
+
+    .evento-selector {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+      padding: 10px 16px; color: var(--text); font-family: 'DM Sans', sans-serif;
+      font-size: 0.9rem; outline: none; margin-bottom: 24px; width: 100%; max-width: 420px; cursor: pointer;
     }
 
-    .qr-box {
-      background: #fff;
-      border-radius: 10px;
-      padding: 12px;
-      min-width: 160px;
-    }
+    .alert { padding: 12px 16px; border-radius: 10px; font-size: 0.85rem; margin-bottom: 18px; display: none; animation: fadeIn 0.2s ease; }
+    .alert.visible { display: block; }
+    .alert.success { background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.3); color: #10b981; }
+    .alert.error   { background: rgba(239,68,68,0.1);  border: 1px solid rgba(239,68,68,0.3);  color: #ef4444; }
+    .alert.warn    { background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.3); color: #f59e0b; }
 
-    #map {
-      width: 100%;
-      height: 400px;
-      background: var(--surface2);
-      border-radius: 14px;
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+
+    .loading { text-align: center; padding: 40px; color: var(--muted); font-size: 0.9rem; }
+
+    @media (max-width: 768px) {
+      .sidebar { width: 60px; }
+      .sidebar-logo, .nav-item span { display: none; }
+      .nav-item { justify-content: center; padding: 14px; }
+      .main { margin-left: 60px; padding: 20px 16px; }
+      .form-row { grid-template-columns: 1fr; }
     }
   </style>
 </head>
-
 <body>
 
   <div class="sidebar">
@@ -365,250 +183,588 @@
   </div>
 
   <div class="main">
+
+    <!-- REGISTROS -->
     <div class="page active" id="pageRegistros">
       <div class="page-header">
         <h1>Registros de asistencia</h1>
         <p>Vista en tiempo real de todos los participantes</p>
       </div>
-      <select class="evento-selector" id="selectorEventoRegistros" onchange="cargarRegistros()"
-        style="margin-bottom:20px; width:100%; max-width:400px; padding:10px; background:var(--surface); color:#fff; border:1px solid var(--border); border-radius:10px;"></select>
+
+      <select class="evento-selector" id="selectorEventoRegistros" onchange="cargarRegistros()">
+        <option value="">— Selecciona un evento —</option>
+      </select>
 
       <div class="stats-grid" id="statsGrid" style="display:none">
         <div class="stat-card">
-          <div class="stat-label">Total</div>
+          <div class="stat-label">Total registros</div>
           <div class="stat-value accent" id="statTotal">0</div>
+          <div class="stat-sub">inscritos</div>
         </div>
         <div class="stat-card">
           <div class="stat-label">Completos</div>
           <div class="stat-value ok" id="statCompleto">0</div>
+          <div class="stat-sub">ambos checks ✓</div>
         </div>
         <div class="stat-card">
           <div class="stat-label">Pendientes</div>
           <div class="stat-value accent" id="statPendiente">0</div>
+          <div class="stat-sub">esperando check 2</div>
         </div>
         <div class="stat-card">
-          <div class="stat-label">Alertas</div>
-          <div class="stat-value error" id="statAlertas">0</div>
+          <div class="stat-label">Parciales</div>
+          <div class="stat-value warn" id="statParcial">0</div>
+          <div class="stat-sub">verificación incompleta</div>
         </div>
       </div>
 
       <div class="table-wrap">
-        <div class="table-toolbar">
-          <input type="text" id="filtroNombre" placeholder="Buscar..." oninput="filtrarTabla()">
-          <button class="btn-export" onclick="exportarCSV()">⬇ Exportar CSV</button>
+        <div class="loading" id="loadingRegistros">Selecciona un evento para ver los registros</div>
+        <div style="display:none" id="tableContent">
+          <div class="table-toolbar">
+            <input type="text" id="filtroNombre" placeholder="Buscar por nombre o DNI..." oninput="filtrarTabla()">
+            <button class="btn-export" onclick="exportarCSV()">⬇ Exportar CSV</button>
+          </div>
+          <div style="overflow-x:auto">
+            <table>
+              <thead>
+                <tr>
+                  <th>Nombre</th><th>Apellidos</th><th>DNI</th><th>Correo</th>
+                  <th>Carrera</th><th>Estado</th><th>Check 1</th><th>Check 2</th><th></th>
+                </tr>
+              </thead>
+              <tbody id="tablaBody"></tbody>
+            </table>
+          </div>
         </div>
-        <table>
-          <thead>
-            <tr>
-              <th>Nombre</th>
-              <th>Apellidos</th>
-              <th>DNI</th>
-              <th>Estado</th>
-              <th>Check 1</th>
-              <th>Check 2</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody id="tablaBody"></tbody>
-        </table>
       </div>
     </div>
 
+    <!-- EVENTOS -->
     <div class="page" id="pageEventos">
       <div class="page-header">
         <h1>Crear evento</h1>
+        <p>Configura un nuevo evento y obtén el QR para los asistentes</p>
       </div>
+
+      <div class="alert" id="alertEvento"></div>
+
       <div class="form-card">
-        <div class="field"><label>Nombre del evento</label><input type="text" id="evNombre"></div>
-        <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:15px;">
-          <div class="field"><label>Fecha</label><input type="date" id="evFecha"></div>
-          <div class="field"><label>Hora Inicio</label><input type="time" id="evHoraInicio"></div>
-          <div class="field"><label>Duración (min)</label><input type="number" id="evTotalMinutos" value="90"></div>
+        <div class="field">
+          <label>Nombre del evento</label>
+          <input type="text" id="evNombre" placeholder="Ej: Conferencia de Sistemas 2025">
         </div>
-        <div class="field"><label>Lugar</label><input type="text" id="evLugar"></div>
-        <button class="btn-primary" onclick="crearEvento()">Crear evento y generar QR</button>
+        <div class="form-row">
+          <div class="field">
+            <label>Fecha</label>
+            <input type="date" id="evFecha" min="2020-01-01" max="2099-12-31">
+          </div>
+          <div class="field">
+            <label>Hora de inicio</label>
+            <input type="time" id="evHoraInicio">
+          </div>
+        </div>
+        <div class="field">
+          <label>Lugar</label>
+          <input type="text" id="evLugar" placeholder="Ej: Auditorio principal UNAJMA">
+        </div>
+        <button class="btn-primary" id="btnCrear" onclick="crearEvento()">Crear evento y generar QR</button>
       </div>
 
       <div class="qr-section" id="qrSection" style="display:none">
         <div class="qr-box" id="qrBox"></div>
-        <div class="qr-info">
-          <h3>QR Generado</h3>
-          <div class="qr-url" id="qrUrl"
-            style="background:rgba(255,255,255,0.05); padding:10px; border-radius:8px; margin:10px 0; font-family:monospace; font-size:0.8rem;">
-          </div>
-          <button class="btn-primary" onclick="descargarQR()">Descargar QR</button>
+        <div>
+          <h3 style="margin-bottom:8px">QR del evento generado</h3>
+          <p style="font-size:0.82rem;color:var(--muted);margin-bottom:12px">Muestra este QR en el evento para que los asistentes puedan registrarse.</p>
+          <div class="qr-url" id="qrUrl"></div>
+          <button class="btn-secondary" onclick="descargarQR()">⬇ Descargar QR</button>
+          <button class="btn-secondary" onclick="copiarUrl()">📋 Copiar URL</button>
         </div>
       </div>
 
-      <h2 style="margin-top:40px; margin-bottom:20px;">Eventos existentes</h2>
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Nombre</th>
-              <th>Fecha / Hora</th>
-              <th>Lugar</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody id="eventosBody"></tbody>
-        </table>
+      <div style="margin-top:36px">
+        <h2 style="font-family:'DM Serif Display',serif;font-size:1.3rem;font-weight:400;margin-bottom:16px">Eventos existentes</h2>
+        <div class="table-wrap">
+          <div class="loading" id="loadingEventos">Cargando eventos...</div>
+          <table>
+            <thead>
+              <tr>
+                <th>Nombre</th><th>Fecha</th><th>Hora inicio</th><th>Lugar</th><th>Perímetro</th><th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="eventosBody"></tbody>
+          </table>
+        </div>
       </div>
     </div>
 
+    <!-- PERÍMETRO -->
     <div class="page" id="pagePerimetro">
       <div class="page-header">
         <h1>Configurar perímetro</h1>
+        <p>Dibuja el área válida del evento haciendo clic en el mapa</p>
       </div>
-      <select id="selectorEventoPerimetro" onchange="cargarEventoPerimetro()"
-        style="margin-bottom:20px; width:100%; max-width:400px; padding:10px; background:var(--surface); color:#fff; border:1px solid var(--border); border-radius:10px;"></select>
-      <div id="map"></div>
-      <div style="margin-top:20px;">
-        <button class="btn-primary" onclick="guardarPerimetro()" id="btnGuardarPerimetro" disabled>Guardar
-          Perímetro</button>
-        <button class="btn-secondary" onclick="limpiarPuntos()"
-          style="background:var(--surface2); color:#fff; padding:10px 20px; border-radius:10px; border:1px solid var(--border); margin-left:10px; cursor:pointer;">Limpiar</button>
+
+      <select class="evento-selector" id="selectorEventoPerimetro" onchange="cargarEventoPerimetro()">
+        <option value="">— Selecciona un evento —</option>
+      </select>
+
+      <div class="alert" id="alertPerimetro"></div>
+
+      <div class="map-section">
+        <div class="map-header">
+          <div>
+            <h3>Mapa interactivo</h3>
+            <p>Haz clic en el mapa para agregar puntos. Mínimo 3 para definir el área.</p>
+          </div>
+          <button class="btn-secondary" onclick="usarMiUbicacion()">📍 Mi ubicación</button>
+        </div>
+        <div id="map"></div>
+        <div class="puntos-list" id="puntosList">
+          <div style="color:var(--muted);font-size:0.82rem;text-align:center;padding:10px">No hay puntos aún</div>
+        </div>
+        <div class="map-actions">
+          <button class="btn-primary" onclick="guardarPerimetro()" id="btnGuardarPerimetro" disabled>Guardar perímetro</button>
+          <button class="btn-secondary" onclick="limpiarPuntos()">🗑 Limpiar puntos</button>
+        </div>
       </div>
     </div>
+
   </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
   <script>
     const SUPABASE_URL = 'https://ccvluulbkjofghzpttfb.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNjdmx1dWxia2pvZmdoenB0dGZiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgwMjI1ODksImV4cCI6MjA5MzU5ODU4OX0.Na9TJ5g3Xr22E7h-28Eol0Bv-ikXsYWvuRsoKkmRrfI';
     const FORMULARIO_BASE_URL = 'https://turtless-bit.github.io/registro-asistencia/formulario.html';
 
-    let map, puntos = [], marcadores = [], poligonoLayer, eventosCache = [], todosLosRegistros = [];
+    let todosLosRegistros = [], eventosCache = [];
+    let map = null, puntos = [], marcadores = [], poligonoLayer = null;
+    let eventoPerimetroId = null, miUbicacionMarker = null;
 
     async function sbFetch(path, opts = {}) {
-      const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
-        headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
+      const res = await fetch(SUPABASE_URL + '/rest/v1/' + path, {
+        headers: {
+          'apikey': SUPABASE_KEY,
+          'Authorization': 'Bearer ' + SUPABASE_KEY,
+          'Content-Type': 'application/json',
+          'Prefer': 'return=representation'
+        },
         ...opts
       });
-      return res.ok ? await res.json() : [];
+      const text = await res.text();
+      const data = text ? JSON.parse(text) : [];
+      if (!res.ok) throw new Error(data?.message || data?.error || 'HTTP ' + res.status);
+      return data;
     }
 
-    function showPage(pageId) {
+    function showAlert(id, msg, tipo) {
+      const el = document.getElementById(id);
+      el.textContent = msg;
+      el.className = 'alert visible ' + tipo;
+      clearTimeout(el._t);
+      el._t = setTimeout(() => el.classList.remove('visible'), 5000);
+    }
+
+    function formatHora(iso) {
+      if (!iso) return '—';
+      return new Date(iso).toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' });
+    }
+
+    function escHTML(s) {
+      if (s == null) return '—';
+      return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    function showPage(id) {
       document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
       document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-      document.getElementById(pageId).classList.add('active');
-      document.querySelector(`[data-page="${pageId}"]`).classList.add('active');
-      if (pageId === 'pagePerimetro' && !map) initMap();
-      if (pageId === 'pageEventos') cargarListaEventos();
-      cargarSelectorEventos();
+      document.getElementById(id).classList.add('active');
+      document.querySelector('[data-page="' + id + '"]').classList.add('active');
+      if (id === 'pagePerimetro') { cargarSelectorPerimetro(); if (!map) iniciarMapa(); }
+      if (id === 'pageEventos') cargarListaEventos();
+      if (id === 'pageRegistros') cargarSelectorRegistros();
     }
 
-    async function cargarSelectorEventos() {
+    // ── EVENTOS ──────────────────────────────────────────────────
+
+    async function cargarEventos() {
       eventosCache = await sbFetch('eventos?select=*&order=creado_en.desc');
-      const html = eventosCache.map(ev => `<option value="${ev.id}">${ev.nombre}</option>`).join('');
-      document.getElementById('selectorEventoRegistros').innerHTML = html;
-      document.getElementById('selectorEventoPerimetro').innerHTML = html;
+      return eventosCache;
+    }
+
+    async function cargarSelectorRegistros() {
+      try { await cargarEventos(); } catch(e) { return; }
+      const sel = document.getElementById('selectorEventoRegistros');
+      const val = sel.value;
+      sel.innerHTML = '<option value="">— Selecciona un evento —</option>';
+      eventosCache.forEach(ev => {
+        const o = document.createElement('option');
+        o.value = ev.id;
+        o.textContent = ev.nombre + (ev.fecha ? ' · ' + ev.fecha : '');
+        sel.appendChild(o);
+      });
+      if (val) { sel.value = val; cargarRegistros(); }
+    }
+
+    async function cargarSelectorPerimetro() {
+      try { await cargarEventos(); } catch(e) { return; }
+      const sel = document.getElementById('selectorEventoPerimetro');
+      const val = sel.value;
+      sel.innerHTML = '<option value="">— Selecciona un evento —</option>';
+      eventosCache.forEach(ev => {
+        const o = document.createElement('option');
+        o.value = ev.id;
+        o.textContent = ev.nombre;
+        sel.appendChild(o);
+      });
+      if (val) { sel.value = val; }
     }
 
     async function crearEvento() {
-      const body = {
-        nombre: document.getElementById('evNombre').value,
-        fecha: document.getElementById('evFecha').value,
-        hora_inicio: document.getElementById('evHoraInicio').value,
-        duracion_total_minutos: parseInt(document.getElementById('evTotalMinutos').value),
-        lugar: document.getElementById('evLugar').value
-      };
-      const res = await sbFetch('eventos', { method: 'POST', body: JSON.stringify(body) });
-      if (res.length) {
-        alert("Evento creado");
-        generarQR(res[0].id);
-        cargarListaEventos();
+      const nombre = document.getElementById('evNombre').value.trim();
+      const fecha  = document.getElementById('evFecha').value;
+      const hora   = document.getElementById('evHoraInicio').value;
+      const lugar  = document.getElementById('evLugar').value.trim();
+
+      if (!nombre) { showAlert('alertEvento', '⚠ Ingresa el nombre del evento.', 'error'); return; }
+
+      const btn = document.getElementById('btnCrear');
+      btn.disabled = true;
+      btn.textContent = 'Creando...';
+
+      try {
+        const data = await sbFetch('eventos', {
+          method: 'POST',
+          body: JSON.stringify({
+            nombre,
+            fecha: fecha || null,
+            hora_inicio: hora || null,
+            lugar: lugar || null
+          })
+        });
+
+        if (data && data[0]) {
+          showAlert('alertEvento', '✓ Evento "' + nombre + '" creado correctamente.', 'success');
+          generarQR(data[0].id, nombre);
+          document.getElementById('evNombre').value = '';
+          document.getElementById('evFecha').value = '';
+          document.getElementById('evHoraInicio').value = '';
+          document.getElementById('evLugar').value = '';
+          cargarListaEventos();
+          cargarSelectorRegistros();
+        } else {
+          showAlert('alertEvento', '✗ No se pudo crear el evento.', 'error');
+        }
+      } catch(e) {
+        showAlert('alertEvento', '✗ Error: ' + e.message, 'error');
       }
+
+      btn.disabled = false;
+      btn.textContent = 'Crear evento y generar QR';
     }
 
-    function generarQR(id) {
-      const url = `${FORMULARIO_BASE_URL}?evento=${id}`;
+    function generarQR(id, nombre) {
+      const url = FORMULARIO_BASE_URL + '?evento=' + id;
       document.getElementById('qrUrl').textContent = url;
       document.getElementById('qrBox').innerHTML = '';
       document.getElementById('qrSection').style.display = 'flex';
-      new QRCode(document.getElementById('qrBox'), { text: url, width: 150, height: 150 });
-    }
-
-    async function cargarListaEventos() {
-      const evs = await sbFetch('eventos?select=*&order=creado_en.desc');
-      document.getElementById('eventosBody').innerHTML = evs.map(ev => `
-        <tr>
-          <td>${ev.nombre}</td>
-          <td>${ev.fecha} / ${ev.hora_inicio || '--:--'}</td>
-          <td>${ev.lugar || '—'}</td>
-          <td><button class="btn-primary" onclick="generarQR('${ev.id}')" style="padding:5px 10px; font-size:0.7rem;">Ver QR</button></td>
-        </tr>
-      `).join('');
-    }
-
-    async function cargarRegistros() {
-      const id = document.getElementById('selectorEventoRegistros').value;
-      todosLosRegistros = await sbFetch(`asistencias?evento_id=eq.${id}`);
-      document.getElementById('statsGrid').style.display = 'grid';
-      actualizarStats();
-      renderTabla(todosLosRegistros);
-    }
-
-    function renderTabla(regs) {
-      document.getElementById('tablaBody').innerHTML = regs.map(r => `
-        <tr>
-          <td>${r.nombre}</td><td>${r.apellidos}</td><td>${r.dni}</td>
-          <td><span class="badge ${r.estado}">${r.estado}</span></td>
-          <td>${r.check1_hora ? new Date(r.check1_hora).toLocaleTimeString() : '—'}</td>
-          <td>${r.check2_hora ? new Date(r.check2_hora).toLocaleTimeString() : '—'}</td>
-          <td><button onclick="eliminarRegistro('${r.id}')" style="color:red; background:none; border:none; cursor:pointer;">🗑</button></td>
-        </tr>
-      `).join('');
-    }
-
-    function initMap() {
-      map = L.map('map').setView([-13.65, -73.33], 15);
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-      map.on('click', (e) => {
-        const p = { lat: e.latlng.lat, lng: e.latlng.lng };
-        puntos.push(p);
-        marcadores.push(L.marker([p.lat, p.lng]).addTo(map));
-        dibujar();
+      new QRCode(document.getElementById('qrBox'), {
+        text: url, width: 150, height: 150,
+        colorDark: '#000', colorLight: '#fff', correctLevel: QRCode.CorrectLevel.H
       });
     }
 
-    function dibujar() {
+    function descargarQR() {
+      const canvas = document.querySelector('#qrBox canvas');
+      if (!canvas) return;
+      const a = document.createElement('a');
+      a.download = 'qr-asistencia.png';
+      a.href = canvas.toDataURL();
+      a.click();
+    }
+
+    function copiarUrl() {
+      const url = document.getElementById('qrUrl').textContent;
+      navigator.clipboard.writeText(url).then(() => showAlert('alertEvento', '📋 URL copiada al portapapeles.', 'success'));
+    }
+
+    async function cargarListaEventos() {
+      document.getElementById('loadingEventos').style.display = 'block';
+      try { await cargarEventos(); } catch(e) {
+        document.getElementById('loadingEventos').textContent = 'Error al cargar eventos.';
+        return;
+      }
+      document.getElementById('loadingEventos').style.display = 'none';
+
+      const tbody = document.getElementById('eventosBody');
+      if (eventosCache.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:32px">No hay eventos creados aún</td></tr>';
+        return;
+      }
+      tbody.innerHTML = eventosCache.map(ev => `
+        <tr>
+          <td><strong>${escHTML(ev.nombre)}</strong></td>
+          <td>${ev.fecha || '—'}</td>
+          <td>${ev.hora_inicio ? ev.hora_inicio.slice(0,5) : '—'}</td>
+          <td>${escHTML(ev.lugar)}</td>
+          <td>${ev.perimetro && ev.perimetro.length >= 3
+            ? '<span style="color:var(--success);font-size:0.82rem">✓ Definido (' + ev.perimetro.length + ' pts)</span>'
+            : '<span style="color:var(--warn);font-size:0.82rem">Sin definir</span>'}</td>
+          <td style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+            <button class="btn-secondary" style="margin:0;padding:6px 12px;font-size:0.78rem" onclick="verQR('${ev.id}','${escHTML(ev.nombre)}')">Ver QR</button>
+            <button class="btn-del" onclick="eliminarEvento('${ev.id}','${escHTML(ev.nombre)}')">🗑 Eliminar</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function verQR(id, nombre) {
+      generarQR(id, nombre);
+      document.getElementById('qrSection').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    async function eliminarEvento(id, nombre) {
+      if (!confirm('¿Eliminar el evento "' + nombre + '" y todos sus registros? Esta acción no se puede deshacer.')) return;
+      try {
+        await sbFetch('eventos?id=eq.' + id, { method: 'DELETE' });
+        showAlert('alertEvento', '✓ Evento "' + nombre + '" eliminado correctamente.', 'success');
+        cargarListaEventos();
+        cargarSelectorRegistros();
+      } catch(e) {
+        showAlert('alertEvento', '✗ Error al eliminar: ' + e.message, 'error');
+      }
+    }
+
+    // ── REGISTROS ────────────────────────────────────────────────
+
+    async function cargarRegistros() {
+      const id = document.getElementById('selectorEventoRegistros').value;
+      if (!id) return;
+      document.getElementById('loadingRegistros').textContent = 'Cargando registros...';
+      document.getElementById('loadingRegistros').style.display = 'block';
+      document.getElementById('tableContent').style.display = 'none';
+      document.getElementById('statsGrid').style.display = 'none';
+      try {
+        todosLosRegistros = await sbFetch('asistencias?evento_id=eq.' + id + '&select=*&order=creado_en.desc');
+      } catch(e) {
+        document.getElementById('loadingRegistros').textContent = 'Error al cargar registros.';
+        return;
+      }
+      actualizarStats();
+      renderTabla(todosLosRegistros);
+      document.getElementById('loadingRegistros').style.display = 'none';
+      document.getElementById('tableContent').style.display = 'block';
+      document.getElementById('statsGrid').style.display = 'grid';
+    }
+
+    function actualizarStats() {
+      document.getElementById('statTotal').textContent    = todosLosRegistros.length;
+      document.getElementById('statCompleto').textContent = todosLosRegistros.filter(r => r.estado === 'completado').length;
+      document.getElementById('statPendiente').textContent = todosLosRegistros.filter(r => r.estado === 'pendiente').length;
+      document.getElementById('statParcial').textContent  = todosLosRegistros.filter(r => r.estado === 'parcial').length;
+    }
+
+    function renderTabla(regs) {
+      const tbody = document.getElementById('tablaBody');
+      if (regs.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--muted);padding:32px">No hay registros para este evento</td></tr>';
+        return;
+      }
+      const label = { completado: '✓ Completo', pendiente: '⏳ Pendiente', parcial: '⚠ Parcial' };
+      tbody.innerHTML = regs.map(r => `
+        <tr>
+          <td>${escHTML(r.nombre)}</td>
+          <td>${escHTML(r.apellidos)}</td>
+          <td style="font-family:monospace">${escHTML(r.dni)}</td>
+          <td style="font-size:0.8rem">${escHTML(r.correo)}</td>
+          <td style="font-size:0.8rem">${escHTML(r.carrera)}</td>
+          <td><span class="badge ${escHTML(r.estado)}">${label[r.estado] || r.estado}</span></td>
+          <td style="font-size:0.78rem">${formatHora(r.check1_hora)}</td>
+          <td style="font-size:0.78rem">${formatHora(r.check2_hora)}</td>
+          <td><button class="btn-del" onclick="eliminarRegistro('${escHTML(r.id)}')">🗑</button></td>
+        </tr>
+      `).join('');
+    }
+
+    function filtrarTabla() {
+      const texto = document.getElementById('filtroNombre').value.toLowerCase();
+      renderTabla(todosLosRegistros.filter(r =>
+        !texto || (r.nombre + ' ' + r.apellidos + ' ' + r.dni).toLowerCase().includes(texto)
+      ));
+    }
+
+    async function eliminarRegistro(id) {
+      if (!confirm('¿Eliminar este registro de asistencia?')) return;
+      try {
+        await sbFetch('asistencias?id=eq.' + id, { method: 'DELETE' });
+        cargarRegistros();
+      } catch(e) {
+        alert('Error al eliminar: ' + e.message);
+      }
+    }
+
+    function exportarCSV() {
+      if (!todosLosRegistros.length) return;
+      const headers = ['Nombre','Apellidos','DNI','Correo','Carrera','Estado','Check 1','Check 2'];
+      const rows = todosLosRegistros.map(r => [
+        r.nombre, r.apellidos, r.dni, r.correo||'', r.carrera||'', r.estado,
+        r.check1_hora||'', r.check2_hora||''
+      ]);
+      const csv = [headers,...rows].map(r => r.map(c => '"'+String(c).replace(/"/g,'""')+'"').join(',')).join('\n');
+      const blob = new Blob(['\uFEFF'+csv], {type:'text/csv;charset=utf-8'});
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'asistencia_' + new Date().toISOString().slice(0,10) + '.csv';
+      a.click();
+    }
+
+    // ── MAPA ─────────────────────────────────────────────────────
+
+    function iniciarMapa() {
+      if (map) return;
+      const link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css';
+      document.head.appendChild(link);
+      const script = document.createElement('script');
+      script.src = 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js';
+      script.onload = () => {
+        map = L.map('map').setView([-13.65, -73.33], 15);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }).addTo(map);
+        map.on('click', e => {
+          if (!eventoPerimetroId) {
+            showAlert('alertPerimetro', '⚠ Selecciona un evento primero.', 'warn');
+            return;
+          }
+          agregarPunto(e.latlng.lat, e.latlng.lng);
+        });
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(
+            pos => map.setView([pos.coords.latitude, pos.coords.longitude], 17),
+            () => {}
+          );
+        }
+      };
+      document.head.appendChild(script);
+    }
+
+    function cargarEventoPerimetro() {
+      const id = document.getElementById('selectorEventoPerimetro').value;
+      if (!id) return;
+      eventoPerimetroId = id;
+      if (!map) { setTimeout(cargarEventoPerimetro, 300); return; }
+      limpiarPuntos();
+      const ev = eventosCache.find(e => e.id === id);
+      if (ev && ev.perimetro && ev.perimetro.length > 0) {
+        ev.perimetro.forEach(p => agregarPunto(p.lat, p.lng, false));
+        dibujarPoligono();
+        map.setView([ev.perimetro[0].lat, ev.perimetro[0].lng], 17);
+        showAlert('alertPerimetro', '✓ Perímetro cargado — ' + ev.perimetro.length + ' puntos existentes. Puedes editarlo.', 'success');
+      } else {
+        showAlert('alertPerimetro', '📍 Evento seleccionado. Haz clic en el mapa para definir el perímetro.', 'warn');
+      }
+    }
+
+    function agregarPunto(lat, lng, redibujar = true) {
+      puntos.push({ lat, lng });
+      const m = L.circleMarker([lat, lng], {
+        radius: 7, fillColor: '#4f8ef7', color: '#fff', weight: 2, fillOpacity: 1
+      }).addTo(map).bindPopup('Punto ' + puntos.length + '<br>' + lat.toFixed(6) + ', ' + lng.toFixed(6));
+      marcadores.push(m);
+      if (redibujar) dibujarPoligono();
+      actualizarListaPuntos();
+    }
+
+    function dibujarPoligono() {
       if (poligonoLayer) map.removeLayer(poligonoLayer);
       if (puntos.length >= 3) {
-        poligonoLayer = L.polygon(puntos.map(p => [p.lat, p.lng]), { color: '#4f8ef7' }).addTo(map);
+        poligonoLayer = L.polygon(puntos.map(p => [p.lat, p.lng]), {
+          color: '#4f8ef7', fillColor: '#4f8ef7', fillOpacity: 0.15, weight: 2
+        }).addTo(map);
         document.getElementById('btnGuardarPerimetro').disabled = false;
       }
     }
 
-    async function guardarPerimetro() {
-      const id = document.getElementById('selectorEventoPerimetro').value;
-      await sbFetch(`eventos?id=eq.${id}`, { method: 'PATCH', body: JSON.stringify({ perimetro: puntos }) });
-      alert("Perímetro guardado");
+    function actualizarListaPuntos() {
+      const list = document.getElementById('puntosList');
+      if (puntos.length === 0) {
+        list.innerHTML = '<div style="color:var(--muted);font-size:0.82rem;text-align:center;padding:10px">No hay puntos aún</div>';
+        return;
+      }
+      list.innerHTML = puntos.map((p, i) => `
+        <div class="punto-item">
+          <span>Punto ${i+1}</span>
+          <span class="punto-coords">${p.lat.toFixed(6)}, ${p.lng.toFixed(6)}</span>
+          <button class="btn-del" onclick="eliminarPunto(${i})">✕</button>
+        </div>
+      `).join('');
+    }
+
+    function eliminarPunto(idx) {
+      puntos.splice(idx, 1);
+      marcadores.forEach(m => map.removeLayer(m));
+      marcadores = [];
+      if (poligonoLayer) { map.removeLayer(poligonoLayer); poligonoLayer = null; }
+      const tmp = [...puntos]; puntos = [];
+      tmp.forEach(p => agregarPunto(p.lat, p.lng, false));
+      dibujarPoligono();
+      actualizarListaPuntos();
     }
 
     function limpiarPuntos() {
-      puntos = []; marcadores.forEach(m => map.removeLayer(m)); marcadores = [];
-      if (poligonoLayer) map.removeLayer(poligonoLayer);
+      puntos = [];
+      marcadores.forEach(m => map.removeLayer(m));
+      marcadores = [];
+      if (poligonoLayer) { map.removeLayer(poligonoLayer); poligonoLayer = null; }
       document.getElementById('btnGuardarPerimetro').disabled = true;
+      actualizarListaPuntos();
     }
 
-    function actualizarStats() {
-      document.getElementById('statTotal').textContent = todosLosRegistros.length;
-      document.getElementById('statCompleto').textContent = todosLosRegistros.filter(r => r.estado === 'completado').length;
-      document.getElementById('statPendiente').textContent = todosLosRegistros.filter(r => r.estado === 'pendiente').length;
+    function usarMiUbicacion() {
+      if (!navigator.geolocation) { showAlert('alertPerimetro', '✗ Tu navegador no soporta geolocalización.', 'error'); return; }
+      showAlert('alertPerimetro', '📡 Obteniendo tu ubicación...', 'warn');
+      navigator.geolocation.getCurrentPosition(
+        pos => {
+          map.setView([pos.coords.latitude, pos.coords.longitude], 18);
+          if (miUbicacionMarker) map.removeLayer(miUbicacionMarker);
+          miUbicacionMarker = L.marker([pos.coords.latitude, pos.coords.longitude], {
+            icon: L.divIcon({
+              className: '',
+              html: '<div style="width:16px;height:16px;background:#4f8ef7;border:3px solid #fff;border-radius:50%;box-shadow:0 0 8px rgba(79,142,247,0.6)"></div>',
+              iconSize: [16,16], iconAnchor: [8,8]
+            })
+          }).addTo(map).bindPopup('📍 Tu ubicación');
+          showAlert('alertPerimetro', '✓ Mapa centrado en tu ubicación.', 'success');
+        },
+        err => showAlert('alertPerimetro', '✗ No se pudo obtener ubicación: ' + err.message, 'error'),
+        { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+      );
     }
 
-    async function eliminarRegistro(id) {
-      if (!confirm("¿Eliminar?")) return;
-      await sbFetch(`asistencias?id=eq.${id}`, { method: 'DELETE' });
-      cargarRegistros();
+    async function guardarPerimetro() {
+      if (!eventoPerimetroId) { showAlert('alertPerimetro', '⚠ Selecciona un evento primero.', 'warn'); return; }
+      if (puntos.length < 3) { showAlert('alertPerimetro', '⚠ Necesitas al menos 3 puntos para definir el perímetro.', 'warn'); return; }
+      const btn = document.getElementById('btnGuardarPerimetro');
+      btn.disabled = true;
+      btn.textContent = 'Guardando...';
+      try {
+        await sbFetch('eventos?id=eq.' + eventoPerimetroId, {
+          method: 'PATCH',
+          body: JSON.stringify({ perimetro: puntos })
+        });
+        showAlert('alertPerimetro', '✓ Perímetro guardado correctamente (' + puntos.length + ' puntos).', 'success');
+        const ev = eventosCache.find(e => e.id === eventoPerimetroId);
+        if (ev) ev.perimetro = [...puntos];
+      } catch(e) {
+        showAlert('alertPerimetro', '✗ Error al guardar: ' + e.message, 'error');
+      }
+      btn.disabled = false;
+      btn.textContent = 'Guardar perímetro';
     }
 
-    window.onload = () => { cargarSelectorEventos(); cargarListaEventos(); };
+    window.onload = () => { cargarSelectorRegistros(); cargarListaEventos(); };
   </script>
 </body>
-
 </html>
