@@ -678,8 +678,7 @@
       <div style="background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.25);border-radius:10px;padding:14px 16px;margin-bottom:18px;font-size:0.82rem;line-height:1.6;color:var(--warn)">
         ⚠️ <strong>Importante:</strong><br>
         • Debes permanecer en el área del evento para que tu registro sea exitoso.<br>
-        • No cierres esta pestaña.<br>
-        • El segundo registro se realizará automáticamente cuando el contador llegue a cero.<br>
+        • Mientras esta pestaña esté abierta, el segundo registro se realizará automáticamente cuando el contador llegue a cero.<br>
         • Si cierras esta pestaña, puedes volver a escanear el QR y completar tu registro con tu DNI.
       </div>
 
@@ -696,12 +695,13 @@
         </div>
       </div>
 
+      <div style="background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.25);border-radius:10px;padding:12px 16px;margin-bottom:12px;font-size:0.82rem;line-height:1.6;color:var(--warn)">
+        ⚠️ <strong>Importante:</strong> Tiempo mínimo de participación para contar asistencia: <span id="tiempoRequeridoBtn">40</span> minutos
+      </div>
+
       <div style="display:flex; gap:10px; margin-bottom: 16px;">
         <button class="btn-check2" onclick="validarCompletaManual()">
-          <div class="btn-check2-icon">✓</div>
-          <div class="btn-check2-text">
-            <strong>Registrar asistencia por tiempo mínimo</strong>
-          </div>
+          Registrar mi asistencia por tiempo mínimo
         </button>
       </div>
       <button class="btn-outline" onclick="mostrarFormularioSalida()" style="margin-top:0;">Justificar salida anticipada</button>
@@ -760,12 +760,12 @@
     <div class="modal-card">
       <div class="modal-clock">⏳</div>
       <div class="modal-title">Aún no puedes registrar tu salida</div>
-      <div class="modal-body">Debes permanecer en el evento al menos <strong id="modalMinReq">40</strong> minutos para que tu asistencia sea válida.</div>
+      <div class="modal-body">Debes permanecer en el evento al menos <strong id="modalMinReq">40</strong> minutos para registrar tu asistencia.</div>
       <div class="modal-tiempo">
         <div class="modal-falta-num" id="modalFaltaMins">—</div>
         <div class="modal-falta-label">minutos<br>restantes</div>
       </div>
-      <div class="modal-body" style="margin-bottom:20px">Cuando se cumpla el tiempo, el sistema lo registrará automáticamente. Si necesitas irte antes, usa "Justificar salida anticipada".</div>
+      <div class="modal-body" style="margin-bottom:20px">Si necesitas irte antes, usa "Justificar salida anticipada".</div>
       <button class="modal-btn" onclick="document.getElementById('modalTiempo').classList.remove('visible')">Entendido, me quedo</button>
     </div>
   </div>
@@ -995,6 +995,7 @@
       minParticipacionMs = minP * 60 * 1000;
       
       document.getElementById('tiempoRequerido').textContent = minP;
+      document.getElementById('tiempoRequeridoBtn').textContent = minP;
 
       // Siempre mostrar formulario, el usuario puede continuar con la sección de DNI
       showScreen('screenForm');
