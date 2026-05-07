@@ -809,20 +809,35 @@
       eventoData = rows[0];
       document.getElementById('eventoNombre').textContent = eventoData.nombre;
 
-      // Calcular timestamp absoluto del fin del evento
-      // hora_inicio de Supabase puede llegar como "15:00:00", "15:00", o incluso "15:00:00+00"
-      // Usamos el constructor Date(año, mes, día, hora, min) que siempre es hora LOCAL del dispositivo
+      // ── Calcular timestamp absoluto del FIN del evento ──────────
+      // El fin es FIJO para todos los asistentes (hora_inicio + duración).
+      // El cronómetro de cada asistente se personaliza en iniciarContador()
+      // según su propio check1_hora, pero eventoFinMs nunca cambia.
+      //
+      // Construcción robusta: usamos Date(año, mes-1, día, hora, min, 0, 0)
+      // para forzar hora LOCAL del dispositivo, evitando que el navegador
+      // interprete la cadena como UTC y desfase el resultado.
       const durMin = eventoData.duracion_total_minutos || 90;
       if (eventoData.fecha && eventoData.hora_inicio) {
-        const partesFecha = String(eventoData.fecha).split('-').map(Number);
-        const partesHora  = String(eventoData.hora_inicio).split(':').map(Number);
-        const anio = partesFecha[0], mes = partesFecha[1] - 1, dia = partesFecha[2];
-        const hora = partesHora[0],  min = partesHora[1] || 0;
-        const inicioLocal = new Date(anio, mes, dia, hora, min, 0, 0);
+        // fecha  → "YYYY-MM-DD"  (Supabase date)
+        // hora_inicio → "HH:MM", "HH:MM:SS" o "HH:MM:SS+00" (Supabase time / timetz)
+        const partesFecha = String(eventoData.fecha).split(/[-\/]/).map(Number);
+        const partesHora  = String(eventoData.hora_inicio).replace(/[+Z].*$/, '').split(':').map(Number);
+        // Supabase siempre devuelve fecha como YYYY-MM-DD; si acaso viene DD/MM/YYYY lo normalizamos
+        let anio, mes, dia;
+        if (partesFecha[0] > 31) {          // YYYY-MM-DD
+          [anio, mes, dia] = partesFecha;
+        } else {                            // DD/MM/YYYY (fallback)
+          [dia, mes, anio] = partesFecha;
+        }
+        const hora = partesHora[0] || 0;
+        const min  = partesHora[1] || 0;
+        const inicioLocal = new Date(anio, mes - 1, dia, hora, min, 0, 0);
         eventoFinMs = isNaN(inicioLocal.getTime())
-          ? Date.now() + durMin * 60 * 1000
+          ? Date.now() + durMin * 60 * 1000   // fallback: desde ahora
           : inicioLocal.getTime() + durMin * 60 * 1000;
       } else {
+        // Sin fecha/hora en BD → el fin es durMin desde el momento actual de carga
         eventoFinMs = Date.now() + durMin * 60 * 1000;
       }
 
@@ -929,6 +944,11 @@
         return;
       }
 
+      // Capturamos el instante del check1 UNA sola vez, antes del INSERT.
+      // Así check1_hora en BD y check1Timestamp en JS son idénticos.
+      check1Timestamp = Date.now();
+      const check1ISOString = new Date(check1Timestamp).toISOString();
+
       // Guardar check 1
       const payload = {
         evento_id: eventoId,
@@ -940,7 +960,7 @@
         device_fingerprint: fp,
         check1_lat: gps.lat,
         check1_lng: gps.lng,
-        check1_hora: new Date().toISOString(),
+        check1_hora: check1ISOString,
         check1_valido: resultado.valido,
         estado: 'pendiente',
         alerta_duplicado: alertaFP
@@ -960,7 +980,8 @@
 
       asistenciaId = inserted[0].id;
       localStorage.setItem('asistencia_sesion_' + eventoId, JSON.stringify({ id: asistenciaId }));
-      check1Timestamp = Date.now();
+      // check1Timestamp ya se capturó con Date.now() justo antes del INSERT,
+      // así el cronómetro arranca desde el instante exacto del registro del asistente.
       iniciarContador();
     }
 
@@ -970,16 +991,30 @@
       showScreen('screenWaiting');
       document.getElementById('formSalidaAnticipada').style.display = 'none';
 
-      // Si el evento ya terminó (asistente llegó tarde y ya pasó el fin), disparar check2 de inmediato
-      if (eventoFinMs - Date.now() <= 0) {
+      // ── Cronómetro personalizado por asistente ───────────────────
+      // eventoFinMs  → timestamp fijo del fin del evento (igual para todos).
+      // check1Timestamp → timestamp exacto en que ESTE asistente hizo check1.
+      //
+      // La barra de progreso refleja cuánto tiempo le queda A ESTE asistente
+      // desde que se registró, no desde el inicio del evento.
+      // Si llegó tarde, ya habrá menos tiempo; si el evento terminó antes de
+      // que pudiera registrarse, disparamos check2 de inmediato.
+
+      const ahora = Date.now();
+      const restanteInicial = eventoFinMs - ahora;
+
+      if (restanteInicial <= 0) {
+        // El evento ya terminó cuando este asistente hizo check1
         document.getElementById('countdownDisplay').textContent = '00:00';
         document.getElementById('progressFill').style.width = '0%';
         ejecutarCheck2Automatico();
         return;
       }
 
-      // Tiempo total desde que el asistente llegó hasta el fin (para la barra de progreso)
-      const totalVisible = Math.max(eventoFinMs - check1Timestamp, 1);
+      // El "100%" de la barra = tiempo disponible desde el momento del check1 hasta el fin.
+      // Si check1Timestamp no está definido usamos ahora como referencia.
+      const baseMs = check1Timestamp ? check1Timestamp : ahora;
+      const totalVisible = Math.max(eventoFinMs - baseMs, 1);
 
       function actualizar() {
         const restante = eventoFinMs - Date.now();
@@ -996,6 +1031,7 @@
         const segs = Math.floor((restante % 60000) / 1000);
         document.getElementById('countdownDisplay').textContent =
           String(mins).padStart(2, '0') + ':' + String(segs).padStart(2, '0');
+        // La barra decrece desde 100% (cuando el asistente hizo check1) hasta 0% (fin del evento)
         document.getElementById('progressFill').style.width =
           Math.max(0, Math.min(100, (restante / totalVisible) * 100)) + '%';
       }
