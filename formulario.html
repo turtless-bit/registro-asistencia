@@ -500,11 +500,6 @@
         <div class="field-error" id="err-carrera">Selecciona tu carrera</div>
       </div>
 
-      <div class="field">
-        <label>Motivo de asistencia <span style="color:var(--muted);font-weight:400;text-transform:none">(opcional)</span></label>
-        <textarea id="motivo" rows="2" placeholder="Ej: Asisto como parte del curso de Sistemas..." style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:13px 16px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:0.95rem;outline:none;resize:vertical;transition:border-color 0.2s" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'"></textarea>
-      </div>
-
       <button class="btn" id="btnRegistrar" onclick="iniciarRegistro()">
         Registrar asistencia
       </button>
@@ -819,16 +814,18 @@
       document.getElementById('eventoMeta').textContent = meta.join(' · ');
 
       // Calcular timestamp absoluto del fin del evento
+      // IMPORTANTE: new Date("YYYY-MM-DDTHH:MM") sin zona horaria se interpreta como UTC en muchos
+      // navegadores, lo que desplazaría el fin 5h para Perú (UTC-5). Se evita parseando manualmente.
       const durMin = eventoData.duracion_total_minutos || 90;
       if (eventoData.fecha && eventoData.hora_inicio) {
-        // Supabase devuelve hora_inicio como "HH:MM:SS" o "HH:MM" — normalizamos a "HH:MM"
-        const horaLimpia = String(eventoData.hora_inicio).slice(0, 5);
-        const inicioMs = new Date(eventoData.fecha + 'T' + horaLimpia).getTime();
-        eventoFinMs = isNaN(inicioMs)
-          ? Date.now() + durMin * 60 * 1000          // parsing falló → fallback
-          : inicioMs + durMin * 60 * 1000;
+        const [anio, mes, dia] = String(eventoData.fecha).split('-').map(Number);
+        const [hora, min]      = String(eventoData.hora_inicio).split(':').map(Number);
+        // Date.UTC no sirve aquí; usamos el constructor local explícito
+        const inicioLocal = new Date(anio, mes - 1, dia, hora, min, 0, 0);
+        eventoFinMs = isNaN(inicioLocal.getTime())
+          ? Date.now() + durMin * 60 * 1000
+          : inicioLocal.getTime() + durMin * 60 * 1000;
       } else {
-        // Sin fecha/hora configurada → fallback desde ahora
         eventoFinMs = Date.now() + durMin * 60 * 1000;
       }
 
@@ -933,7 +930,6 @@
         dni: dni,
         correo: document.getElementById('correo').value.trim().toLowerCase(),
         carrera: document.getElementById('carrera').value,
-        motivo: document.getElementById('motivo').value.trim() || null,
         device_fingerprint: fp,
         check1_lat: gps.lat,
         check1_lng: gps.lng,

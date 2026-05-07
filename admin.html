@@ -230,7 +230,7 @@
               <thead>
                 <tr>
                   <th>Nombre</th><th>Apellidos</th><th>DNI</th><th>Correo</th>
-                  <th>Carrera</th><th>Motivo</th><th>Estado</th><th>Check 1</th><th>Check 2</th><th></th>
+                  <th>Carrera</th><th>Motivo salida</th><th>Estado</th><th>Check 1</th><th>Check 2</th><th></th>
                 </tr>
               </thead>
               <tbody id="tablaBody"></tbody>
@@ -586,7 +586,7 @@
           <td style="font-family:monospace">${escHTML(r.dni)}</td>
           <td style="font-size:0.8rem">${escHTML(r.correo)}</td>
           <td style="font-size:0.8rem">${escHTML(r.carrera)}</td>
-          <td style="font-size:0.78rem;max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${escHTML(r.motivo)}">${escHTML(r.motivo)}</td>
+          <td style="font-size:0.78rem;max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${escHTML(r.razon_salida)}">${escHTML(r.razon_salida)}</td>
           <td><span class="badge ${escHTML(r.estado)}">${label[r.estado] || r.estado}</span></td>
           <td style="font-size:0.78rem">${formatHora(r.check1_hora)}</td>
           <td style="font-size:0.78rem">${formatHora(r.check2_hora)}</td>
@@ -614,9 +614,9 @@
 
     function exportarCSV() {
       if (!todosLosRegistros.length) return;
-      const headers = ['Nombre','Apellidos','DNI','Correo','Carrera','Motivo','Estado','Check 1','Check 2'];
+      const headers = ['Nombre','Apellidos','DNI','Correo','Carrera','Motivo salida','Estado','Check 1','Check 2'];
       const rows = todosLosRegistros.map(r => [
-        r.nombre, r.apellidos, r.dni, r.correo||'', r.carrera||'', r.motivo||'', r.estado,
+        r.nombre, r.apellidos, r.dni, r.correo||'', r.carrera||'', r.razon_salida||'', r.estado,
         r.check1_hora||'', r.check2_hora||''
       ]);
       const csv = [headers,...rows].map(r => r.map(c => '"'+String(c).replace(/"/g,'""')+'"').join(',')).join('\n');
