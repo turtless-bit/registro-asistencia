@@ -422,10 +422,18 @@
     }
 
     @keyframes pulse {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.4; transform: scale(0.7); }
-    }
 
+      0%,
+      100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+
+      50% {
+        opacity: 0.4;
+        transform: scale(0.7);
+      }
+    }
   </style>
 </head>
 
@@ -444,7 +452,6 @@
 
   <div class="card">
 
-    <!-- PANTALLA 1: FORMULARIO -->
     <div class="screen active" id="screenForm">
       <div class="alert" id="alertForm"></div>
 
@@ -504,7 +511,6 @@
         Registrar asistencia
       </button>
 
-      <!-- CONTINUACIÓN POR DNI -->
       <hr class="divider">
       <div class="section-title">¿Ya te registraste? Continúa aquí</div>
       <div class="field">
@@ -514,7 +520,6 @@
       <button class="btn-outline" onclick="continuarPorDNI()">Continuar registro</button>
     </div>
 
-    <!-- PANTALLA 2: OBTENIENDO GPS -->
     <div class="screen" id="screenGPS">
       <div class="gps-status">
         <div class="spinner"></div>
@@ -523,16 +528,17 @@
       </div>
     </div>
 
-    <!-- PANTALLA 3: CONTADOR CHECK 2 -->
     <div class="screen" id="screenWaiting">
       <div class="result-icon ok">✅</div>
       <div class="result-title">Asistencia registrada</div>
       <div class="result-msg">Tu primer registro fue validado correctamente dentro del área del evento.</div>
 
-      <div style="background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.25);border-radius:10px;padding:14px 16px;margin-bottom:18px;font-size:0.82rem;line-height:1.6;color:var(--warn)">
+      <div
+        style="background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.25);border-radius:10px;padding:14px 16px;margin-bottom:18px;font-size:0.82rem;line-height:1.6;color:var(--warn)">
         ⚠️ <strong>Importante:</strong><br>
         • Debes permanecer en el área del evento para que tu segundo registro sea exitoso.<br>
-        • Mientras esta pestaña esté abierta, el segundo registro se realizará automáticamente cuando el contador llegue a cero.<br>
+        • Mientras esta pestaña esté abierta, el segundo registro se realizará automáticamente cuando el contador llegue
+        a cero.<br>
         • Si cierras esta pestaña, puedes volver a escanear el QR y completar tu registro con tu DNI.
       </div>
 
@@ -544,16 +550,18 @@
         </div>
       </div>
 
-      <button class="btn-outline" onclick="mostrarFormularioSalida()" style="margin-top:0;">Justificar salida anticipada</button>
-      
+      <button class="btn-outline" onclick="mostrarFormularioSalida()" style="margin-top:0;">Justificar salida
+        anticipada</button>
+
       <div id="formSalidaAnticipada" style="display:none; margin-top:16px;">
-        <textarea id="razonSalida" rows="2" placeholder="Opcional: Explica brevemente por qué te retiras antes..."></textarea>
-        <button class="btn" style="margin-top:12px; background: var(--warn);" onclick="ejecutarSalidaAnticipada()">Confirmar
+        <textarea id="razonSalida" rows="2"
+          placeholder="Opcional: Explica brevemente por qué te retiras antes..."></textarea>
+        <button class="btn" style="margin-top:12px; background: var(--warn);"
+          onclick="ejecutarSalidaAnticipada()">Confirmar
           salida anticipada</button>
       </div>
     </div>
 
-    <!-- PANTALLA 4: OBTENIENDO GPS CHECK 2 -->
     <div class="screen" id="screenGPS2">
       <div class="gps-status">
         <div class="spinner"></div>
@@ -562,12 +570,10 @@
       </div>
     </div>
 
-    <!-- PANTALLA 5: RESULTADO FINAL -->
     <div class="screen" id="screenFinal">
       <div class="final-ok" id="finalContent"></div>
     </div>
 
-    <!-- PANTALLA 6: RECUPERAR SESIÓN -->
     <div class="screen" id="screenRecovery">
       <div class="result-icon warn">⚠️</div>
       <div class="result-title">Sesión no encontrada</div>
@@ -575,7 +581,6 @@
       <button class="btn" onclick="showScreen('screenForm')">Ir al formulario</button>
     </div>
 
-    <!-- PANTALLA 7: FUERA DE PERÍMETRO -->
     <div class="screen" id="screenFuera">
       <div class="result-icon error">📍</div>
       <div class="result-title">Fuera del área</div>
@@ -584,7 +589,6 @@
       <button class="btn" onclick="reintentar()" style="margin-top:8px">Volver a intentar</button>
     </div>
 
-    <!-- PANTALLA 8: SIN EVENTO -->
     <div class="screen" id="screenNoEvento">
       <div class="result-icon error">❌</div>
       <div class="result-title">Evento no encontrado</div>
@@ -809,26 +813,32 @@
       eventoData = rows[0];
       document.getElementById('eventoNombre').textContent = eventoData.nombre;
 
-      // Calcular timestamp absoluto del fin del evento
-      // hora_inicio de Supabase puede llegar como "15:00:00", "15:00", o incluso "15:00:00+00"
-      // Usamos el constructor Date(año, mes, día, hora, min) que siempre es hora LOCAL del dispositivo
-      const durMin = eventoData.duracion_total_minutos || 90;
-      if (eventoData.fecha && eventoData.hora_inicio) {
-        const partesFecha = String(eventoData.fecha).split('-').map(Number);
-        const partesHora  = String(eventoData.hora_inicio).split(':').map(Number);
-        const anio = partesFecha[0], mes = partesFecha[1] - 1, dia = partesFecha[2];
-        const hora = partesHora[0],  min = partesHora[1] || 0;
-        const inicioLocal = new Date(anio, mes, dia, hora, min, 0, 0);
-        eventoFinMs = isNaN(inicioLocal.getTime())
-          ? Date.now() + durMin * 60 * 1000
-          : inicioLocal.getTime() + durMin * 60 * 1000;
-      } else {
-        eventoFinMs = Date.now() + durMin * 60 * 1000;
-      }
+      // --- LÓGICA DE TIEMPO CORREGIDA ---
+      // Aseguramos que la duración sea un número entero para evitar errores de cálculo
+      const durMin = parseInt(eventoData.duracion_total_minutos || 90);
 
-      // Mostrar hora de fin en el banner para que el asistente sepa hasta cuándo
+      if (eventoData.fecha && eventoData.hora_inicio) {
+        // Descomponemos los strings manualmente para evitar que el navegador aplique
+        // desfases de zona horaria (UTC) que suelen causar errores de +/- 24 horas.
+        const [anio, mes, dia] = String(eventoData.fecha).split('-').map(Number);
+        const [hora, min] = String(eventoData.hora_inicio).split(':').map(Number);
+
+        // Creamos el objeto Date usando componentes individuales (esto usa la hora LOCAL de Perú)
+        // El mes se resta 1 porque en JavaScript Enero es 0.
+        const inicioLocal = new Date(anio, mes - 1, dia, hora, min, 0);
+
+        // Calculamos el timestamp de fin sumando la duración en milisegundos (minutos * 60,000)
+        // Usar .getTime() asegura que estamos operando sobre un timestamp numérico exacto.
+        eventoFinMs = inicioLocal.getTime() + (durMin * 60000);
+      } else {
+        // Fallback en caso de que no haya datos de fecha/hora: 90 min desde ahora.
+        eventoFinMs = Date.now() + (durMin * 60000);
+      }
+      // ----------------------------------
+
+      // Mostrar hora de fin en el banner para que el asistente sepa hasta cuándo tiene plazo
       const finDate = new Date(eventoFinMs);
-      const finStr  = finDate.toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' });
+      const finStr = finDate.toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' });
       const meta = [];
       if (eventoData.fecha) meta.push(eventoData.fecha);
       if (eventoData.lugar) meta.push(eventoData.lugar);
@@ -1027,8 +1037,8 @@
       }
 
       const perimetro = eventoData?.perimetro || null;
-      const tolerancia = eventoData?.tolerancia_metros || 10;
-      const resultado = validarUbicacion(gps.lat, gps.lng, perimetro, tolerancia);
+      const tolerance = eventoData?.tolerancia_metros || 10;
+      const resultado = validarUbicacion(gps.lat, gps.lng, perimetro, tolerance);
 
       const estado = resultado.valido ? 'completado' : 'parcial';
       const patch = {
@@ -1075,7 +1085,7 @@
 
       const perimetro = eventoData?.perimetro || null;
       const tolerancia = eventoData?.tolerancia_metros || 10;
-      const resultado = validarUbicacion(gps.lat, gps.lng, perimetro, tolerancia);
+      const resultado = validarUbicacion(gps.lat, gps.lng, perimetro, tolerance);
 
       // Siempre parcial por tiempo si usa este botón
       const patch = {
