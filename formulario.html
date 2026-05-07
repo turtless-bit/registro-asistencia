@@ -677,14 +677,9 @@
 
       <div style="background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.25);border-radius:10px;padding:14px 16px;margin-bottom:18px;font-size:0.82rem;line-height:1.6;color:var(--warn)">
         ⚠️ <strong>Importante:</strong><br>
-        • Debes permanecer en el área del evento para que tu registro sea exitoso.<br>
+        • Debes permanecer en el área del evento para que tu segundo registro sea exitoso.<br>
         • Mientras esta pestaña esté abierta, el segundo registro se realizará automáticamente cuando el contador llegue a cero.<br>
         • Si cierras esta pestaña, puedes volver a escanear el QR y completar tu registro con tu DNI.
-      </div>
-
-      <div class="check2-waiting">
-        <div class="dot-pulse"></div>
-        <span>Segunda verificación en progreso</span>
       </div>
 
       <div class="countdown-box">
@@ -707,7 +702,9 @@
       <button class="btn-outline" onclick="mostrarFormularioSalida()" style="margin-top:0;">Justificar salida anticipada</button>
       
       <div id="formSalidaAnticipada" style="display:none; margin-top:16px;">
-        <p style="font-size:0.85rem; color:var(--warn); margin-bottom:12px;">⚠️ Vas a retirarte antes de completar el tiempo mínimo de <span id="tiempoRequerido">40</span> minutos.</p>
+        <div style="background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.25);border-radius:10px;padding:12px 16px;margin-bottom:12px;font-size:0.82rem;line-height:1.6;color:var(--warn)">
+          ⚠️ Vas a retirarte antes de completar el tiempo mínimo de <span id="tiempoRequerido">40</span> minutos.
+        </div>
         <label style="font-size:0.8rem;">Opcional: Motivo de tu salida</label>
         <textarea id="razonSalida" rows="2" placeholder="Explica brevemente por qué te retiras antes..."></textarea>
         <button class="btn" style="margin-top:12px; background: var(--warn);" onclick="ejecutarSalidaAnticipada()">Confirmar
@@ -1340,7 +1337,6 @@
         <div class="result-icon ok" style="background:rgba(79,142,247,0.15)">📋</div>
         <div class="result-title">Asistencia registrada</div>
         <div class="result-msg">Tu participación quedó guardada en el sistema. El organizador podrá revisar los detalles de tu registro.</div>
-        <span class="badge parcial">Registro guardado</span>
       `;
       }
     }
