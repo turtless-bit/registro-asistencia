@@ -16,6 +16,7 @@
       --accent2: #7c3aed;
       --success: #10b981;
       --error: #ef4444;
+      --warn: #f59e0b;
       --text: #e8eaf0;
       --muted: #6b7280;
       --border: #2d3148;
@@ -31,64 +32,195 @@
       font-family: 'DM Sans', sans-serif;
       background: var(--bg);
       color: var(--text);
+      min-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 20px;
+      padding: 24px 16px 48px;
     }
 
     .header {
       text-align: center;
-      margin-bottom: 25px;
+      margin-bottom: 32px;
+      padding-top: 16px;
+    }
+
+    .header .logo {
+      width: 56px;
+      height: 56px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 16px;
+      font-size: 24px;
     }
 
     .header h1 {
       font-family: 'DM Serif Display', serif;
-      font-size: 1.6rem;
+      font-size: 1.7rem;
+      font-weight: 400;
+      line-height: 1.2;
+      margin-bottom: 6px;
+    }
+
+    .header p {
+      color: var(--muted);
+      font-size: 0.875rem;
+    }
+
+    .evento-banner {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--accent);
+      border-radius: 10px;
+      padding: 14px 18px;
+      margin-bottom: 24px;
+      width: 100%;
+      max-width: 480px;
+    }
+
+    .evento-banner .ev-nombre {
+      font-weight: 600;
+      font-size: 1rem;
+      margin-bottom: 4px;
+    }
+
+    .evento-banner .ev-meta {
+      font-size: 0.8rem;
+      color: var(--muted);
     }
 
     .card {
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: 16px;
-      padding: 25px;
+      padding: 28px 24px;
       width: 100%;
-      max-width: 450px;
+      max-width: 480px;
     }
 
     .field {
-      margin-bottom: 15px;
+      margin-bottom: 18px;
     }
 
     label {
       display: block;
-      font-size: 0.75rem;
+      font-size: 0.8rem;
+      font-weight: 500;
       color: var(--muted);
       text-transform: uppercase;
-      margin-bottom: 5px;
+      letter-spacing: 0.05em;
+      margin-bottom: 7px;
     }
 
     input,
-    select {
+    select,
+    textarea {
       width: 100%;
       background: var(--surface2);
       border: 1px solid var(--border);
       border-radius: 10px;
-      padding: 12px;
+      padding: 13px 16px;
       color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.95rem;
       outline: none;
+      transition: border-color 0.2s;
+      appearance: none;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      border-color: var(--accent);
+    }
+
+    input.error,
+    select.error {
+      border-color: var(--error);
+    }
+
+    .field-error {
+      font-size: 0.75rem;
+      color: var(--error);
+      margin-top: 5px;
+      display: none;
+    }
+
+    .field-error.visible {
+      display: block;
+    }
+
+    .select-wrap {
+      position: relative;
+    }
+
+    .select-wrap::after {
+      content: '▾';
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--muted);
+      pointer-events: none;
+    }
+
+    select option {
+      background: var(--surface2);
+      color: var(--text);
+    }
+
+    optgroup {
+      color: var(--accent);
+      font-weight: 600;
     }
 
     .btn {
       width: 100%;
-      padding: 14px;
+      padding: 15px;
       background: linear-gradient(135deg, var(--accent), var(--accent2));
       border: none;
       border-radius: 12px;
       color: #fff;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 1rem;
       font-weight: 600;
       cursor: pointer;
-      margin-top: 10px;
+      transition: opacity 0.2s, transform 0.1s;
+      margin-top: 8px;
+    }
+
+    .btn:hover {
+      opacity: 0.9;
+    }
+
+    .btn:active {
+      transform: scale(0.98);
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .btn-outline {
+      width: 100%;
+      padding: 14px;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.95rem;
+      cursor: pointer;
+      margin-top: 8px;
+    }
+
+    .btn-outline:hover {
+      border-color: var(--accent);
+      color: var(--accent);
     }
 
     .screen {
@@ -99,14 +231,19 @@
       display: block;
     }
 
+    .gps-status {
+      text-align: center;
+      padding: 32px 0;
+    }
+
     .spinner {
-      width: 40px;
-      height: 40px;
+      width: 48px;
+      height: 48px;
       border: 3px solid var(--border);
       border-top-color: var(--accent);
       border-radius: 50%;
       animation: spin 0.8s linear infinite;
-      margin: 20px auto;
+      margin: 0 auto 20px;
     }
 
     @keyframes spin {
@@ -116,59 +253,377 @@
     }
 
     .result-icon {
-      font-size: 40px;
-      text-align: center;
-      margin-bottom: 15px;
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      margin: 0 auto 20px;
     }
+
+    .result-icon.ok {
+      background: rgba(16, 185, 129, 0.15);
+    }
+
+    .result-icon.error {
+      background: rgba(239, 68, 68, 0.15);
+    }
+
+    .result-icon.warn {
+      background: rgba(245, 158, 11, 0.15);
+    }
+
+    .result-title {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.4rem;
+      text-align: center;
+      margin-bottom: 10px;
+    }
+
+    .result-msg {
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.9rem;
+      line-height: 1.6;
+      margin-bottom: 24px;
+    }
+
+    .countdown-box {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 24px;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .countdown-label {
+      font-size: 0.75rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 12px;
+    }
+
+    .countdown-time {
+      font-family: 'DM Serif Display', serif;
+      font-size: 3rem;
+      color: var(--accent);
+      letter-spacing: 0.05em;
+      line-height: 1;
+      margin-bottom: 10px;
+    }
+
+    .progress-bar {
+      height: 4px;
+      background: var(--border);
+      border-radius: 2px;
+      margin-top: 16px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      border-radius: 2px;
+      transition: width 1s linear;
+    }
+
+    .divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 24px 0;
+    }
+
+    .section-title {
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 16px;
+      color: var(--muted);
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    .badge.ok {
+      background: rgba(16, 185, 129, 0.15);
+      color: #10b981;
+    }
+
+    .badge.parcial {
+      background: rgba(245, 158, 11, 0.15);
+      color: #f59e0b;
+    }
+
+    .badge.fuera {
+      background: rgba(239, 68, 68, 0.15);
+      color: #ef4444;
+    }
+
+    .alert {
+      padding: 12px 16px;
+      border-radius: 10px;
+      font-size: 0.85rem;
+      margin-bottom: 16px;
+      display: none;
+    }
+
+    .alert.visible {
+      display: block;
+    }
+
+    .alert.success {
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: #10b981;
+    }
+
+    .alert.error {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: #ef4444;
+    }
+
+    .alert.warn {
+      background: rgba(245, 158, 11, 0.1);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      color: #f59e0b;
+    }
+
+    .check2-waiting {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 16px;
+      background: rgba(79, 142, 247, 0.08);
+      border: 1px solid rgba(79, 142, 247, 0.2);
+      border-radius: 10px;
+      font-size: 0.85rem;
+      color: var(--accent);
+      margin-bottom: 16px;
+    }
+
+    .dot-pulse {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent);
+      animation: pulse 1.5s ease-in-out infinite;
+      flex-shrink: 0;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.7); }
+    }
+
   </style>
 </head>
 
 <body>
+
   <div class="header">
-    <h1>Registro UNAJMA</h1>
-    <p id="eventoNombre">Cargando evento...</p>
+    <div class="logo">📋</div>
+    <h1>Registro de Asistencia</h1>
+    <p>UNAJMA — Sistema de verificación GPS</p>
+  </div>
+
+  <div class="evento-banner" id="eventoBanner">
+    <div class="ev-nombre" id="eventoNombre">Cargando evento...</div>
+    <div class="ev-meta" id="eventoMeta"></div>
   </div>
 
   <div class="card">
+
+    <!-- PANTALLA 1: FORMULARIO -->
     <div class="screen active" id="screenForm">
-      <div class="field"><label>Nombres</label><input type="text" id="nombres"></div>
-      <div class="field"><label>Apellidos</label><input type="text" id="apellidos"></div>
-      <div class="field"><label>DNI</label><input type="text" id="dni" maxlength="8"></div>
-      <button class="btn" onclick="iniciarRegistro()">Registrar Ingreso</button>
+      <div class="alert" id="alertForm"></div>
+
+      <div class="field">
+        <label>Nombres</label>
+        <input type="text" id="nombres" placeholder="Ej: Carlos Mauricio" autocomplete="given-name">
+        <div class="field-error" id="err-nombres"></div>
+      </div>
+
+      <div class="field">
+        <label>Apellidos (ambos obligatorios)</label>
+        <input type="text" id="apellidos" placeholder="Ej: Silvera Hurtado" autocomplete="family-name">
+        <div class="field-error" id="err-apellidos"></div>
+      </div>
+
+      <div class="field">
+        <label>DNI</label>
+        <input type="text" id="dni" placeholder="8 dígitos" maxlength="8" inputmode="numeric">
+        <div class="field-error" id="err-dni">DNI debe tener 8 dígitos</div>
+      </div>
+
+      <div class="field">
+        <label>Correo institucional o electrónico</label>
+        <input type="email" id="correo" placeholder="usuario@unajma.edu.pe o usuario@gmail.com" inputmode="email">
+        <div class="field-error" id="err-correo">Debe ser un correo @unajma.edu.pe o @gmail.com</div>
+      </div>
+
+      <div class="field">
+        <label>Carrera</label>
+        <div class="select-wrap">
+          <select id="carrera">
+            <option value="">Selecciona tu carrera</option>
+            <optgroup label="Ciencias de la Salud y Sociales">
+              <option value="Enfermería">Enfermería</option>
+              <option value="Psicología">Psicología</option>
+            </optgroup>
+            <optgroup label="Ingenierías">
+              <option value="Ingeniería Civil">Ingeniería Civil</option>
+              <option value="Ingeniería de Sistemas">Ingeniería de Sistemas</option>
+              <option value="Ingeniería Ambiental">Ingeniería Ambiental</option>
+              <option value="Ingeniería Agroindustrial">Ingeniería Agroindustrial</option>
+            </optgroup>
+            <optgroup label="Ciencias de la Empresa y Educación">
+              <option value="Administración de Empresas">Administración de Empresas</option>
+              <option value="Contabilidad">Contabilidad</option>
+              <option value="Educación Primaria Intercultural">Educación Primaria Intercultural</option>
+            </optgroup>
+            <optgroup label="Ciencias Exactas">
+              <option value="Matemáticas y Estadística Aplicadas">Matemáticas y Estadística Aplicadas</option>
+            </optgroup>
+          </select>
+        </div>
+        <div class="field-error" id="err-carrera">Selecciona tu carrera</div>
+      </div>
+
+      <button class="btn" id="btnRegistrar" onclick="iniciarRegistro()">
+        Registrar asistencia
+      </button>
+
+      <!-- CONTINUACIÓN POR DNI -->
+      <hr class="divider">
+      <div class="section-title">¿Ya te registraste? Continúa aquí</div>
+      <div class="field">
+        <label>DNI</label>
+        <input type="text" id="dniContinuar" placeholder="Ingresa tu DNI" maxlength="8" inputmode="numeric">
+      </div>
+      <button class="btn-outline" onclick="continuarPorDNI()">Continuar registro</button>
     </div>
 
+    <!-- PANTALLA 2: OBTENIENDO GPS -->
     <div class="screen" id="screenGPS">
-      <div class="spinner"></div>
-      <p style="text-align:center">Verificando ubicación GPS...</p>
+      <div class="gps-status">
+        <div class="spinner"></div>
+        <h2 id="gpsMsg">Obteniendo tu ubicación...</h2>
+        <p id="gpsSub">Acepta el permiso de ubicación cuando el navegador lo solicite</p>
+      </div>
     </div>
 
+    <!-- PANTALLA 3: CONTADOR CHECK 2 -->
     <div class="screen" id="screenWaiting">
-      <div class="result-icon">✅</div>
-      <h2 style="text-align:center">Ingreso Exitoso</h2>
-      <p style="text-align:center; color:var(--muted); margin: 15px 0">Mantén esta ventana abierta. Al finalizar el
-        evento, presiona el botón de abajo.</p>
-      <button class="btn" onclick="ejecutarCheck2Final()">Registrar Salida</button>
+      <div class="result-icon ok">✅</div>
+      <div class="result-title">Asistencia registrada</div>
+      <div class="result-msg">Tu primer registro fue validado correctamente dentro del área del evento.</div>
+
+      <div style="background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.25);border-radius:10px;padding:14px 16px;margin-bottom:18px;font-size:0.82rem;line-height:1.6;color:var(--warn)">
+        ⚠️ <strong>Importante:</strong><br>
+        • Debes permanecer en el área del evento para que tu segundo registro sea exitoso.<br>
+        • Mientras esta pestaña esté abierta, el segundo registro se realizará automáticamente cuando el contador llegue a cero.<br>
+        • Si cierras esta pestaña, puedes volver a escanear el QR y completar tu registro con tu DNI.
+      </div>
+
+      <div class="countdown-box">
+        <div class="countdown-label">Tiempo restante para completar asistencia</div>
+        <div class="countdown-time" id="countdownDisplay">40:00</div>
+        <div class="progress-bar">
+          <div class="progress-fill" id="progressFill" style="width:100%"></div>
+        </div>
+      </div>
+
+      <button class="btn-outline" onclick="mostrarFormularioSalida()" style="margin-top:0;">Justificar salida anticipada</button>
+      
+      <div id="formSalidaAnticipada" style="display:none; margin-top:16px;">
+        <textarea id="razonSalida" rows="2" placeholder="Opcional: Explica brevemente por qué te retiras antes..."></textarea>
+        <button class="btn" style="margin-top:12px; background: var(--warn);" onclick="ejecutarSalidaAnticipada()">Confirmar
+          salida anticipada</button>
+      </div>
     </div>
 
-    <div class="screen" id="screenFinal">
-      <div class="result-icon">🎉</div>
-      <h2 style="text-align:center">¡Asistencia Completa!</h2>
-      <p style="text-align:center; color:var(--muted)">Ya puedes cerrar esta ventana.</p>
+    <!-- PANTALLA 4: OBTENIENDO GPS CHECK 2 -->
+    <div class="screen" id="screenGPS2">
+      <div class="gps-status">
+        <div class="spinner"></div>
+        <h2>Verificación final</h2>
+        <p>Obteniendo tu ubicación para confirmar tu asistencia...</p>
+      </div>
     </div>
+
+    <!-- PANTALLA 5: RESULTADO FINAL -->
+    <div class="screen" id="screenFinal">
+      <div class="final-ok" id="finalContent"></div>
+    </div>
+
+    <!-- PANTALLA 6: RECUPERAR SESIÓN -->
+    <div class="screen" id="screenRecovery">
+      <div class="result-icon warn">⚠️</div>
+      <div class="result-title">Sesión no encontrada</div>
+      <div class="result-msg">No se encontró un registro activo con ese DNI. Completa el formulario de inicio.</div>
+      <button class="btn" onclick="showScreen('screenForm')">Ir al formulario</button>
+    </div>
+
+    <!-- PANTALLA 7: FUERA DE PERÍMETRO -->
+    <div class="screen" id="screenFuera">
+      <div class="result-icon error">📍</div>
+      <div class="result-title">Fuera del área</div>
+      <div class="result-msg" id="fueraMsg">Tu ubicación no está dentro del área del evento. Acércate al lugar y vuelve
+        a intentarlo.</div>
+      <button class="btn" onclick="reintentar()" style="margin-top:8px">Volver a intentar</button>
+    </div>
+
+    <!-- PANTALLA 8: SIN EVENTO -->
+    <div class="screen" id="screenNoEvento">
+      <div class="result-icon error">❌</div>
+      <div class="result-title">Evento no encontrado</div>
+      <div class="result-msg">El enlace no es válido o el evento no existe. Contacta al organizador.</div>
+    </div>
+
   </div>
 
   <script>
     const SUPABASE_URL = 'https://ccvluulbkjofghzpttfb.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNjdmx1dWxia2pvZmdoenB0dGZiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgwMjI1ODksImV4cCI6MjA5MzU5ODU4OX0.Na9TJ5g3Xr22E7h-28Eol0Bv-ikXsYWvuRsoKkmRrfI';
 
-    let eventoId, asistenciaId;
+    let eventoId = null;
+    let eventoData = null;
+    let asistenciaId = null;
+    let countdownInterval = null;
+    let check1Timestamp = null;
+    let eventoFinMs = null;   // timestamp absoluto del fin del evento
 
-    async function sb(path, opts = {}) {
-      const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
-        headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
+    // ---- UTILIDADES ----
+
+    async function sbFetch(path, opts = {}) {
+      const res = await fetch(SUPABASE_URL + '/rest/v1/' + path, {
+        headers: {
+          'apikey': SUPABASE_KEY,
+          'Authorization': 'Bearer ' + SUPABASE_KEY,
+          'Content-Type': 'application/json',
+          'Prefer': 'return=representation',
+          ...opts.headers
+        },
         ...opts
       });
-      return res.ok ? await res.json() : null;
+      const text = await res.text();
+      const parsed = text ? JSON.parse(text) : [];
+      if (!res.ok) {
+        const msg = parsed?.message || parsed?.error || `HTTP ${res.status}`;
+        throw new Error(msg);
+      }
+      return parsed;
     }
 
     function showScreen(id) {
@@ -176,66 +631,499 @@
       document.getElementById(id).classList.add('active');
     }
 
-    async function cargarEvento() {
-      const params = new URLSearchParams(window.location.search);
-      eventoId = params.get('evento');
-      if (!eventoId) return alert("Enlace inválido");
-      const data = await sb(`eventos?id=eq.${eventoId}`);
-      if (data) document.getElementById('eventoNombre').textContent = data[0].nombre;
-    }
-
-    async function iniciarRegistro() {
-      const nombres = document.getElementById('nombres').value;
-      const dni = document.getElementById('dni').value;
-      if (!nombres || dni.length !== 8) return alert("Datos incompletos");
-
-      showScreen('screenGPS');
-      const gps = await obtenerGPS();
-
-      const res = await sb('asistencias', {
-        method: 'POST',
-        body: JSON.stringify({
-          evento_id: eventoId,
-          nombre: nombres,
-          apellidos: document.getElementById('apellidos').value,
-          dni: dni,
-          check1_lat: gps.lat, check1_lng: gps.lng,
-          check1_hora: new Date().toISOString(),
-          estado: 'pendiente'
-        })
-      });
-
-      if (res) {
-        asistenciaId = res[0].id;
-        showScreen('screenWaiting');
+    function showAlert(elId, msg, tipo) {
+      const el = document.getElementById(elId);
+      el.textContent = msg;
+      el.className = 'alert visible ' + tipo;
+      // Auto-cerrar alertas de éxito/warn; las de error persisten hasta acción del usuario
+      if (tipo !== 'error') {
+        setTimeout(() => el.classList.remove('visible'), 5000);
       }
     }
 
-    async function ejecutarCheck2Final() {
-      showScreen('screenGPS');
-      const gps = await obtenerGPS();
-
-      await sb(`asistencias?id=eq.${asistenciaId}`, {
-        method: 'PATCH',
-        body: JSON.stringify({
-          check2_lat: gps.lat, check2_lng: gps.lng,
-          check2_hora: new Date().toISOString(),
-          estado: 'completado'
-        })
-      });
-      showScreen('screenFinal');
+    function getFingerprint() {
+      const nav = navigator;
+      const raw = [nav.userAgent, screen.width, screen.height, screen.colorDepth,
+      Intl.DateTimeFormat().resolvedOptions().timeZone, nav.language,
+      nav.hardwareConcurrency || 0].join('|');
+      let hash = 0;
+      for (let i = 0; i < raw.length; i++) {
+        hash = ((hash << 5) - hash) + raw.charCodeAt(i);
+        hash |= 0;
+      }
+      return Math.abs(hash).toString(36);
     }
 
+    // Validación de coherencia: acepta nombres hispanos y quechuas/andinos (QUISPE, MAMANI, CCOPA, TTITO, etc.)
+    function esCoherente(texto) {
+      const str = texto.trim().toLowerCase();
+      if (str.length < 2) return false;
+      // Solo letras y tildes (incluyendo ñ)
+      if (!/^[a-záéíóúüñ]+$/.test(str)) return false;
+      // Rechazar si toda la cadena es la misma letra repetida (ej: "aaaa", "rrrr")
+      if (/^(.)\1+$/.test(str)) return false;
+      // Rechazar cadenas sin ninguna vocal (incluye la "y" quechua como vocal aproximada: no aplica aquí)
+      // Excepción: apellidos andinos pueden tener combinaciones como QQ, CC, TT al inicio
+      // Se permiten si tienen al menos una vocal O si son conocidas combinaciones quechuas (cc, qq, tt al inicio)
+      const tieneVocal = /[aeiouáéíóúü]/.test(str);
+      const esAndino = /^(cc|qq|tt|ll|ch|qu|hu|gu)/.test(str) && str.length >= 3;
+      if (!tieneVocal && !esAndino) return false;
+      // Rechazar si tiene más de 3 consonantes idénticas consecutivas (ej: "bbbbb")
+      if (/(.)\1{3,}/.test(str)) return false;
+      return true;
+    }
+
+    function validarApellidos(texto) {
+      const partes = texto.trim().split(/\s+/);
+      if (partes.length < 2) return false;
+      return partes.every(p => p.length >= 3 && esCoherente(p));
+    }
+
+    // ---- GEOMETRÍA ----
+
+    function puntoEnPoligono(lat, lng, poligono) {
+      let dentro = false;
+      const n = poligono.length;
+      for (let i = 0, j = n - 1; i < n; j = i++) {
+        const xi = poligono[i].lat, yi = poligono[i].lng;
+        const xj = poligono[j].lat, yj = poligono[j].lng;
+        if (((yi > lng) !== (yj > lng)) && (lat < (xj - xi) * (lng - yi) / (yj - yi) + xi)) {
+          dentro = !dentro;
+        }
+      }
+      return dentro;
+    }
+
+    function distanciaAlPoligono(lat, lng, poligono) {
+      let minDist = Infinity;
+      const R = 6371000;
+      const toRad = x => x * Math.PI / 180;
+      for (let i = 0; i < poligono.length; i++) {
+        const p = poligono[i];
+        const dLat = toRad(lat - p.lat);
+        const dLng = toRad(lng - p.lng);
+        const a = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(lat)) * Math.cos(toRad(p.lat)) * Math.sin(dLng / 2) ** 2;
+        const d = 2 * R * Math.asin(Math.sqrt(a));
+        if (d < minDist) minDist = d;
+      }
+      return minDist;
+    }
+
+    function validarUbicacion(lat, lng, perimetro, tolerancia) {
+      if (!perimetro || perimetro.length < 3) return { valido: true, motivo: 'sin_perimetro' };
+      const dentro = puntoEnPoligono(lat, lng, perimetro);
+      if (dentro) return { valido: true, motivo: 'dentro' };
+      const dist = distanciaAlPoligono(lat, lng, perimetro);
+      if (dist <= tolerancia) return { valido: true, motivo: 'tolerancia', distancia: dist };
+      return { valido: false, motivo: 'fuera', distancia: dist };
+    }
+
+    // ---- GPS ----
+
     function obtenerGPS() {
-      return new Promise(resolve => {
+      return new Promise((resolve, reject) => {
+        if (!navigator.geolocation) { reject(new Error('GPS no disponible')); return; }
         navigator.geolocation.getCurrentPosition(
-          p => resolve({ lat: p.coords.latitude, lng: p.coords.longitude }),
-          () => resolve({ lat: 0, lng: 0 }),
-          { enableHighAccuracy: true }
+          pos => resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude, accuracy: pos.coords.accuracy }),
+          err => reject(err),
+          { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
         );
       });
     }
 
+    // ---- VALIDACIÓN FORMULARIO ----
+
+    function validarCampos() {
+      let ok = true;
+      const nombres = document.getElementById('nombres').value.trim();
+      const apellidos = document.getElementById('apellidos').value.trim();
+      const dni = document.getElementById('dni').value.trim();
+      const correo = document.getElementById('correo').value.trim();
+      const carrera = document.getElementById('carrera').value;
+
+      // Nombres
+      if (!esCoherente(nombres)) {
+        document.getElementById('nombres').classList.add('error');
+        document.getElementById('err-nombres').textContent = 'Secuencia inválida';
+        document.getElementById('err-nombres').classList.add('visible');
+        ok = false;
+      } else {
+        document.getElementById('nombres').classList.remove('error');
+        document.getElementById('err-nombres').classList.remove('visible');
+      }
+
+      // Apellidos
+      if (!validarApellidos(apellidos)) {
+        document.getElementById('apellidos').classList.add('error');
+        document.getElementById('err-apellidos').textContent = 'Secuencia inválida';
+        document.getElementById('err-apellidos').classList.add('visible');
+        ok = false;
+      } else {
+        document.getElementById('apellidos').classList.remove('error');
+        document.getElementById('err-apellidos').classList.remove('visible');
+      }
+
+      // DNI
+      if (!/^\d{8}$/.test(dni)) {
+        document.getElementById('dni').classList.add('error');
+        document.getElementById('err-dni').classList.add('visible');
+        ok = false;
+      } else {
+        document.getElementById('dni').classList.remove('error');
+        document.getElementById('err-dni').classList.remove('visible');
+      }
+
+      // Correo
+      const correoLower = correo.toLowerCase();
+      if (!correoLower.endsWith('@unajma.edu.pe') && !correoLower.endsWith('@gmail.com')) {
+        document.getElementById('correo').classList.add('error');
+        document.getElementById('err-correo').classList.add('visible');
+        ok = false;
+      } else {
+        document.getElementById('correo').classList.remove('error');
+        document.getElementById('err-correo').classList.remove('visible');
+      }
+
+      // Carrera
+      if (carrera === '') {
+        document.getElementById('carrera').classList.add('error');
+        document.getElementById('err-carrera').classList.add('visible');
+        ok = false;
+      } else {
+        document.getElementById('carrera').classList.remove('error');
+        document.getElementById('err-carrera').classList.remove('visible');
+      }
+
+      return ok;
+    }
+
+    // ---- INICIO Y CARGA DE EVENTO ----
+
+    async function cargarEvento() {
+      const params = new URLSearchParams(window.location.search);
+      eventoId = params.get('evento');
+      if (!eventoId) { showScreen('screenNoEvento'); return; }
+
+      const rows = await sbFetch('eventos?id=eq.' + eventoId + '&select=*');
+      if (!rows || rows.length === 0) { showScreen('screenNoEvento'); return; }
+      eventoData = rows[0];
+      document.getElementById('eventoNombre').textContent = eventoData.nombre;
+      const meta = [];
+      if (eventoData.fecha) meta.push(eventoData.fecha);
+      if (eventoData.lugar) meta.push(eventoData.lugar);
+      document.getElementById('eventoMeta').textContent = meta.join(' · ');
+
+      // Calcular timestamp absoluto del fin del evento
+      // Si tiene fecha y hora_inicio los usamos; si no, el fin es "ahora + duracion" (fallback)
+      const durMin = eventoData.duracion_total_minutos || 90;
+      if (eventoData.fecha && eventoData.hora_inicio) {
+        const inicioStr = eventoData.fecha + 'T' + eventoData.hora_inicio;
+        const inicioMs = new Date(inicioStr).getTime();
+        eventoFinMs = inicioMs + durMin * 60 * 1000;
+      } else {
+        eventoFinMs = Date.now() + durMin * 60 * 1000;
+      }
+
+      // Siempre mostrar formulario, el usuario puede continuar con la sección de DNI
+      showScreen('screenForm');
+    }
+
+    // ---- CONTINUACIÓN POR DNI ----
+
+    async function continuarPorDNI() {
+      if (!eventoId) {
+        showAlert('alertForm', 'El evento aún se está cargando. Espera un momento e intenta de nuevo.', 'warn');
+        return;
+      }
+      const dni = document.getElementById('dniContinuar').value.trim();
+      if (!/^\d{8}$/.test(dni)) {
+        showAlert('alertForm', 'Ingresa un DNI válido de 8 dígitos.', 'error');
+        return;
+      }
+
+      const rows = await sbFetch('asistencias?dni=eq.' + dni + '&evento_id=eq.' + eventoId + '&select=*');
+      if (!rows || rows.length === 0) {
+        showAlert('alertForm', 'No se encontró ningún registro con ese DNI. Completa el formulario de arriba.', 'error');
+        return;
+      }
+
+      const reg = rows[0];
+      if (reg.estado === 'completado' || reg.estado === 'parcial') {
+        mostrarFinal(reg);
+        return;
+      }
+      if (reg.check1_hora && !reg.check2_hora) {
+        asistenciaId = reg.id;
+        check1Timestamp = new Date(reg.check1_hora).getTime();
+        localStorage.setItem('asistencia_sesion_' + eventoId, JSON.stringify({ id: reg.id }));
+        iniciarContador();
+        return;
+      }
+      showAlert('alertForm', 'El registro no se puede continuar en este momento. Contacta al organizador.', 'error');
+    }
+
+    // ---- REGISTRO INICIAL ----
+
+    async function iniciarRegistro() {
+      if (!validarCampos()) return;
+
+      const dni = document.getElementById('dni').value.trim();
+      const fp = getFingerprint();
+
+      // Bloqueo real de DNI duplicado
+      const existeDNI = await sbFetch('asistencias?dni=eq.' + dni + '&evento_id=eq.' + eventoId + '&select=id,estado,check1_hora,check2_hora');
+      if (existeDNI && existeDNI.length > 0) {
+        const reg = existeDNI[0];
+        if (reg.estado === 'completado' || reg.estado === 'parcial') {
+          showAlert('alertForm', 'Este DNI ya completó su registro en este evento.', 'error');
+          return;
+        }
+        if (reg.check1_hora && !reg.check2_hora) {
+          // Retomar sesión existente
+          asistenciaId = reg.id;
+          localStorage.setItem('asistencia_sesion_' + eventoId, JSON.stringify({ id: reg.id }));
+          check1Timestamp = new Date(reg.check1_hora).getTime();
+          iniciarContador();
+          return;
+        }
+      }
+
+      // Verificar fingerprint duplicado (alerta visible)
+      const existeFP = await sbFetch('asistencias?device_fingerprint=eq.' + fp + '&evento_id=eq.' + eventoId + '&select=id');
+      const alertaFP = existeFP && existeFP.length > 0;
+
+      document.getElementById('btnRegistrar').disabled = true;
+      showScreen('screenGPS');
+
+      let gps;
+      try {
+        gps = await obtenerGPS();
+      } catch (e) {
+        showScreen('screenForm');
+        showAlert('alertForm', 'No se pudo obtener tu ubicación. Activa el GPS e intenta de nuevo.', 'error');
+        document.getElementById('btnRegistrar').disabled = false;
+        return;
+      }
+
+      const perimetro = eventoData?.perimetro || null;
+      const tolerancia = eventoData?.tolerancia_metros || 10;
+      const resultado = validarUbicacion(gps.lat, gps.lng, perimetro, tolerancia);
+
+      if (!resultado.valido) {
+        const dist = resultado.distancia ? Math.round(resultado.distancia) + 'm del área' : '';
+        document.getElementById('fueraMsg').textContent = `Tu ubicación está fuera del área del evento (${dist}). Acércate al lugar y vuelve a intentarlo.`;
+        showScreen('screenFuera');
+        document.getElementById('btnRegistrar').disabled = false;
+        return;
+      }
+
+      // Guardar check 1
+      const payload = {
+        evento_id: eventoId,
+        nombre: document.getElementById('nombres').value.trim(),
+        apellidos: document.getElementById('apellidos').value.trim(),
+        dni: dni,
+        correo: document.getElementById('correo').value.trim().toLowerCase(),
+        carrera: document.getElementById('carrera').value,
+        device_fingerprint: fp,
+        check1_lat: gps.lat,
+        check1_lng: gps.lng,
+        check1_hora: new Date().toISOString(),
+        check1_valido: resultado.valido,
+        estado: 'pendiente',
+        alerta_duplicado: alertaFP
+      };
+
+      const inserted = await sbFetch('asistencias', {
+        method: 'POST',
+        body: JSON.stringify(payload)
+      });
+
+      if (!inserted || inserted.error) {
+        showScreen('screenForm');
+        showAlert('alertForm', 'Error al guardar el registro. Intenta de nuevo.', 'error');
+        document.getElementById('btnRegistrar').disabled = false;
+        return;
+      }
+
+      asistenciaId = inserted[0].id;
+      localStorage.setItem('asistencia_sesion_' + eventoId, JSON.stringify({ id: asistenciaId }));
+      check1Timestamp = Date.now();
+      iniciarContador();
+    }
+
+    // ---- CONTADOR ----
+
+    function iniciarContador() {
+      showScreen('screenWaiting');
+      document.getElementById('formSalidaAnticipada').style.display = 'none';
+
+      // Tiempo total visible en la barra de progreso = desde que el asistente se registró hasta el fin
+      const totalVisible = Math.max(eventoFinMs - check1Timestamp, 1);
+
+      function actualizar() {
+        const restante = eventoFinMs - Date.now();
+
+        if (restante <= 0) {
+          clearInterval(countdownInterval);
+          document.getElementById('countdownDisplay').textContent = '00:00';
+          document.getElementById('progressFill').style.width = '0%';
+          ejecutarCheck2Automatico();
+          return;
+        }
+
+        const mins = Math.floor(restante / 60000);
+        const segs = Math.floor((restante % 60000) / 1000);
+        document.getElementById('countdownDisplay').textContent =
+          String(mins).padStart(2, '0') + ':' + String(segs).padStart(2, '0');
+        // La barra refleja el progreso desde que el asistente llegó
+        const transcurrido = check1Timestamp + totalVisible - eventoFinMs + restante;
+        document.getElementById('progressFill').style.width =
+          Math.max(0, Math.min(100, (restante / totalVisible) * 100)) + '%';
+      }
+
+      actualizar();
+      countdownInterval = setInterval(actualizar, 1000);
+    }
+
+    function mostrarFormularioSalida() {
+      document.getElementById('formSalidaAnticipada').style.display = 'block';
+    }
+
+    // ---- CHECK 2 AUTOMÁTICO ----
+
+    async function ejecutarCheck2Automatico() {
+      clearInterval(countdownInterval);
+      showScreen('screenGPS2');
+
+      let gps;
+      try {
+        gps = await obtenerGPS();
+      } catch (e) {
+        await sbFetch('asistencias?id=eq.' + asistenciaId, {
+          method: 'PATCH',
+          body: JSON.stringify({ estado: 'parcial', parcial_tipo: 'ubicacion', check2_valido: false, check2_hora: new Date().toISOString() })
+        });
+        mostrarFinal({ estado: 'parcial', parcial_tipo: 'ubicacion' });
+        return;
+      }
+
+      const perimetro = eventoData?.perimetro || null;
+      const tolerancia = eventoData?.tolerancia_metros || 10;
+      const resultado = validarUbicacion(gps.lat, gps.lng, perimetro, tolerancia);
+
+      const estado = resultado.valido ? 'completado' : 'parcial';
+      const patch = {
+        check2_lat: gps.lat,
+        check2_lng: gps.lng,
+        check2_hora: new Date().toISOString(),
+        check2_valido: resultado.valido,
+        estado: estado,
+        parcial_tipo: resultado.valido ? null : 'ubicacion'
+      };
+
+      await sbFetch('asistencias?id=eq.' + asistenciaId, {
+        method: 'PATCH',
+        body: JSON.stringify(patch)
+      });
+
+      localStorage.removeItem('asistencia_sesion_' + eventoId);
+      mostrarFinal({ estado, parcial_tipo: patch.parcial_tipo });
+    }
+
+    // ---- CHECK 2 MANUAL (SALIDA ANTICIPADA) ----
+
+    async function ejecutarSalidaAnticipada() {
+      clearInterval(countdownInterval);
+      const razon = document.getElementById('razonSalida').value.trim();
+      showScreen('screenGPS2');
+
+      let gps;
+      try {
+        gps = await obtenerGPS();
+      } catch (e) {
+        await sbFetch('asistencias?id=eq.' + asistenciaId, {
+          method: 'PATCH',
+          body: JSON.stringify({
+            estado: 'parcial',
+            razon_salida: razon || null,
+            check2_valido: false,
+            check2_hora: new Date().toISOString()
+          })
+        });
+        mostrarFinal({ estado: 'parcial', check2_valido: false });
+        return;
+      }
+
+      const perimetro = eventoData?.perimetro || null;
+      const tolerancia = eventoData?.tolerancia_metros || 10;
+      const resultado = validarUbicacion(gps.lat, gps.lng, perimetro, tolerancia);
+
+      // Siempre parcial por tiempo si usa este botón
+      const patch = {
+        check2_lat: gps.lat,
+        check2_lng: gps.lng,
+        check2_hora: new Date().toISOString(),
+        check2_valido: resultado.valido,
+        estado: 'parcial',
+        razon_salida: razon || null
+      };
+
+      await sbFetch('asistencias?id=eq.' + asistenciaId, {
+        method: 'PATCH',
+        body: JSON.stringify(patch)
+      });
+
+      localStorage.removeItem('asistencia_sesion_' + eventoId);
+      mostrarFinal({ estado: 'parcial', check2_valido: resultado.valido });
+    }
+
+    function mostrarFinal(reg) {
+      showScreen('screenFinal');
+      const container = document.getElementById('finalContent');
+      if (reg.estado === 'completado') {
+        container.innerHTML = `
+        <div class="result-icon ok">🎉</div>
+        <div class="result-title">¡Asistencia completa!</div>
+        <div class="result-msg">Ambas verificaciones fueron exitosas. Tu participación ha sido registrada correctamente.</div>
+      `;
+      } else if (reg.parcial_tipo === 'tiempo') {
+        container.innerHTML = `
+        <div class="result-icon warn">⚠️</div>
+        <div class="result-title">Asistencia parcial</div>
+        <div class="result-msg">Tu participación ha sido registrada.</div>
+      `;
+      } else if (reg.parcial_tipo === 'ubicacion') {
+        container.innerHTML = `
+        <div class="result-icon warn">📍</div>
+        <div class="result-title">Asistencia parcial (fuera de perímetro)</div>
+        <div class="result-msg">No te encontrabas dentro del área en la segunda verificación. Contacta al organizador si crees que es un error.</div>
+      `;
+      } else if (reg.razon_salida) {
+        container.innerHTML = `
+        <div class="result-icon ok" style="background:rgba(79,142,247,0.15)">📋</div>
+        <div class="result-title">Asistencia registrada con justificación</div>
+        <div class="result-msg" style="margin-bottom:14px">Tu asistencia quedó registrada correctamente. Se adjuntó tu motivo de retiro anticipado para que el organizador lo evalúe.</div>
+        <div style="background:var(--surface2);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:10px;padding:12px 14px;font-size:0.82rem;color:var(--muted);line-height:1.6;margin-bottom:14px;text-align:left">
+          <div style="font-size:0.72rem;text-transform:uppercase;letter-spacing:0.06em;color:var(--accent);margin-bottom:6px">Motivo registrado</div>
+          "${reg.razon_salida}"
+        </div>
+      `;
+      } else {
+        container.innerHTML = `
+        <div class="result-icon ok" style="background:rgba(79,142,247,0.15)">📋</div>
+        <div class="result-title">Asistencia registrada</div>
+        <div class="result-msg">Tu participación quedó guardada en el sistema. El organizador podrá revisar los detalles de tu registro.</div>
+      `;
+      }
+    }
+
+    function reintentar() {
+      showScreen('screenForm');
+      document.getElementById('btnRegistrar').disabled = false;
+    }
+
+    // Arranque
     cargarEvento();
   </script>
 </body>
