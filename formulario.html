@@ -500,6 +500,11 @@
         <div class="field-error" id="err-carrera">Selecciona tu carrera</div>
       </div>
 
+      <div class="field">
+        <label>Motivo de asistencia <span style="color:var(--muted);font-weight:400;text-transform:none">(opcional)</span></label>
+        <textarea id="motivo" rows="2" placeholder="Ej: Asisto como parte del curso de Sistemas..." style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:13px 16px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:0.95rem;outline:none;resize:vertical;transition:border-color 0.2s" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'"></textarea>
+      </div>
+
       <button class="btn" id="btnRegistrar" onclick="iniciarRegistro()">
         Registrar asistencia
       </button>
@@ -814,13 +819,16 @@
       document.getElementById('eventoMeta').textContent = meta.join(' · ');
 
       // Calcular timestamp absoluto del fin del evento
-      // Si tiene fecha y hora_inicio los usamos; si no, el fin es "ahora + duracion" (fallback)
       const durMin = eventoData.duracion_total_minutos || 90;
       if (eventoData.fecha && eventoData.hora_inicio) {
-        const inicioStr = eventoData.fecha + 'T' + eventoData.hora_inicio;
-        const inicioMs = new Date(inicioStr).getTime();
-        eventoFinMs = inicioMs + durMin * 60 * 1000;
+        // Supabase devuelve hora_inicio como "HH:MM:SS" o "HH:MM" — normalizamos a "HH:MM"
+        const horaLimpia = String(eventoData.hora_inicio).slice(0, 5);
+        const inicioMs = new Date(eventoData.fecha + 'T' + horaLimpia).getTime();
+        eventoFinMs = isNaN(inicioMs)
+          ? Date.now() + durMin * 60 * 1000          // parsing falló → fallback
+          : inicioMs + durMin * 60 * 1000;
       } else {
+        // Sin fecha/hora configurada → fallback desde ahora
         eventoFinMs = Date.now() + durMin * 60 * 1000;
       }
 
@@ -925,6 +933,7 @@
         dni: dni,
         correo: document.getElementById('correo').value.trim().toLowerCase(),
         carrera: document.getElementById('carrera').value,
+        motivo: document.getElementById('motivo').value.trim() || null,
         device_fingerprint: fp,
         check1_lat: gps.lat,
         check1_lng: gps.lng,
@@ -958,7 +967,15 @@
       showScreen('screenWaiting');
       document.getElementById('formSalidaAnticipada').style.display = 'none';
 
-      // Tiempo total visible en la barra de progreso = desde que el asistente se registró hasta el fin
+      // Si el evento ya terminó (asistente llegó tarde y ya pasó el fin), disparar check2 de inmediato
+      if (eventoFinMs - Date.now() <= 0) {
+        document.getElementById('countdownDisplay').textContent = '00:00';
+        document.getElementById('progressFill').style.width = '0%';
+        ejecutarCheck2Automatico();
+        return;
+      }
+
+      // Tiempo total desde que el asistente llegó hasta el fin (para la barra de progreso)
       const totalVisible = Math.max(eventoFinMs - check1Timestamp, 1);
 
       function actualizar() {
@@ -976,8 +993,6 @@
         const segs = Math.floor((restante % 60000) / 1000);
         document.getElementById('countdownDisplay').textContent =
           String(mins).padStart(2, '0') + ':' + String(segs).padStart(2, '0');
-        // La barra refleja el progreso desde que el asistente llegó
-        const transcurrido = check1Timestamp + totalVisible - eventoFinMs + restante;
         document.getElementById('progressFill').style.width =
           Math.max(0, Math.min(100, (restante / totalVisible) * 100)) + '%';
       }
