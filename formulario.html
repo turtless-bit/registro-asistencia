@@ -544,7 +544,7 @@
 
       <div class="countdown-box">
         <div class="countdown-label">Tiempo restante para completar asistencia</div>
-        <div class="countdown-time" id="countdownDisplay">40:00</div>
+        <div class="countdown-time" id="countdownDisplay">00:00</div>
         <div class="progress-bar">
           <div class="progress-fill" id="progressFill" style="width:100%"></div>
         </div>
@@ -966,18 +966,14 @@
       iniciarContador();
     }
 
-    // ---- CONTADOR (LOGICA CORREGIDA PARA CALCULO INDIVIDUAL) ----
+    // ---- CONTADOR (LOGICA ACTUALIZADA: FIN DE EVENTO GLOBAL) ----
 
     function iniciarContador() {
       showScreen('screenWaiting');
       document.getElementById('formSalidaAnticipada').style.display = 'none';
 
-      // Duración que debe esperar el usuario individualmente (por defecto 90 min si no hay en DB)
-      const duracionMinutos = parseInt(eventoData.duracion_total_minutos) || 90;
-      const tiempoRequeridoMs = duracionMinutos * 60 * 1000;
-
-      // La hora de finalización es personal: Hora de Entrada del Usuario + Tiempo Requerido
-      const targetTimeMs = check1Timestamp + tiempoRequeridoMs;
+      // La hora de finalización es absoluta: Hora de Inicio + Duración Total del Evento
+      const targetTimeMs = eventoFinMs;
 
       if (countdownInterval) clearInterval(countdownInterval);
 
@@ -989,7 +985,7 @@
           clearInterval(countdownInterval);
           document.getElementById('countdownDisplay').textContent = '00:00';
           document.getElementById('progressFill').style.width = '0%';
-          ejecutarCheck2Automatico(); // Dispara la validación final automáticamente
+          ejecutarCheck2Automatico(); // Validación final automática al terminar el evento
           return;
         }
 
@@ -998,8 +994,11 @@
         document.getElementById('countdownDisplay').textContent =
           String(mins).padStart(2, '0') + ':' + String(segs).padStart(2, '0');
 
-        // Progreso relativo al tiempo total que DEBE estar el usuario
-        const porcentaje = Math.max(0, Math.min(100, (restante / tiempoRequeridoMs) * 100));
+        // El progreso se calcula basándose en el tiempo total de espera desde el Check 1 hasta el fin del evento
+        const tiempoTotalEspera = targetTimeMs - check1Timestamp;
+        const progresoActual = restante / tiempoTotalEspera;
+        const porcentaje = Math.max(0, Math.min(100, progresoActual * 100));
+
         document.getElementById('progressFill').style.width = porcentaje + '%';
       }
 
