@@ -808,20 +808,17 @@
       if (!rows || rows.length === 0) { showScreen('screenNoEvento'); return; }
       eventoData = rows[0];
       document.getElementById('eventoNombre').textContent = eventoData.nombre;
-      const meta = [];
-      if (eventoData.fecha) meta.push(eventoData.fecha);
-      if (eventoData.lugar) meta.push(eventoData.lugar);
-      document.getElementById('eventoMeta').textContent = meta.join(' · ');
 
       // Calcular timestamp absoluto del fin del evento
-      // IMPORTANTE: new Date("YYYY-MM-DDTHH:MM") sin zona horaria se interpreta como UTC en muchos
-      // navegadores, lo que desplazaría el fin 5h para Perú (UTC-5). Se evita parseando manualmente.
+      // hora_inicio de Supabase puede llegar como "15:00:00", "15:00", o incluso "15:00:00+00"
+      // Usamos el constructor Date(año, mes, día, hora, min) que siempre es hora LOCAL del dispositivo
       const durMin = eventoData.duracion_total_minutos || 90;
       if (eventoData.fecha && eventoData.hora_inicio) {
-        const [anio, mes, dia] = String(eventoData.fecha).split('-').map(Number);
-        const [hora, min]      = String(eventoData.hora_inicio).split(':').map(Number);
-        // Date.UTC no sirve aquí; usamos el constructor local explícito
-        const inicioLocal = new Date(anio, mes - 1, dia, hora, min, 0, 0);
+        const partesFecha = String(eventoData.fecha).split('-').map(Number);
+        const partesHora  = String(eventoData.hora_inicio).split(':').map(Number);
+        const anio = partesFecha[0], mes = partesFecha[1] - 1, dia = partesFecha[2];
+        const hora = partesHora[0],  min = partesHora[1] || 0;
+        const inicioLocal = new Date(anio, mes, dia, hora, min, 0, 0);
         eventoFinMs = isNaN(inicioLocal.getTime())
           ? Date.now() + durMin * 60 * 1000
           : inicioLocal.getTime() + durMin * 60 * 1000;
@@ -829,7 +826,15 @@
         eventoFinMs = Date.now() + durMin * 60 * 1000;
       }
 
-      // Siempre mostrar formulario, el usuario puede continuar con la sección de DNI
+      // Mostrar hora de fin en el banner para que el asistente sepa hasta cuándo
+      const finDate = new Date(eventoFinMs);
+      const finStr  = finDate.toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' });
+      const meta = [];
+      if (eventoData.fecha) meta.push(eventoData.fecha);
+      if (eventoData.lugar) meta.push(eventoData.lugar);
+      meta.push('Fin: ' + finStr);
+      document.getElementById('eventoMeta').textContent = meta.join(' · ');
+
       showScreen('screenForm');
     }
 
@@ -875,20 +880,22 @@
       const dni = document.getElementById('dni').value.trim();
       const fp = getFingerprint();
 
-      // Bloqueo real de DNI duplicado
-      const existeDNI = await sbFetch('asistencias?dni=eq.' + dni + '&evento_id=eq.' + eventoId + '&select=id,estado,check1_hora,check2_hora');
+      // Bloqueo de DNI duplicado
+      let existeDNI;
+      try {
+        existeDNI = await sbFetch('asistencias?dni=eq.' + dni + '&evento_id=eq.' + eventoId + '&select=id,estado,check1_hora,check2_hora');
+      } catch (e) {
+        showAlert('alertForm', 'Error al verificar el DNI. Intenta de nuevo.', 'error');
+        return;
+      }
       if (existeDNI && existeDNI.length > 0) {
         const reg = existeDNI[0];
         if (reg.estado === 'completado' || reg.estado === 'parcial') {
           showAlert('alertForm', 'Este DNI ya completó su registro en este evento.', 'error');
           return;
         }
-        if (reg.check1_hora && !reg.check2_hora) {
-          // Retomar sesión existente
-          asistenciaId = reg.id;
-          localStorage.setItem('asistencia_sesion_' + eventoId, JSON.stringify({ id: reg.id }));
-          check1Timestamp = new Date(reg.check1_hora).getTime();
-          iniciarContador();
+        if (reg.estado === 'pendiente') {
+          showAlert('alertForm', 'Este DNI ya tiene un registro en curso. Si eres tú, usa la sección "Continuar registro" con tu DNI.', 'error');
           return;
         }
       }
