@@ -705,8 +705,7 @@
         <div style="background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.25);border-radius:10px;padding:12px 16px;margin-bottom:12px;font-size:0.82rem;line-height:1.6;color:var(--warn)">
           ⚠️ Vas a retirarte antes de completar el tiempo mínimo de <span id="tiempoRequerido">40</span> minutos.
         </div>
-        <label style="font-size:0.8rem;">Opcional: Motivo de tu salida</label>
-        <textarea id="razonSalida" rows="2" placeholder="Explica brevemente por qué te retiras antes..."></textarea>
+        <textarea id="razonSalida" rows="2" placeholder="Opcional: Explica brevemente por qué te retiras antes..."></textarea>
         <button class="btn" style="margin-top:12px; background: var(--warn);" onclick="ejecutarSalidaAnticipada()">Confirmar
           salida anticipada</button>
       </div>
@@ -1305,21 +1304,18 @@
         <div class="result-icon ok">🎉</div>
         <div class="result-title">¡Asistencia completa!</div>
         <div class="result-msg">Ambas verificaciones fueron exitosas. Tu participación ha sido registrada correctamente.</div>
-        <span class="badge ok">✓ Asistencia validada</span>
       `;
       } else if (reg.parcial_tipo === 'tiempo') {
         container.innerHTML = `
         <div class="result-icon warn">⚠️</div>
         <div class="result-title">Asistencia parcial</div>
         <div class="result-msg">Tu participación ha sido registrada.</div>
-        <span class="badge parcial">⚠ Parcial</span>
       `;
       } else if (reg.parcial_tipo === 'ubicacion') {
         container.innerHTML = `
         <div class="result-icon warn">📍</div>
         <div class="result-title">Asistencia parcial (fuera de perímetro)</div>
         <div class="result-msg">No te encontrabas dentro del área en la segunda verificación. Contacta al organizador si crees que es un error.</div>
-        <span class="badge parcial">Fuera de perímetro</span>
       `;
       } else if (reg.razon_salida) {
         container.innerHTML = `
@@ -1330,7 +1326,6 @@
           <div style="font-size:0.72rem;text-transform:uppercase;letter-spacing:0.06em;color:var(--accent);margin-bottom:6px">Motivo registrado</div>
           "${reg.razon_salida}"
         </div>
-        <span class="badge parcial">📋 Con justificación</span>
       `;
       } else {
         container.innerHTML = `
