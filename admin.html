@@ -948,12 +948,24 @@
       <div class="field">
         <label>Estado</label>
         <div class="select-wrap-modal">
-          <select id="mEstado">
+          <select id="mEstado" onchange="toggleCamposEstado()">
             <option value="completado">✓ Completo</option>
             <option value="pendiente">⏳ Pendiente</option>
             <option value="parcial">⚠ Parcial</option>
           </select>
         </div>
+      </div>
+      <div class="field">
+        <label>Check 1 — Hora de entrada</label>
+        <input type="datetime-local" id="mCheck1">
+      </div>
+      <div class="field" id="campoCheck2">
+        <label>Check 2 — Hora de salida</label>
+        <input type="datetime-local" id="mCheck2">
+      </div>
+      <div class="field" id="campoMotivo">
+        <label>Motivo de salida <span style="color:var(--muted);font-size:0.72rem;text-transform:none">(opcional)</span></label>
+        <input type="text" id="mMotivo" placeholder="Ej: Compromiso académico, cita médica...">
       </div>
       <div class="modal-footer">
         <button class="btn-secondary" onclick="cerrarModalAgregar()">Cancelar</button>
@@ -1103,17 +1115,26 @@
       document.getElementById('qrBox').innerHTML = '';
       document.getElementById('qrSection').style.display = 'flex';
       new QRCode(document.getElementById('qrBox'), {
-        text: url, width: 150, height: 150,
-        colorDark: '#000', colorLight: '#fff', correctLevel: QRCode.CorrectLevel.H
+        text: url, width: 200, height: 200,
+        colorDark: '#000000', colorLight: '#ffffff', correctLevel: QRCode.CorrectLevel.H
       });
     }
 
     function descargarQR() {
       const canvas = document.querySelector('#qrBox canvas');
-      if (!canvas) return;
+      if (!canvas) { showAlert('alertEvento', '⚠ Genera el QR primero.', 'warn'); return; }
+      // Crear canvas con fondo blanco y margen para que los lectores lo reconozcan bien
+      const margen = 24;
+      const out = document.createElement('canvas');
+      out.width  = canvas.width  + margen * 2;
+      out.height = canvas.height + margen * 2;
+      const ctx = out.getContext('2d');
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, out.width, out.height);
+      ctx.drawImage(canvas, margen, margen);
       const a = document.createElement('a');
       a.download = 'qr-asistencia.png';
-      a.href = canvas.toDataURL();
+      a.href = out.toDataURL('image/png');
       a.click();
     }
 
@@ -1402,6 +1423,19 @@
 
     // ── MODAL AGREGAR REGISTRO ────────────────────────────────────
 
+    function toLocalDatetimeValue(date) {
+      // Convierte un Date a string "YYYY-MM-DDTHH:MM" en hora LOCAL para input datetime-local
+      const pad = n => String(n).padStart(2, '0');
+      return date.getFullYear() + '-' + pad(date.getMonth()+1) + '-' + pad(date.getDate()) +
+             'T' + pad(date.getHours()) + ':' + pad(date.getMinutes());
+    }
+
+    function toggleCamposEstado() {
+      const estado = document.getElementById('mEstado').value;
+      document.getElementById('campoCheck2').style.display = estado === 'pendiente' ? 'none' : '';
+      document.getElementById('campoMotivo').style.display = estado === 'completado' ? 'none' : '';
+    }
+
     function abrirModalAgregar() {
       const eventoId = document.getElementById('selectorEventoRegistros').value;
       if (!eventoId) {
@@ -1409,10 +1443,15 @@
         showPage('pageEventos');
         return;
       }
-      // Limpiar campos
-      ['mNombres','mApellidos','mDni','mCorreo'].forEach(id => document.getElementById(id).value = '');
+      // Limpiar campos de texto
+      ['mNombres','mApellidos','mDni','mCorreo','mMotivo'].forEach(id => document.getElementById(id).value = '');
       document.getElementById('mCarrera').value = '';
       document.getElementById('mEstado').value = 'completado';
+      // Poner hora actual como valor por defecto para check1 y check2
+      const ahora = toLocalDatetimeValue(new Date());
+      document.getElementById('mCheck1').value = ahora;
+      document.getElementById('mCheck2').value = ahora;
+      toggleCamposEstado();
       const alerta = document.getElementById('alertModal');
       alerta.className = 'alert';
       alerta.textContent = '';
@@ -1424,13 +1463,16 @@
     }
 
     async function guardarRegistroManual() {
-      const eventoId = document.getElementById('selectorEventoRegistros').value;
+      const eventoId  = document.getElementById('selectorEventoRegistros').value;
       const nombres   = document.getElementById('mNombres').value.trim();
       const apellidos = document.getElementById('mApellidos').value.trim();
       const dni       = document.getElementById('mDni').value.trim();
       const correo    = document.getElementById('mCorreo').value.trim();
       const carrera   = document.getElementById('mCarrera').value;
       const estado    = document.getElementById('mEstado').value;
+      const motivo    = document.getElementById('mMotivo').value.trim();
+      const check1Val = document.getElementById('mCheck1').value;
+      const check2Val = document.getElementById('mCheck2').value;
 
       const alerta = document.getElementById('alertModal');
       const mostrarError = msg => {
@@ -1442,6 +1484,8 @@
       if (!apellidos)            return mostrarError('⚠ Ingresa los apellidos.');
       if (!/^\d{8}$/.test(dni))  return mostrarError('⚠ El DNI debe tener 8 dígitos.');
       if (!carrera)              return mostrarError('⚠ Selecciona una carrera.');
+      if (!check1Val)            return mostrarError('⚠ Ingresa la hora del Check 1.');
+      if (estado !== 'pendiente' && !check2Val) return mostrarError('⚠ Ingresa la hora del Check 2.');
 
       // Verificar DNI duplicado
       try {
@@ -1453,18 +1497,22 @@
       btn.disabled = true;
       btn.textContent = 'Guardando...';
 
-      const ahora = new Date().toISOString();
+      // datetime-local devuelve "YYYY-MM-DDTHH:MM" en hora local — lo convertimos a ISO UTC
+      const check1ISO = check1Val ? new Date(check1Val).toISOString() : null;
+      const check2ISO = (estado !== 'pendiente' && check2Val) ? new Date(check2Val).toISOString() : null;
+
       const payload = {
-        evento_id:   eventoId,
-        nombre:      nombres,
-        apellidos:   apellidos,
-        dni:         dni,
-        correo:      correo || null,
-        carrera:     carrera,
-        estado:      estado,
-        check1_hora: ahora,
+        evento_id:     eventoId,
+        nombre:        nombres,
+        apellidos:     apellidos,
+        dni:           dni,
+        correo:        correo || null,
+        carrera:       carrera,
+        estado:        estado,
+        check1_hora:   check1ISO,
         check1_valido: true,
-        ...(estado === 'completado' ? { check2_hora: ahora, check2_valido: true } : {})
+        ...(check2ISO ? { check2_hora: check2ISO, check2_valido: true } : {}),
+        ...(motivo ? { razon_salida: motivo } : {})
       };
 
       try {
