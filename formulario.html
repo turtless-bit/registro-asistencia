@@ -613,9 +613,9 @@
       </div>
 
       <div class="field">
-        <label>Correo institucional</label>
-        <input type="email" id="correo" placeholder="usuario@unajma.edu.pe" inputmode="email">
-        <div class="field-error" id="err-correo">Debe ser un correo @unajma.edu.pe</div>
+        <label>Correo institucional o electrónico</label>
+        <input type="email" id="correo" placeholder="usuario@unajma.edu.pe o usuario@gmail.com" inputmode="email">
+        <div class="field-error" id="err-correo">Debe ser un correo @unajma.edu.pe o @gmail.com</div>
       </div>
 
       <div class="field">
@@ -700,8 +700,7 @@
         <button class="btn-check2" onclick="validarCompletaManual()">
           <div class="btn-check2-icon">✓</div>
           <div class="btn-check2-text">
-            <strong>Ya terminó el evento, registrar mi salida</strong>
-            <span>Confirma que seguiste en el área hasta el final</span>
+            <strong>Registrar asistencia por tiempo mínimo</strong>
           </div>
         </button>
       </div>
@@ -949,7 +948,8 @@
       }
 
       // Correo
-      if (!correo.toLowerCase().endsWith('@unajma.edu.pe')) {
+      const correoLower = correo.toLowerCase();
+      if (!correoLower.endsWith('@unajma.edu.pe') && !correoLower.endsWith('@gmail.com')) {
         document.getElementById('correo').classList.add('error');
         document.getElementById('err-correo').classList.add('visible');
         ok = false;

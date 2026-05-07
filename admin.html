@@ -779,7 +779,11 @@
               <input type="text" id="addDni" placeholder="DNI (8 dígitos)" maxlength="8" inputmode="numeric">
             </div>
             <div class="add-row">
-              <input type="email" id="addCorreo" placeholder="Correo @unajma.edu.pe">
+              <div style="display:flex;flex-direction:column;gap:4px;flex:1">
+                <label style="font-size:0.75rem;color:var(--muted);font-weight:500;letter-spacing:0.02em">CORREO INSTITUCIONAL O ELECTRÓNICO</label>
+                <input type="email" id="addCorreo" placeholder="usuario@unajma.edu.pe o usuario@gmail.com">
+                <div id="correoAdminMsg" style="display:none;font-size:0.75rem;color:var(--error);margin-top:2px"></div>
+              </div>
               <select id="addCarrera">
                 <option value="">Selecciona carrera</option>
                 <optgroup label="Ciencias de la Salud y Sociales">
@@ -1561,6 +1565,16 @@
         document.getElementById('addMsg').textContent = 'DNI debe tener 8 dígitos.';
         return;
       }
+      const correoLower = correo.toLowerCase();
+      const correoValido = correoLower.endsWith('@unajma.edu.pe') || correoLower.endsWith('@gmail.com');
+      const correoMsgEl = document.getElementById('correoAdminMsg');
+      if (!correoValido) {
+        correoMsgEl.textContent = '⚠ Solo se acepta correo @unajma.edu.pe o @gmail.com';
+        correoMsgEl.style.display = 'block';
+        document.getElementById('addMsg').textContent = 'Correo no válido.';
+        return;
+      }
+      correoMsgEl.style.display = 'none';
 
       const now = new Date().toISOString();
       const body = {
