@@ -792,6 +792,7 @@
                   <th>DNI</th>
                   <th>Correo</th>
                   <th>Carrera</th>
+                  <th>Ciclo</th>
                   <th>Motivo salida</th>
                   <th>Estado</th>
                   <th>Check 1</th>
@@ -1206,6 +1207,9 @@
     async function eliminarEvento(id, nombre) {
       if (!confirm('¿Eliminar el evento "' + nombre + '" y todos sus registros? Esta acción no se puede deshacer.')) return;
       try {
+        // Borrar asistencias del evento primero para evitar registros huérfanos
+        // si la BD no tiene ON DELETE CASCADE configurado en la FK asistencias.evento_id
+        await sbFetch('asistencias?evento_id=eq.' + id, { method: 'DELETE' });
         await sbFetch('eventos?id=eq.' + id, { method: 'DELETE' });
         showAlert('alertEvento', '✓ Evento "' + nombre + '" eliminado correctamente.', 'success');
         _eventosCacheTs = 0; // invalidar cache tras mutación
@@ -1263,7 +1267,7 @@
       const regs = _regsActuales;
       const tbody = document.getElementById('tablaBody');
       if (regs.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;color:var(--muted);padding:32px">No hay registros para este evento</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="11" style="text-align:center;color:var(--muted);padding:32px">No hay registros para este evento</td></tr>';
         _renderPaginacion(0, 0);
         return;
       }
@@ -1277,6 +1281,7 @@
           <td style="font-family:monospace">${escHTML(r.dni)}</td>
           <td style="font-size:0.8rem">${escHTML(r.correo)}</td>
           <td style="font-size:0.8rem">${escHTML(r.carrera)}</td>
+          <td style="font-size:0.8rem;text-align:center">${escHTML(r.ciclo)}</td>
           <td style="font-size:0.78rem;max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${escHTML(r.razon_salida)}">${escHTML(r.razon_salida)}</td>
           <td><span class="badge ${escHTML(r.estado)}">${label[r.estado] || r.estado}</span></td>
           <td style="font-size:0.78rem">${formatHora(r.check1_hora)}</td>
@@ -1313,12 +1318,14 @@
     function filtrarTabla() {
       const texto = document.getElementById('filtroNombre').value.toLowerCase();
       const carrera = document.getElementById('filtroCarrera').value;
+      const ciclo = document.getElementById('filtroCiclo').value;
       const filtrados = todosLosRegistros.filter(r => {
         const coincideTexto = !texto || (r.nombre + ' ' + r.apellidos + ' ' + r.dni).toLowerCase().includes(texto);
         const coincideCarrera = !carrera || r.carrera === carrera;
-        return coincideTexto && coincideCarrera;
+        const coincideCiclo = !ciclo || r.ciclo === ciclo;
+        return coincideTexto && coincideCarrera && coincideCiclo;
       });
-      const hayFiltro = texto || carrera;
+      const hayFiltro = texto || carrera || ciclo;
       actualizarStats(hayFiltro ? filtrados : todosLosRegistros);
       // Indicador visual de que los stats muestran el subconjunto filtrado
       const sub = document.getElementById('statFiltroAviso');
@@ -1357,7 +1364,7 @@
         return coincideTexto && coincideCarrera;
       });
       if (!registrosFiltrados.length) { alert('No hay registros visibles para exportar.'); return; }
-      const headers = ['Nombre', 'Apellidos', 'DNI', 'Correo', 'Carrera', 'Motivo salida', 'Estado', 'Check 1', 'Check 2'];
+      const headers = ['Nombre', 'Apellidos', 'DNI', 'Correo', 'Carrera', 'Ciclo', 'Motivo salida', 'Estado', 'Check 1', 'Check 2'];
       // Fix 12: fechas en hora local peruana (DD/MM/YYYY HH:MM) en lugar de ISO UTC.
       const fmtCSV = iso => {
         if (!iso) return '';
@@ -1367,7 +1374,7 @@
           ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes());
       };
       const rows = registrosFiltrados.map(r => [
-        r.nombre, r.apellidos, r.dni, r.correo || '', r.carrera || '', r.razon_salida || '', r.estado,
+        r.nombre, r.apellidos, r.dni, r.correo || '', r.carrera || '', r.ciclo || '', r.razon_salida || '', r.estado,
         fmtCSV(r.check1_hora), fmtCSV(r.check2_hora)
       ]);
       const csv = [headers, ...rows].map(r => r.map(c => '"' + String(c).replace(/"/g, '""') + '"').join(',')).join('\n');

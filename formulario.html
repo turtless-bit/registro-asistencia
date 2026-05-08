@@ -426,44 +426,6 @@
       50% { opacity: 0.4; transform: scale(0.7); }
     }
 
-    /* ── Ciclo chips ─────────────────────────────────────── */
-    .ciclo-grid {
-      display: grid;
-      grid-template-columns: repeat(5, 1fr);
-      gap: 8px;
-    }
-
-    .ciclo-chip {
-      background: var(--surface2);
-      border: 1.5px solid var(--border);
-      border-radius: 10px;
-      color: var(--muted);
-      font-family: 'DM Sans', sans-serif;
-      font-size: 0.88rem;
-      font-weight: 600;
-      padding: 10px 4px;
-      cursor: pointer;
-      transition: all 0.15s;
-      text-align: center;
-    }
-
-    .ciclo-chip:hover {
-      border-color: var(--accent);
-      color: var(--text);
-      background: rgba(79, 142, 247, 0.06);
-    }
-
-    .ciclo-chip.selected {
-      background: rgba(79, 142, 247, 0.14);
-      border-color: var(--accent);
-      color: var(--accent);
-      box-shadow: 0 0 0 2px rgba(79, 142, 247, 0.2);
-    }
-
-    .ciclo-chip.chip-error {
-      border-color: var(--error);
-    }
-
   </style>
 </head>
 
@@ -540,18 +502,20 @@
 
       <div class="field">
         <label>Ciclo</label>
-        <input type="hidden" id="ciclo" value="">
-        <div class="ciclo-grid" id="cicloGrid">
-          <button type="button" class="ciclo-chip" data-value="I"   onclick="seleccionarCiclo(this)">I</button>
-          <button type="button" class="ciclo-chip" data-value="II"  onclick="seleccionarCiclo(this)">II</button>
-          <button type="button" class="ciclo-chip" data-value="III" onclick="seleccionarCiclo(this)">III</button>
-          <button type="button" class="ciclo-chip" data-value="IV"  onclick="seleccionarCiclo(this)">IV</button>
-          <button type="button" class="ciclo-chip" data-value="V"   onclick="seleccionarCiclo(this)">V</button>
-          <button type="button" class="ciclo-chip" data-value="VI"  onclick="seleccionarCiclo(this)">VI</button>
-          <button type="button" class="ciclo-chip" data-value="VII" onclick="seleccionarCiclo(this)">VII</button>
-          <button type="button" class="ciclo-chip" data-value="VIII" onclick="seleccionarCiclo(this)">VIII</button>
-          <button type="button" class="ciclo-chip" data-value="IX"  onclick="seleccionarCiclo(this)">IX</button>
-          <button type="button" class="ciclo-chip" data-value="X"   onclick="seleccionarCiclo(this)">X</button>
+        <div class="select-wrap">
+          <select id="ciclo">
+            <option value="">Selecciona tu ciclo</option>
+            <option value="I">I Ciclo</option>
+            <option value="II">II Ciclo</option>
+            <option value="III">III Ciclo</option>
+            <option value="IV">IV Ciclo</option>
+            <option value="V">V Ciclo</option>
+            <option value="VI">VI Ciclo</option>
+            <option value="VII">VII Ciclo</option>
+            <option value="VIII">VIII Ciclo</option>
+            <option value="IX">IX Ciclo</option>
+            <option value="X">X Ciclo</option>
+          </select>
         </div>
         <div class="field-error" id="err-ciclo">Selecciona tu ciclo</div>
       </div>
@@ -711,15 +675,14 @@
     }
 
     // Validación de coherencia: acepta nombres hispanos y quechuas/andinos (QUISPE, MAMANI, CCOPA, TTITO, etc.)
-    function esCoherente(texto) {
-      const str = texto.trim().toLowerCase();
+    // Acepta nombres simples ("Carlos") y compuestos ("Juan Carlos", "María de los Ángeles").
+    function esCoherentePalabra(str) {
+      // str ya viene en minúsculas y sin espacios (una sola palabra)
       if (str.length < 2) return false;
-      // Solo letras y tildes (incluyendo ñ)
+      // Solo letras, tildes y ñ (sin espacios — el split se hace en esCoherente)
       if (!/^[a-záéíóúüñ]+$/.test(str)) return false;
       // Rechazar si toda la cadena es la misma letra repetida (ej: "aaaa", "rrrr")
       if (/^(.)\1+$/.test(str)) return false;
-      // Rechazar cadenas sin ninguna vocal (incluye la "y" quechua como vocal aproximada: no aplica aquí)
-      // Excepción: apellidos andinos pueden tener combinaciones como QQ, CC, TT al inicio
       // Se permiten si tienen al menos una vocal O si son conocidas combinaciones quechuas (cc, qq, tt al inicio)
       const tieneVocal = /[aeiouáéíóúü]/.test(str);
       const esAndino = /^(cc|qq|tt|ll|ch|qu|hu|gu)/.test(str) && str.length >= 3;
@@ -727,6 +690,18 @@
       // Rechazar si tiene más de 3 consonantes idénticas consecutivas (ej: "bbbbb")
       if (/(.)\1{3,}/.test(str)) return false;
       return true;
+    }
+
+    // Valida un string que puede ser una o varias palabras (nombre simple o compuesto).
+    // Palabras de enlace comunes (de, del, la, los, etc.) se permiten sin validación estricta.
+    const PALABRAS_ENLACE = new Set(['de', 'del', 'la', 'las', 'los', 'el', 'y', 'e', 'da', 'dos']);
+    function esCoherente(texto) {
+      const partes = texto.trim().toLowerCase().split(/\s+/);
+      if (partes.length === 0 || (partes.length === 1 && partes[0].length < 2)) return false;
+      // Al menos una parte debe ser una palabra sustantiva (no enlace) válida
+      const sustantivas = partes.filter(p => !PALABRAS_ENLACE.has(p));
+      if (sustantivas.length === 0) return false;
+      return sustantivas.every(p => esCoherentePalabra(p));
     }
 
     function validarApellidos(texto) {
@@ -853,11 +828,11 @@
       // Ciclo
       const ciclo = document.getElementById('ciclo').value;
       if (ciclo === '') {
-        document.querySelectorAll('.ciclo-chip').forEach(c => c.classList.add('chip-error'));
+        document.getElementById('ciclo').classList.add('error');
         document.getElementById('err-ciclo').classList.add('visible');
         ok = false;
       } else {
-        document.querySelectorAll('.ciclo-chip').forEach(c => c.classList.remove('chip-error'));
+        document.getElementById('ciclo').classList.remove('error');
         document.getElementById('err-ciclo').classList.remove('visible');
       }
 
@@ -1309,19 +1284,6 @@
     function reintentar() {
       showScreen('screenForm');
       document.getElementById('btnRegistrar').disabled = false;
-    }
-
-    // ---- SELECTOR DE CICLO ----
-
-    function seleccionarCiclo(chip) {
-      // Deseleccionar todos
-      document.querySelectorAll('.ciclo-chip').forEach(c => {
-        c.classList.remove('selected', 'chip-error');
-      });
-      // Seleccionar el pulsado
-      chip.classList.add('selected');
-      document.getElementById('ciclo').value = chip.dataset.value;
-      document.getElementById('err-ciclo').classList.remove('visible');
     }
 
     // Arranque
