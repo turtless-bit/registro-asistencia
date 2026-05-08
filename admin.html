@@ -1253,7 +1253,18 @@
     }
 
     async function eliminarRegistro(id) {
-      if (!confirm('¿Eliminar este registro de asistencia?')) return;
+      // #13 — Verificar si el registro está pendiente (puede tener cronómetro activo)
+      const reg = todosLosRegistros.find(r => r.id === id);
+      if (reg && reg.estado === 'pendiente') {
+        const confirmar = confirm(
+          '⚠ Este registro está PENDIENTE — el asistente puede tener el cronómetro activo en su celular.\n\n' +
+          'Si lo eliminas ahora, su check2 fallará silenciosamente.\n\n' +
+          '¿Estás seguro de que deseas eliminarlo?'
+        );
+        if (!confirmar) return;
+      } else {
+        if (!confirm('¿Eliminar este registro de asistencia?')) return;
+      }
       try {
         await sbFetch('asistencias?id=eq.' + id, { method: 'DELETE' });
         cargarRegistros();
@@ -1263,9 +1274,17 @@
     }
 
     function exportarCSV() {
-      if (!todosLosRegistros.length) return;
+      // Exporta exactamente lo que está visible en la tabla (respeta filtros activos)
+      const texto = document.getElementById('filtroNombre').value.toLowerCase();
+      const carrera = document.getElementById('filtroCarrera').value;
+      const registrosFiltrados = todosLosRegistros.filter(r => {
+        const coincideTexto = !texto || (r.nombre + ' ' + r.apellidos + ' ' + r.dni).toLowerCase().includes(texto);
+        const coincideCarrera = !carrera || r.carrera === carrera;
+        return coincideTexto && coincideCarrera;
+      });
+      if (!registrosFiltrados.length) { alert('No hay registros visibles para exportar.'); return; }
       const headers = ['Nombre', 'Apellidos', 'DNI', 'Correo', 'Carrera', 'Motivo salida', 'Estado', 'Check 1', 'Check 2'];
-      const rows = todosLosRegistros.map(r => [
+      const rows = registrosFiltrados.map(r => [
         r.nombre, r.apellidos, r.dni, r.correo || '', r.carrera || '', r.razon_salida || '', r.estado,
         r.check1_hora || '', r.check2_hora || ''
       ]);
@@ -1486,6 +1505,13 @@
       if (!carrera)              return mostrarError('⚠ Selecciona una carrera.');
       if (!check1Val)            return mostrarError('⚠ Ingresa la hora del Check 1.');
       if (estado !== 'pendiente' && !check2Val) return mostrarError('⚠ Ingresa la hora del Check 2.');
+
+      // #9 — Check 2 no puede ser anterior a Check 1
+      if (estado !== 'pendiente' && check2Val && check1Val) {
+        if (new Date(check2Val) < new Date(check1Val)) {
+          return mostrarError('⚠ La hora de Check 2 no puede ser anterior a la de Check 1.');
+        }
+      }
 
       // Verificar DNI duplicado
       try {
