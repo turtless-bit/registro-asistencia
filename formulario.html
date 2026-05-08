@@ -22,7 +22,11 @@
       --border: #2d3148;
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
     body {
       font-family: 'DM Sans', sans-serif;
@@ -35,23 +39,36 @@
       padding: 24px 16px 48px;
     }
 
-    .header { text-align: center; margin-bottom: 32px; padding-top: 16px; }
+    .header {
+      text-align: center;
+      margin-bottom: 32px;
+      padding-top: 16px;
+    }
 
     .header .logo {
-      width: 56px; height: 56px;
+      width: 56px;
+      height: 56px;
       background: linear-gradient(135deg, var(--accent), var(--accent2));
       border-radius: 16px;
-      display: flex; align-items: center; justify-content: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       margin: 0 auto 16px;
       font-size: 24px;
     }
 
     .header h1 {
       font-family: 'DM Serif Display', serif;
-      font-size: 1.7rem; font-weight: 400; line-height: 1.2; margin-bottom: 6px;
+      font-size: 1.7rem;
+      font-weight: 400;
+      line-height: 1.2;
+      margin-bottom: 6px;
     }
 
-    .header p { color: var(--muted); font-size: 0.875rem; }
+    .header p {
+      color: var(--muted);
+      font-size: 0.875rem;
+    }
 
     .evento-banner {
       background: var(--surface);
@@ -60,31 +77,46 @@
       border-radius: 10px;
       padding: 14px 18px;
       margin-bottom: 24px;
-      width: 100%; max-width: 480px;
+      width: 100%;
+      max-width: 480px;
     }
 
-    .evento-banner .ev-nombre { font-weight: 600; font-size: 1rem; margin-bottom: 4px; }
-    .evento-banner .ev-meta   { font-size: 0.8rem; color: var(--muted); }
+    .evento-banner .ev-nombre {
+      font-weight: 600;
+      font-size: 1rem;
+      margin-bottom: 4px;
+    }
+
+    .evento-banner .ev-meta {
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
 
     .card {
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: 16px;
       padding: 28px 24px;
-      width: 100%; max-width: 480px;
+      width: 100%;
+      max-width: 480px;
     }
 
-    .field { margin-bottom: 18px; }
+    .field {
+      margin-bottom: 18px;
+    }
 
     label {
       display: block;
-      font-size: 0.8rem; font-weight: 500;
+      font-size: 0.8rem;
+      font-weight: 500;
       color: var(--muted);
-      text-transform: uppercase; letter-spacing: 0.05em;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
       margin-bottom: 7px;
     }
 
-    input, select {
+    input,
+    select {
       width: 100%;
       background: var(--surface2);
       border: 1px solid var(--border);
@@ -98,75 +130,159 @@
       appearance: none;
     }
 
-    input:focus, select:focus { border-color: var(--accent); }
-    input.error, select.error { border-color: var(--error); }
-
-    .field-error { font-size: 0.75rem; color: var(--error); margin-top: 5px; display: none; }
-    .field-error.visible { display: block; }
-
-    .select-wrap { position: relative; }
-    .select-wrap::after {
-      content: '▾';
-      position: absolute; right: 14px; top: 50%;
-      transform: translateY(-50%);
-      color: var(--muted); pointer-events: none;
+    input:focus,
+    select:focus {
+      border-color: var(--accent);
     }
 
-    select option { background: var(--surface2); color: var(--text); }
-    optgroup { color: var(--accent); font-weight: 600; }
+    input.error,
+    select.error {
+      border-color: var(--error);
+    }
+
+    .field-error {
+      font-size: 0.75rem;
+      color: var(--error);
+      margin-top: 5px;
+      display: none;
+    }
+
+    .field-error.visible {
+      display: block;
+    }
+
+    .select-wrap {
+      position: relative;
+    }
+
+    .select-wrap::after {
+      content: '▾';
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--muted);
+      pointer-events: none;
+    }
+
+    select option {
+      background: var(--surface2);
+      color: var(--text);
+    }
+
+    optgroup {
+      color: var(--accent);
+      font-weight: 600;
+    }
 
     .btn {
-      width: 100%; padding: 15px;
+      width: 100%;
+      padding: 15px;
       background: linear-gradient(135deg, var(--accent), var(--accent2));
-      border: none; border-radius: 12px;
+      border: none;
+      border-radius: 12px;
       color: #fff;
-      font-family: 'DM Sans', sans-serif; font-size: 1rem; font-weight: 600;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 1rem;
+      font-weight: 600;
       cursor: pointer;
       transition: opacity 0.2s, transform 0.1s;
       margin-top: 8px;
     }
-    .btn:hover   { opacity: 0.9; }
-    .btn:active  { transform: scale(0.98); }
-    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-    .screen { display: none; }
-    .screen.active { display: block; animation: fadeIn 0.25s ease; }
+    .btn:hover {
+      opacity: 0.9;
+    }
+
+    .btn:active {
+      transform: scale(0.98);
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .screen {
+      display: none;
+    }
+
+    .screen.active {
+      display: block;
+      animation: fadeIn 0.25s ease;
+    }
 
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(6px); }
-      to   { opacity: 1; transform: none; }
+      from {
+        opacity: 0;
+        transform: translateY(6px);
+      }
+
+      to {
+        opacity: 1;
+        transform: none;
+      }
     }
 
     /* GPS spinner */
-    .gps-status { text-align: center; padding: 32px 0; }
+    .gps-status {
+      text-align: center;
+      padding: 32px 0;
+    }
+
     .spinner {
-      width: 48px; height: 48px;
+      width: 48px;
+      height: 48px;
       border: 3px solid var(--border);
       border-top-color: var(--accent);
       border-radius: 50%;
       animation: spin 0.8s linear infinite;
       margin: 0 auto 20px;
     }
-    @keyframes spin { to { transform: rotate(360deg); } }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
 
     /* Íconos circulares */
     .result-icon {
-      width: 72px; height: 72px; border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 32px; margin: 0 auto 20px;
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      margin: 0 auto 20px;
     }
-    .result-icon.ok    { background: rgba(16,185,129,0.15); }
-    .result-icon.error { background: rgba(239,68,68,0.15); }
-    .result-icon.warn  { background: rgba(245,158,11,0.15); }
+
+    .result-icon.ok {
+      background: rgba(16, 185, 129, 0.15);
+    }
+
+    .result-icon.error {
+      background: rgba(239, 68, 68, 0.15);
+    }
+
+    .result-icon.warn {
+      background: rgba(245, 158, 11, 0.15);
+    }
 
     .result-title {
       font-family: 'DM Serif Display', serif;
-      font-size: 1.4rem; text-align: center; margin-bottom: 10px;
+      font-size: 1.4rem;
+      text-align: center;
+      margin-bottom: 10px;
     }
 
     .result-msg {
-      text-align: center; color: var(--muted);
-      font-size: 0.9rem; line-height: 1.6; margin-bottom: 24px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.9rem;
+      line-height: 1.6;
+      margin-bottom: 24px;
     }
 
     /* Cuenta regresiva pre-apertura */
@@ -180,40 +296,73 @@
     }
 
     .countdown-label {
-      font-size: 0.75rem; color: var(--muted);
-      text-transform: uppercase; letter-spacing: 0.08em;
+      font-size: 0.75rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
       margin-bottom: 12px;
     }
 
     .countdown-time {
       font-family: 'DM Serif Display', serif;
-      font-size: 3.2rem; color: var(--warn);
-      letter-spacing: 0.05em; line-height: 1;
+      font-size: 3.2rem;
+      color: var(--warn);
+      letter-spacing: 0.05em;
+      line-height: 1;
       margin-bottom: 8px;
     }
 
-    .countdown-sub { font-size: 0.82rem; color: var(--muted); margin-top: 8px; }
+    .countdown-sub {
+      font-size: 0.82rem;
+      color: var(--muted);
+      margin-top: 8px;
+    }
 
     .progress-bar {
-      height: 4px; background: var(--border);
-      border-radius: 2px; margin-top: 16px; overflow: hidden;
+      height: 4px;
+      background: var(--border);
+      border-radius: 2px;
+      margin-top: 16px;
+      overflow: hidden;
     }
 
     .progress-fill {
       height: 100%;
       background: linear-gradient(90deg, var(--warn), var(--accent));
-      border-radius: 2px; transition: width 1s linear;
+      border-radius: 2px;
+      transition: width 1s linear;
     }
 
     /* Alertas */
     .alert {
-      padding: 12px 16px; border-radius: 10px;
-      font-size: 0.85rem; margin-bottom: 16px; display: none;
+      padding: 12px 16px;
+      border-radius: 10px;
+      font-size: 0.85rem;
+      margin-bottom: 16px;
+      display: none;
     }
-    .alert.visible  { display: block; }
-    .alert.success  { background: rgba(16,185,129,0.1);  border: 1px solid rgba(16,185,129,0.3);  color: #10b981; }
-    .alert.error    { background: rgba(239,68,68,0.1);   border: 1px solid rgba(239,68,68,0.3);   color: #ef4444; }
-    .alert.warn     { background: rgba(245,158,11,0.1);  border: 1px solid rgba(245,158,11,0.3);  color: #f59e0b; }
+
+    .alert.visible {
+      display: block;
+    }
+
+    .alert.success {
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: #10b981;
+    }
+
+    .alert.error {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: #ef4444;
+    }
+
+    .alert.warn {
+      background: rgba(245, 158, 11, 0.1);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      color: #f59e0b;
+    }
   </style>
 </head>
 
@@ -227,12 +376,11 @@
 
   <div class="evento-banner" id="eventoBanner">
     <div class="ev-nombre" id="eventoNombre">Cargando evento...</div>
-    <div class="ev-meta"   id="eventoMeta"></div>
+    <div class="ev-meta" id="eventoMeta"></div>
   </div>
 
   <div class="card">
 
-    <!-- PANTALLA 0: QR aún no abierto — cuenta regresiva -->
     <div class="screen" id="screenEspera">
       <div class="result-icon warn">⏳</div>
       <div class="result-title">El registro aún no está disponible</div>
@@ -241,19 +389,19 @@
       <div class="countdown-box">
         <div class="countdown-label">Tiempo hasta apertura</div>
         <div class="countdown-time" id="esperaDisplay">--:--</div>
-        <div class="countdown-sub"  id="esperaSub"></div>
+        <div class="countdown-sub" id="esperaSub"></div>
         <div class="progress-bar">
           <div class="progress-fill" id="esperaFill" style="width:0%"></div>
         </div>
       </div>
 
-      <div style="background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.25);border-radius:10px;padding:14px 16px;font-size:0.82rem;line-height:1.7;color:var(--warn)">
+      <div
+        style="background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.25);border-radius:10px;padding:14px 16px;font-size:0.82rem;line-height:1.7;color:var(--warn)">
         ⚠️ <strong>No cierres esta página.</strong><br>
         El formulario aparecerá automáticamente cuando llegue la hora de apertura.
       </div>
     </div>
 
-    <!-- PANTALLA 1: Formulario de registro -->
     <div class="screen" id="screenForm">
       <div class="alert" id="alertForm"></div>
 
@@ -334,7 +482,6 @@
       </button>
     </div>
 
-    <!-- PANTALLA 2: Obteniendo GPS -->
     <div class="screen" id="screenGPS">
       <div class="gps-status">
         <div class="spinner"></div>
@@ -345,7 +492,6 @@
       </div>
     </div>
 
-    <!-- PANTALLA 3: Fuera de perímetro -->
     <div class="screen" id="screenFuera">
       <div class="result-icon error">📍</div>
       <div class="result-title">Fuera del área del evento</div>
@@ -357,7 +503,6 @@
       </button>
     </div>
 
-    <!-- PANTALLA 4: Registro exitoso -->
     <div class="screen" id="screenFinal">
       <div class="result-icon ok">🎉</div>
       <div class="result-title">¡Asistencia registrada!</div>
@@ -366,11 +511,10 @@
       </div>
     </div>
 
-    <!-- PANTALLA 5: Sin evento / cerrado -->
     <div class="screen" id="screenNoEvento">
       <div class="result-icon error">❌</div>
       <div class="result-title" id="noEventoTitulo">Evento no encontrado</div>
-      <div class="result-msg"   id="noEventoMsg">
+      <div class="result-msg" id="noEventoMsg">
         El enlace no es válido o el evento no existe. Contacta al organizador.
       </div>
     </div>
@@ -381,11 +525,11 @@
     const SUPABASE_URL = 'https://ccvluulbkjofghzpttfb.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNjdmx1dWxia2pvZmdoenB0dGZiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgwMjI1ODksImV4cCI6MjA5MzU5ODU4OX0.Na9TJ5g3Xr22E7h-28Eol0Bv-ikXsYWvuRsoKkmRrfI';
 
-    let eventoId   = null;
+    let eventoId = null;
     let eventoData = null;
     let aperturaMs = null;   // timestamp en que el QR abre
-    let cierreMs   = null;   // timestamp en que el QR cierra
-    let esperaTotalMs  = null;
+    let cierreMs = null;   // timestamp en que el QR cierra
+    let esperaTotalMs = null;
     let esperaInterval = null;
 
     // ── UTILIDADES ───────────────────────────────────────────────
@@ -422,8 +566,8 @@
     function getFingerprint() {
       const nav = navigator;
       const raw = [nav.userAgent, screen.width, screen.height, screen.colorDepth,
-        Intl.DateTimeFormat().resolvedOptions().timeZone, nav.language,
-        nav.hardwareConcurrency || 0].join('|');
+      Intl.DateTimeFormat().resolvedOptions().timeZone, nav.language,
+      nav.hardwareConcurrency || 0].join('|');
       let hash = 0;
       for (let i = 0; i < raw.length; i++) {
         hash = ((hash << 5) - hash) + raw.charCodeAt(i);
@@ -439,7 +583,7 @@
       if (!/^[a-záéíóúüñ]+$/.test(str)) return false;
       if (/^(.)\1+$/.test(str)) return false;
       const tieneVocal = /[aeiouáéíóúü]/.test(str);
-      const esAndino   = /^(cc|qq|tt|ll|ch|qu|hu|gu)/.test(str) && str.length >= 3;
+      const esAndino = /^(cc|qq|tt|ll|ch|qu|hu|gu)/.test(str) && str.length >= 3;
       if (!tieneVocal && !esAndino) return false;
       if (/(.)\1{3,}/.test(str)) return false;
       return true;
@@ -525,9 +669,9 @@
           return;
         }
 
-        const h   = Math.floor(restante / 3600000);
-        const m   = Math.floor((restante % 3600000) / 60000);
-        const s   = Math.floor((restante % 60000) / 1000);
+        const h = Math.floor(restante / 3600000);
+        const m = Math.floor((restante % 3600000) / 60000);
+        const s = Math.floor((restante % 60000) / 1000);
         const pad = n => String(n).padStart(2, '0');
 
         document.getElementById('esperaDisplay').textContent =
@@ -551,15 +695,15 @@
     function validarCampos() {
       let ok = true;
 
-      const nombres   = document.getElementById('nombres').value.trim();
+      const nombres = document.getElementById('nombres').value.trim();
       const apellidos = document.getElementById('apellidos').value.trim();
-      const dni       = document.getElementById('dni').value.trim();
-      const correo    = document.getElementById('correo').value.trim();
-      const carrera   = document.getElementById('carrera').value;
-      const ciclo     = document.getElementById('ciclo').value;
+      const dni = document.getElementById('dni').value.trim();
+      const correo = document.getElementById('correo').value.trim();
+      const carrera = document.getElementById('carrera').value;
+      const ciclo = document.getElementById('ciclo').value;
 
       function marcar(id, errId, msg, fallo) {
-        const el  = document.getElementById(id);
+        const el = document.getElementById(id);
         const err = document.getElementById(errId);
         if (fallo) {
           el.classList.add('error');
@@ -572,16 +716,16 @@
         }
       }
 
-      marcar('nombres',   'err-nombres',  'Ingresa un nombre válido',          !esCoherente(nombres));
-      marcar('apellidos', 'err-apellidos','Ingresa ambos apellidos válidos',   !validarApellidos(apellidos));
-      marcar('dni',       'err-dni',      null,                                 !/^\d{8}$/.test(dni));
+      marcar('nombres', 'err-nombres', 'Ingresa un nombre válido', !esCoherente(nombres));
+      marcar('apellidos', 'err-apellidos', 'Ingresa ambos apellidos válidos', !validarApellidos(apellidos));
+      marcar('dni', 'err-dni', null, !/^\d{8}$/.test(dni));
 
       const correoLower = correo.toLowerCase();
-      marcar('correo',    'err-correo',   null,
+      marcar('correo', 'err-correo', null,
         !correoLower.endsWith('@unajma.edu.pe') && !correoLower.endsWith('@gmail.com'));
 
-      marcar('carrera',   'err-carrera',  null, !carrera);
-      marcar('ciclo',     'err-ciclo',    null, !ciclo);
+      marcar('carrera', 'err-carrera', null, !carrera);
+      marcar('ciclo', 'err-ciclo', null, !ciclo);
 
       return ok;
     }
@@ -599,7 +743,7 @@
       } catch (e) {
         showScreen('screenNoEvento');
         document.getElementById('noEventoTitulo').textContent = 'Error de conexión';
-        document.getElementById('noEventoMsg').textContent    =
+        document.getElementById('noEventoMsg').textContent =
           'No se pudo cargar el evento. Verifica tu conexión e intenta de nuevo.';
         return;
       }
@@ -609,19 +753,17 @@
       document.getElementById('eventoNombre').textContent = eventoData.nombre;
 
       // ── Calcular apertura y cierre del QR ───────────────────────
-      // hora_apertura  → "HH:MM" — hora en que el formulario se habilita
-      // ventana_minutos → minutos disponibles para registrarse
-      const ventanaMin = eventoData.ventana_minutos || 30;
+      const ventanaMin = eventoData.duracion_total_minutos || 30;
 
-      if (eventoData.fecha && eventoData.hora_apertura) {
+      if (eventoData.fecha && eventoData.hora_inicio) {
         const partesFecha = String(eventoData.fecha).split(/[-\/]/).map(Number);
-        const partesHora  = String(eventoData.hora_apertura).replace(/[+Z].*$/, '').split(':').map(Number);
+        const partesHora = String(eventoData.hora_inicio).replace(/[+Z].*$/, '').split(':').map(Number);
         let anio, mes, dia;
         if (partesFecha[0] > 31) { [anio, mes, dia] = partesFecha; }
-        else                      { [dia, mes, anio] = partesFecha; }
+        else { [dia, mes, anio] = partesFecha; }
         const hora = partesHora[0] || 0;
-        const min  = partesHora[1] || 0;
-        const dt   = new Date(anio, mes - 1, dia, hora, min, 0, 0);
+        const min = partesHora[1] || 0;
+        const dt = new Date(anio, mes - 1, dia, hora, min, 0, 0);
         aperturaMs = isNaN(dt.getTime()) ? Date.now() : dt.getTime();
       } else {
         aperturaMs = Date.now(); // sin datos → abierto ahora mismo
@@ -632,8 +774,8 @@
       // Banner
       const fmt = d => d.toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' });
       const meta = [];
-      if (eventoData.fecha)  meta.push(eventoData.fecha);
-      if (eventoData.lugar)  meta.push(eventoData.lugar);
+      if (eventoData.fecha) meta.push(eventoData.fecha);
+      if (eventoData.lugar) meta.push(eventoData.lugar);
       meta.push('Registro: ' + fmt(new Date(aperturaMs)) + ' – ' + fmt(new Date(cierreMs)));
       document.getElementById('eventoMeta').textContent = meta.join(' · ');
 
@@ -649,7 +791,7 @@
       if (ahora >= cierreMs) {
         showScreen('screenNoEvento');
         document.getElementById('noEventoTitulo').textContent = 'Registro cerrado';
-        document.getElementById('noEventoMsg').textContent    =
+        document.getElementById('noEventoMsg').textContent =
           'El período de registro cerró a las ' + fmt(new Date(cierreMs)) +
           '. Contacta al organizador si crees que es un error.';
         return;
@@ -672,13 +814,13 @@
       if (Date.now() >= cierreMs) {
         showScreen('screenNoEvento');
         document.getElementById('noEventoTitulo').textContent = 'Registro cerrado';
-        document.getElementById('noEventoMsg').textContent    =
+        document.getElementById('noEventoMsg').textContent =
           'El tiempo de registro se cerró mientras completabas el formulario. Contacta al organizador.';
         return;
       }
 
       const dni = document.getElementById('dni').value.trim();
-      const fp  = getFingerprint();
+      const fp = getFingerprint();
 
       // Verificar DNI duplicado
       let existeDNI;
@@ -716,9 +858,9 @@
         return;
       }
 
-      const perimetro  = eventoData?.perimetro || null;
+      const perimetro = eventoData?.perimetro || null;
       const tolerancia = eventoData?.tolerancia_metros || 10;
-      const resultado  = validarUbicacion(gps.lat, gps.lng, perimetro, tolerancia);
+      const resultado = validarUbicacion(gps.lat, gps.lng, perimetro, tolerancia);
 
       if (!resultado.valido) {
         const dist = resultado.distancia ? Math.round(resultado.distancia) + ' m del área' : '';
@@ -733,20 +875,20 @@
 
       // Guardar registro — estado 'completado' de una sola vez
       const payload = {
-        evento_id:          eventoId,
-        nombre:             document.getElementById('nombres').value.trim(),
-        apellidos:          document.getElementById('apellidos').value.trim(),
-        dni:                dni,
-        correo:             document.getElementById('correo').value.trim().toLowerCase(),
-        carrera:            document.getElementById('carrera').value,
-        ciclo:              document.getElementById('ciclo').value,
+        evento_id: eventoId,
+        nombre: document.getElementById('nombres').value.trim(),
+        apellidos: document.getElementById('apellidos').value.trim(),
+        dni: dni,
+        correo: document.getElementById('correo').value.trim().toLowerCase(),
+        carrera: document.getElementById('carrera').value,
+        ciclo: document.getElementById('ciclo').value,
         device_fingerprint: fp,
-        check1_lat:         gps.lat,
-        check1_lng:         gps.lng,
-        check1_hora:        new Date().toISOString(),
-        check1_valido:      true,
-        estado:             'completado',
-        alerta_duplicado:   alertaFP
+        check1_lat: gps.lat,
+        check1_lng: gps.lng,
+        check1_hora: new Date().toISOString(),
+        check1_valido: true,
+        estado: 'completado',
+        alerta_duplicado: alertaFP
       };
 
       try {

@@ -714,7 +714,6 @@
 
   <div class="main">
 
-    <!-- REGISTROS -->
     <div class="page active" id="pageRegistros">
       <div class="page-header">
         <h1>Registros de asistencia</h1>
@@ -732,7 +731,6 @@
           <div class="stat-sub">inscritos</div>
         </div>
       </div>
-      <!-- Fix 8: aviso de filtro activo -->
       <div id="statFiltroAviso"
         style="display:none;font-size:0.78rem;color:var(--warn);margin:-18px 0 18px;padding:6px 12px;background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.2);border-radius:8px">
         ⚠ Los totales reflejan el filtro activo, no el evento completo.
@@ -802,7 +800,6 @@
       </div>
     </div>
 
-    <!-- EVENTOS -->
     <div class="page" id="pageEventos">
       <div class="page-header">
         <h1>Crear evento</h1>
@@ -871,7 +868,6 @@
       </div>
     </div>
 
-    <!-- PERÍMETRO -->
     <div class="page" id="pagePerimetro">
       <div class="page-header">
         <h1>Configurar perímetro</h1>
@@ -906,7 +902,6 @@
 
   </div>
 
-  <!-- MODAL: AGREGAR REGISTRO MANUAL -->
   <div class="modal-overlay" id="modalAgregar">
     <div class="modal">
       <div class="modal-header">
@@ -961,9 +956,16 @@
         <div class="select-wrap-modal">
           <select id="mCiclo">
             <option value="">Selecciona un ciclo</option>
-            <option>I</option><option>II</option><option>III</option>
-            <option>IV</option><option>V</option><option>VI</option>
-            <option>VII</option><option>VIII</option><option>IX</option><option>X</option>
+            <option>I</option>
+            <option>II</option>
+            <option>III</option>
+            <option>IV</option>
+            <option>V</option>
+            <option>VI</option>
+            <option>VII</option>
+            <option>VIII</option>
+            <option>IX</option>
+            <option>X</option>
           </select>
         </div>
       </div>
@@ -1090,8 +1092,8 @@
           body: JSON.stringify({
             nombre,
             fecha: fecha || null,
-            hora_apertura: hora || null,
-            ventana_minutos: parseInt(document.getElementById('evVentana').value) || null,
+            hora_inicio: hora || null,
+            duracion_total_minutos: parseInt(document.getElementById('evVentana').value) || null,
             lugar: lugar || null
           })
         });
@@ -1167,9 +1169,9 @@
       }
       tbody.innerHTML = eventosCache.map(ev => `
         <tr>
-          <td><strong>${escHTML(ev.nombre)}</strong><br><span style="font-size:0.75rem;color:var(--muted)">${ev.ventana_minutos ? ev.ventana_minutos + ' min de ventana' : '—'}</span></td>
+          <td><strong>${escHTML(ev.nombre)}</strong><br><span style="font-size:0.75rem;color:var(--muted)">${ev.duracion_total_minutos ? ev.duracion_total_minutos + ' min de ventana' : '—'}</span></td>
           <td>${ev.fecha || '—'}</td>
-          <td>${ev.hora_apertura ? ev.hora_apertura.slice(0, 5) : '—'}</td>
+          <td>${ev.hora_inicio ? ev.hora_inicio.slice(0, 5) : '—'}</td>
           <td>${escHTML(ev.lugar)}</td>
           <td>${ev.perimetro && ev.perimetro.length >= 3
           ? '<span style="color:var(--success);font-size:0.82rem">✓ Definido (' + ev.perimetro.length + ' pts)</span>'
@@ -1543,11 +1545,11 @@
         alerta.className = 'alert visible error';
       };
 
-      if (!nombres)  return mostrarError('⚠ Ingresa los nombres.');
+      if (!nombres) return mostrarError('⚠ Ingresa los nombres.');
       if (!apellidos) return mostrarError('⚠ Ingresa los apellidos.');
       if (!/^\d{8}$/.test(dni)) return mostrarError('⚠ El DNI debe tener 8 dígitos.');
-      if (!carrera)  return mostrarError('⚠ Selecciona una carrera.');
-      if (!ciclo)    return mostrarError('⚠ Selecciona un ciclo.');
+      if (!carrera) return mostrarError('⚠ Selecciona una carrera.');
+      if (!ciclo) return mostrarError('⚠ Selecciona un ciclo.');
 
       // Verificar DNI duplicado
       try {
@@ -1560,16 +1562,16 @@
       btn.textContent = 'Guardando...';
 
       const payload = {
-        evento_id:   eventoId,
-        nombre:      nombres,
-        apellidos:   apellidos,
-        dni:         dni,
-        correo:      correo || null,
-        carrera:     carrera,
-        ciclo:       ciclo,
+        evento_id: eventoId,
+        nombre: nombres,
+        apellidos: apellidos,
+        dni: dni,
+        correo: correo || null,
+        carrera: carrera,
+        ciclo: ciclo,
         check1_hora: new Date().toISOString(),
         check1_valido: true,
-        estado:      'completado'
+        estado: 'completado'
       };
 
       try {
