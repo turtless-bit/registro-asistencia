@@ -769,6 +769,20 @@
                 <option>Matemáticas y Estadística Aplicadas</option>
               </optgroup>
             </select>
+            <select class="filter-select" id="filtroCiclo" onchange="filtrarTabla()">
+              <option value="">Todos los ciclos</option>
+              <option value="I">I Ciclo</option>
+              <option value="II">II Ciclo</option>
+              <option value="III">III Ciclo</option>
+              <option value="IV">IV Ciclo</option>
+              <option value="V">V Ciclo</option>
+              <option value="VI">VI Ciclo</option>
+              <option value="VII">VII Ciclo</option>
+              <option value="VIII">VIII Ciclo</option>
+              <option value="IX">IX Ciclo</option>
+              <option value="X">X Ciclo</option>
+            </select>
+            <div id="filtrosActivos" style="display:flex;gap:6px;flex-wrap:wrap;align-items:center"></div>
             <button class="btn-export" style="border-color:var(--accent);color:var(--accent)" onclick="abrirModalAgregar()">＋ Agregar registro</button>
             <button class="btn-export" onclick="exportarCSV()">⬇ Exportar CSV</button>
           </div>
@@ -781,6 +795,7 @@
                   <th>DNI</th>
                   <th>Correo</th>
                   <th>Carrera</th>
+                  <th>Ciclo</th>
                   <th>Motivo salida</th>
                   <th>Estado</th>
                   <th>Check 1</th>
@@ -828,7 +843,7 @@
           <input type="text" id="evLugar" placeholder="Ej: Auditorio principal UNAJMA">
         </div>
         <div class="field">
-          <label>Apertura del QR <span style="color:var(--muted);font-size:0.72rem;text-transform:none">(minutos antes del inicio en que los asistentes pueden registrarse)</span></label>
+          <label>Apertura del QR (minutos antes del inicio)</label>
           <input type="number" id="evApertura" placeholder="Ej: 15" min="0" max="120" value="15">
         </div>
         <button class="btn-primary" id="btnCrear" onclick="crearEvento()">Crear evento y generar QR</button>
@@ -950,6 +965,24 @@
             <optgroup label="Ciencias Exactas">
               <option>Matemáticas y Estadística Aplicadas</option>
             </optgroup>
+          </select>
+        </div>
+      </div>
+      <div class="field">
+        <label>Ciclo</label>
+        <div class="select-wrap-modal">
+          <select id="mCiclo">
+            <option value="">Selecciona un ciclo</option>
+            <option value="I">I Ciclo</option>
+            <option value="II">II Ciclo</option>
+            <option value="III">III Ciclo</option>
+            <option value="IV">IV Ciclo</option>
+            <option value="V">V Ciclo</option>
+            <option value="VI">VI Ciclo</option>
+            <option value="VII">VII Ciclo</option>
+            <option value="VIII">VIII Ciclo</option>
+            <option value="IX">IX Ciclo</option>
+            <option value="X">X Ciclo</option>
           </select>
         </div>
       </div>
@@ -1257,7 +1290,7 @@
       const regs = _regsActuales;
       const tbody = document.getElementById('tablaBody');
       if (regs.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;color:var(--muted);padding:32px">No hay registros para este evento</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="11" style="text-align:center;color:var(--muted);padding:32px">No hay registros para este evento</td></tr>';
         _renderPaginacion(0, 0);
         return;
       }
@@ -1271,6 +1304,7 @@
           <td style="font-family:monospace">${escHTML(r.dni)}</td>
           <td style="font-size:0.8rem">${escHTML(r.correo)}</td>
           <td style="font-size:0.8rem">${escHTML(r.carrera)}</td>
+          <td style="font-size:0.8rem">${escHTML(r.ciclo)}</td>
           <td style="font-size:0.78rem;max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${escHTML(r.razon_salida)}">${escHTML(r.razon_salida)}</td>
           <td><span class="badge ${escHTML(r.estado)}">${label[r.estado] || r.estado}</span></td>
           <td style="font-size:0.78rem">${formatHora(r.check1_hora)}</td>
@@ -1305,18 +1339,26 @@
     }
 
     function filtrarTabla() {
-      const texto = document.getElementById('filtroNombre').value.toLowerCase();
+      const texto   = document.getElementById('filtroNombre').value.toLowerCase();
       const carrera = document.getElementById('filtroCarrera').value;
+      const ciclo   = document.getElementById('filtroCiclo').value;
       const filtrados = todosLosRegistros.filter(r => {
-        const coincideTexto = !texto || (r.nombre + ' ' + r.apellidos + ' ' + r.dni).toLowerCase().includes(texto);
+        const coincideTexto   = !texto   || (r.nombre + ' ' + r.apellidos + ' ' + r.dni).toLowerCase().includes(texto);
         const coincideCarrera = !carrera || r.carrera === carrera;
-        return coincideTexto && coincideCarrera;
+        const coincideCiclo   = !ciclo   || r.ciclo === ciclo;
+        return coincideTexto && coincideCarrera && coincideCiclo;
       });
-      const hayFiltro = texto || carrera;
+      const hayFiltro = texto || carrera || ciclo;
       actualizarStats(hayFiltro ? filtrados : todosLosRegistros);
-      // Indicador visual de que los stats muestran el subconjunto filtrado
       const sub = document.getElementById('statFiltroAviso');
       if (sub) sub.style.display = hayFiltro ? 'block' : 'none';
+      // Etiquetas combinadas de filtros activos
+      const tags = document.getElementById('filtrosActivos');
+      if (tags) {
+        tags.innerHTML = '';
+        if (carrera) tags.innerHTML += '<span style="display:inline-flex;align-items:center;gap:4px;background:rgba(79,142,247,0.12);border:1px solid rgba(79,142,247,0.3);color:var(--accent);border-radius:20px;padding:3px 10px;font-size:0.75rem;font-weight:600">' + escHTML(carrera) + ' <button onclick="document.getElementById('filtroCarrera').value='';filtrarTabla()" style="background:none;border:none;color:var(--accent);cursor:pointer;font-size:0.85rem;padding:0;line-height:1">✕</button></span>';
+        if (ciclo)   tags.innerHTML += '<span style="display:inline-flex;align-items:center;gap:4px;background:rgba(124,58,237,0.12);border:1px solid rgba(124,58,237,0.3);color:var(--accent2);border-radius:20px;padding:3px 10px;font-size:0.75rem;font-weight:600">' + escHTML(ciclo) + ' Ciclo <button onclick="document.getElementById('filtroCiclo').value='';filtrarTabla()" style="background:none;border:none;color:var(--accent2);cursor:pointer;font-size:0.85rem;padding:0;line-height:1">✕</button></span>';
+      }
       renderTabla(filtrados);
     }
 
@@ -1343,15 +1385,17 @@
 
     function exportarCSV() {
       // Exporta exactamente lo que está visible en la tabla (respeta filtros activos)
-      const texto = document.getElementById('filtroNombre').value.toLowerCase();
+      const texto   = document.getElementById('filtroNombre').value.toLowerCase();
       const carrera = document.getElementById('filtroCarrera').value;
+      const ciclo   = document.getElementById('filtroCiclo').value;
       const registrosFiltrados = todosLosRegistros.filter(r => {
-        const coincideTexto = !texto || (r.nombre + ' ' + r.apellidos + ' ' + r.dni).toLowerCase().includes(texto);
+        const coincideTexto   = !texto   || (r.nombre + ' ' + r.apellidos + ' ' + r.dni).toLowerCase().includes(texto);
         const coincideCarrera = !carrera || r.carrera === carrera;
-        return coincideTexto && coincideCarrera;
+        const coincideCiclo   = !ciclo   || r.ciclo === ciclo;
+        return coincideTexto && coincideCarrera && coincideCiclo;
       });
       if (!registrosFiltrados.length) { alert('No hay registros visibles para exportar.'); return; }
-      const headers = ['Nombre', 'Apellidos', 'DNI', 'Correo', 'Carrera', 'Motivo salida', 'Estado', 'Check 1', 'Check 2'];
+      const headers = ['Nombre', 'Apellidos', 'DNI', 'Correo', 'Carrera', 'Ciclo', 'Motivo salida', 'Estado', 'Check 1', 'Check 2'];
       // Fix 12: fechas en hora local peruana (DD/MM/YYYY HH:MM) en lugar de ISO UTC.
       const fmtCSV = iso => {
         if (!iso) return '';
@@ -1361,7 +1405,7 @@
                ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes());
       };
       const rows = registrosFiltrados.map(r => [
-        r.nombre, r.apellidos, r.dni, r.correo || '', r.carrera || '', r.razon_salida || '', r.estado,
+        r.nombre, r.apellidos, r.dni, r.correo || '', r.carrera || '', r.ciclo || '', r.razon_salida || '', r.estado,
         fmtCSV(r.check1_hora), fmtCSV(r.check2_hora)
       ]);
       const csv = [headers, ...rows].map(r => r.map(c => '"' + String(c).replace(/"/g, '""') + '"').join(',')).join('\n');
@@ -1541,6 +1585,7 @@
       // Limpiar campos de texto
       ['mNombres','mApellidos','mDni','mCorreo','mMotivo'].forEach(id => document.getElementById(id).value = '');
       document.getElementById('mCarrera').value = '';
+      document.getElementById('mCiclo').value = '';
       document.getElementById('mEstado').value = 'completado';
       // Poner hora actual como valor por defecto para check1 y check2
       const ahora = toLocalDatetimeValue(new Date());
@@ -1564,6 +1609,7 @@
       const dni       = document.getElementById('mDni').value.trim();
       const correo    = document.getElementById('mCorreo').value.trim();
       const carrera   = document.getElementById('mCarrera').value;
+      const ciclo     = document.getElementById('mCiclo').value;
       const estado    = document.getElementById('mEstado').value;
       const motivo    = document.getElementById('mMotivo').value.trim();
       const check1Val = document.getElementById('mCheck1').value;
@@ -1610,6 +1656,7 @@
         dni:           dni,
         correo:        correo || null,
         carrera:       carrera,
+        ciclo:         ciclo || null,
         estado:        estado,
         check1_hora:   check1ISO,
         check1_valido: true,
