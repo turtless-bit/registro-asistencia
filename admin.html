@@ -1356,8 +1356,28 @@
       const tags = document.getElementById('filtrosActivos');
       if (tags) {
         tags.innerHTML = '';
-        if (carrera) tags.innerHTML += '<span style="display:inline-flex;align-items:center;gap:4px;background:rgba(79,142,247,0.12);border:1px solid rgba(79,142,247,0.3);color:var(--accent);border-radius:20px;padding:3px 10px;font-size:0.75rem;font-weight:600">' + escHTML(carrera) + ' <button onclick="document.getElementById('filtroCarrera').value='';filtrarTabla()" style="background:none;border:none;color:var(--accent);cursor:pointer;font-size:0.85rem;padding:0;line-height:1">✕</button></span>';
-        if (ciclo)   tags.innerHTML += '<span style="display:inline-flex;align-items:center;gap:4px;background:rgba(124,58,237,0.12);border:1px solid rgba(124,58,237,0.3);color:var(--accent2);border-radius:20px;padding:3px 10px;font-size:0.75rem;font-weight:600">' + escHTML(ciclo) + ' Ciclo <button onclick="document.getElementById('filtroCiclo').value='';filtrarTabla()" style="background:none;border:none;color:var(--accent2);cursor:pointer;font-size:0.85rem;padding:0;line-height:1">✕</button></span>';
+        if (carrera) {
+          const t = document.createElement('span');
+          t.style.cssText = 'display:inline-flex;align-items:center;gap:4px;background:rgba(79,142,247,0.12);border:1px solid rgba(79,142,247,0.3);color:var(--accent);border-radius:20px;padding:3px 10px;font-size:0.75rem;font-weight:600';
+          t.textContent = carrera + ' ';
+          const b = document.createElement('button');
+          b.textContent = '✕';
+          b.style.cssText = 'background:none;border:none;color:var(--accent);cursor:pointer;font-size:0.85rem;padding:0;line-height:1';
+          b.onclick = () => { document.getElementById('filtroCarrera').value = ''; filtrarTabla(); };
+          t.appendChild(b);
+          tags.appendChild(t);
+        }
+        if (ciclo) {
+          const t = document.createElement('span');
+          t.style.cssText = 'display:inline-flex;align-items:center;gap:4px;background:rgba(124,58,237,0.12);border:1px solid rgba(124,58,237,0.3);color:var(--accent2);border-radius:20px;padding:3px 10px;font-size:0.75rem;font-weight:600';
+          t.textContent = ciclo + ' Ciclo ';
+          const b = document.createElement('button');
+          b.textContent = '✕';
+          b.style.cssText = 'background:none;border:none;color:var(--accent2);cursor:pointer;font-size:0.85rem;padding:0;line-height:1';
+          b.onclick = () => { document.getElementById('filtroCiclo').value = ''; filtrarTabla(); };
+          t.appendChild(b);
+          tags.appendChild(t);
+        }
       }
       renderTabla(filtrados);
     }
