@@ -4,7 +4,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Registro de Asistencia</title>
+  <meta name="description" content="Registro de asistencia verificado por GPS · UNAJMA">
+  <meta name="theme-color" content="#0f1117">
+  <meta property="og:title" content="Asistencia UNAJMA · Pensamiento Arguediano">
+  <meta property="og:description" content="Escanea el QR, permite tu ubicación y registra tu asistencia.">
+  <title>Asistencia UNAJMA · Pensamiento Arguediano</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Serif+Display&display=swap');
 
@@ -369,9 +373,9 @@
 <body>
 
   <div class="header">
-    <div class="logo">📋</div>
-    <h1>Registro de Asistencia</h1>
-    <p>UNAJMA — Sistema de verificación GPS</p>
+    <div class="logo">🎓</div>
+    <h1>Asistencia UNAJMA</h1>
+    <p>Registro seguro · Pensamiento Arguediano</p>
   </div>
 
   <div class="evento-banner" id="eventoBanner">
@@ -383,8 +387,8 @@
 
     <div class="screen" id="screenEspera">
       <div class="result-icon warn">⏳</div>
-      <div class="result-title">El registro aún no está disponible</div>
-      <div class="result-msg">El formulario de registro abrirá en:</div>
+      <div class="result-title">El registro abrirá pronto</div>
+      <div class="result-msg">Estás en el lugar correcto. El formulario se habilitará automáticamente en:</div>
 
       <div class="countdown-box">
         <div class="countdown-label">Tiempo hasta apertura</div>
@@ -480,30 +484,45 @@
 
     <div class="screen" id="screenGPS">
       <div class="gps-status">
-        <div class="spinner"></div>
-        <h2>Verificando tu ubicación...</h2>
-        <p style="color:var(--muted);margin-top:10px;font-size:0.875rem">
-          Acepta el permiso de ubicación cuando el navegador lo solicite
+        <div style="font-size:3rem;margin-bottom:16px;line-height:1">📍</div>
+        <h2 style="font-size:1.15rem;font-weight:600;margin-bottom:10px">Verificando tu ubicación</h2>
+        <p style="color:var(--muted);font-size:0.875rem;line-height:1.6;margin-bottom:20px">
+          Tu navegador te pedirá permiso para acceder a tu ubicación.<br>
+          <strong style="color:var(--text)">Toca "Permitir"</strong> para continuar con el registro.
         </p>
+        <!-- Instrucción visual del diálogo del sistema -->
+        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:14px 16px;text-align:left;font-size:0.8rem;line-height:1.7;color:var(--muted);margin-bottom:20px">
+          <div style="font-weight:600;color:var(--text);margin-bottom:6px;font-size:0.85rem">¿Por qué necesitamos tu ubicación?</div>
+          El sistema verifica que estés físicamente en el lugar del evento antes de registrar tu asistencia. Tu ubicación <strong style="color:var(--text)">no se comparte con nadie</strong> ni se usa fuera de esta verificación.
+        </div>
+        <div class="spinner"></div>
       </div>
     </div>
 
     <div class="screen" id="screenFuera">
       <div class="result-icon error">📍</div>
-      <div class="result-title">Fuera del área del evento</div>
+      <div class="result-title">Fuera del área</div>
       <div class="result-msg" id="fueraMsg">
         Tu ubicación no está dentro del área del evento. Acércate al lugar y vuelve a intentarlo.
       </div>
-      <button class="btn" onclick="reintentar()" style="margin-top:4px">
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;font-size:0.8rem;color:var(--muted);line-height:1.7;margin-top:12px;margin-bottom:16px;text-align:left">
+        <strong style="color:var(--text)">Consejos:</strong><br>
+        · Sal al exterior si estás en un pasillo cerrado<br>
+        · Asegúrate de estar dentro del auditorio o zona indicada<br>
+        · Espera 5 segundos y vuelve a intentar
+      </div>
+      <button class="btn" onclick="reintentar()">
         Volver a intentar
       </button>
     </div>
 
     <div class="screen" id="screenFinal">
-      <div class="result-icon ok">🎉</div>
+      <div class="result-icon ok">✅</div>
       <div class="result-title">¡Asistencia registrada!</div>
       <div class="result-msg">
-        Tu participación ha sido guardada correctamente en el sistema.<br>Ya puedes cerrar esta página.
+        Tu participación fue verificada y guardada correctamente.<br><br>
+        <span style="color:var(--success);font-weight:500">📚 Esta asistencia cuenta como parte de tu nota actitudinal en Pensamiento Arguediano.</span><br><br>
+        Ya puedes cerrar esta página.
       </div>
     </div>
 
