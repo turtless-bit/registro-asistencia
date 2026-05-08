@@ -500,26 +500,6 @@
         <div class="field-error" id="err-carrera">Selecciona tu carrera</div>
       </div>
 
-      <div class="field">
-        <label>Ciclo</label>
-        <div class="select-wrap">
-          <select id="ciclo">
-            <option value="">Selecciona tu ciclo</option>
-            <option value="I">I Ciclo</option>
-            <option value="II">II Ciclo</option>
-            <option value="III">III Ciclo</option>
-            <option value="IV">IV Ciclo</option>
-            <option value="V">V Ciclo</option>
-            <option value="VI">VI Ciclo</option>
-            <option value="VII">VII Ciclo</option>
-            <option value="VIII">VIII Ciclo</option>
-            <option value="IX">IX Ciclo</option>
-            <option value="X">X Ciclo</option>
-          </select>
-        </div>
-        <div class="field-error" id="err-ciclo">Selecciona tu ciclo</div>
-      </div>
-
       <button class="btn" id="btnRegistrar" onclick="iniciarRegistro()">
         Registrar asistencia
       </button>
@@ -602,6 +582,15 @@
       <div class="result-msg" id="fueraMsg">Tu ubicación no está dentro del área del evento. Acércate al lugar y vuelve
         a intentarlo.</div>
       <button class="btn" onclick="reintentar()" style="margin-top:8px">Volver a intentar</button>
+    </div>
+
+    <!-- PANTALLA 8b: SESIÓN PREVIA ENCONTRADA -->
+    <div class="screen" id="screenSesionPrevia">
+      <div class="result-icon warn">👤</div>
+      <div class="result-title">Sesión activa encontrada</div>
+      <div class="result-msg" id="sesionPreviaMsg">Se encontró un registro en curso en este dispositivo.</div>
+      <button class="btn" onclick="continuarSesionGuardada()" style="margin-bottom:10px">Sí, continuar mi cronómetro</button>
+      <button class="btn-outline" onclick="ignorarSesionGuardada()">No, soy otra persona</button>
     </div>
 
     <!-- PANTALLA 8: SIN EVENTO -->
@@ -814,17 +803,6 @@
         document.getElementById('err-carrera').classList.remove('visible');
       }
 
-      // Ciclo
-      const ciclo = document.getElementById('ciclo').value;
-      if (ciclo === '') {
-        document.getElementById('ciclo').classList.add('error');
-        document.getElementById('err-ciclo').classList.add('visible');
-        ok = false;
-      } else {
-        document.getElementById('ciclo').classList.remove('error');
-        document.getElementById('err-ciclo').classList.remove('visible');
-      }
-
       return ok;
     }
 
@@ -902,33 +880,57 @@
 
       showScreen('screenForm');
 
-      // ── Recuperación automática de sesión (#12) ──────────────────
-      // Si el asistente ya hizo check1 en este dispositivo y cerró la pestaña,
-      // al reabrir el QR retomamos el cronómetro sin que tenga que buscar "Continuar".
+      // ── Recuperación de sesión con confirmación ──────────────────
+      // Si hay una sesión guardada en este dispositivo, preguntamos al usuario
+      // si es él antes de redirigir — así otra persona puede registrarse
+      // en el mismo celular sin problemas.
       const sesionGuardada = localStorage.getItem('asistencia_sesion_' + eventoId);
       if (sesionGuardada) {
         try {
           const { id } = JSON.parse(sesionGuardada);
-          const regs = await sbFetch('asistencias?id=eq.' + id + '&select=id,estado,check1_hora,check2_hora');
+          const regs = await sbFetch('asistencias?id=eq.' + id + '&select=id,estado,check1_hora,check2_hora,nombre');
           if (regs && regs.length > 0) {
             const reg = regs[0];
             if (reg.estado === 'pendiente' && reg.check1_hora && !reg.check2_hora) {
-              asistenciaId = reg.id;
-              check1Timestamp = new Date(reg.check1_hora).getTime();
-              iniciarContador();
+              // Guardar datos para que los botones de confirmación los usen
+              _sesionPendienteId = reg.id;
+              _sesionPendienteCheck1 = new Date(reg.check1_hora).getTime();
+              const nombre = reg.nombre || 'alguien';
+              document.getElementById('sesionPreviaMsg').textContent =
+                'Este dispositivo tiene un registro activo de ' + nombre + '. ¿Eres tú?';
+              showScreen('screenSesionPrevia');
               return;
             } else {
-              // Sesión ya completada o inválida — limpiar
               localStorage.removeItem('asistencia_sesion_' + eventoId);
             }
           } else {
             localStorage.removeItem('asistencia_sesion_' + eventoId);
           }
         } catch (e) {
-          // Si falla la recuperación, simplemente mostramos el formulario normal
           localStorage.removeItem('asistencia_sesion_' + eventoId);
         }
       }
+    }
+
+    // Variables temporales para la confirmación de sesión previa
+    let _sesionPendienteId = null;
+    let _sesionPendienteCheck1 = null;
+
+    function continuarSesionGuardada() {
+      // El usuario confirma que es él — retomar su cronómetro
+      asistenciaId = _sesionPendienteId;
+      check1Timestamp = _sesionPendienteCheck1;
+      _sesionPendienteId = null;
+      _sesionPendienteCheck1 = null;
+      iniciarContador();
+    }
+
+    function ignorarSesionGuardada() {
+      // Es otra persona — limpiar sesión y mostrar formulario limpio
+      localStorage.removeItem('asistencia_sesion_' + eventoId);
+      _sesionPendienteId = null;
+      _sesionPendienteCheck1 = null;
+      showScreen('screenForm');
     }
 
     // ---- CONTINUACIÓN POR DNI ----
@@ -1052,7 +1054,6 @@
         dni: dni,
         correo: document.getElementById('correo').value.trim().toLowerCase(),
         carrera: document.getElementById('carrera').value,
-        ciclo: document.getElementById('ciclo').value,
         device_fingerprint: fp,
         check1_lat: gps.lat,
         check1_lng: gps.lng,
