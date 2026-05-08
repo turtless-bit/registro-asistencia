@@ -779,6 +779,19 @@
                 <option>Matemáticas y Estadística Aplicadas</option>
               </optgroup>
             </select>
+            <select class="filter-select" id="filtroCiclo" onchange="filtrarTabla()">
+              <option value="">Todos los ciclos</option>
+              <option>I</option>
+              <option>II</option>
+              <option>III</option>
+              <option>IV</option>
+              <option>V</option>
+              <option>VI</option>
+              <option>VII</option>
+              <option>VIII</option>
+              <option>IX</option>
+              <option>X</option>
+            </select>
             <button class="btn-export" style="border-color:var(--accent);color:var(--accent)"
               onclick="abrirModalAgregar()">＋ Agregar registro</button>
             <button class="btn-export" onclick="exportarCSV()">⬇ Exportar CSV</button>
@@ -1358,10 +1371,12 @@
       // Exporta exactamente lo que está visible en la tabla (respeta filtros activos)
       const texto = document.getElementById('filtroNombre').value.toLowerCase();
       const carrera = document.getElementById('filtroCarrera').value;
+      const ciclo = document.getElementById('filtroCiclo').value;
       const registrosFiltrados = todosLosRegistros.filter(r => {
         const coincideTexto = !texto || (r.nombre + ' ' + r.apellidos + ' ' + r.dni).toLowerCase().includes(texto);
         const coincideCarrera = !carrera || r.carrera === carrera;
-        return coincideTexto && coincideCarrera;
+        const coincideCiclo = !ciclo || r.ciclo === ciclo;
+        return coincideTexto && coincideCarrera && coincideCiclo;
       });
       if (!registrosFiltrados.length) { alert('No hay registros visibles para exportar.'); return; }
       const headers = ['Nombre', 'Apellidos', 'DNI', 'Correo', 'Carrera', 'Ciclo', 'Motivo salida', 'Estado', 'Check 1', 'Check 2'];
