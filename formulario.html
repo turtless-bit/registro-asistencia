@@ -869,13 +869,16 @@
           return;
         }
 
-        // Detectar fingerprint duplicado (alerta interna para el admin)
-        let alertaFP = false;
+        // Bloquear si este dispositivo ya se registró en este evento
         try {
           const existeFP = await sbFetch(
             'asistencias?device_fingerprint=eq.' + fp + '&evento_id=eq.' + eventoId + '&select=id');
-          alertaFP = existeFP && existeFP.length > 0;
-        } catch (e) { /* no bloquea el registro */ }
+          if (existeFP && existeFP.length > 0) {
+            showAlert('alertForm', 'Este dispositivo ya fue usado para registrarse en este evento.', 'error');
+            return;
+          }
+        } catch (e) { /* si falla la consulta, permitir continuar */ }
+        const alertaFP = false; // ya no se usa como alerta, se bloquea directamente
 
         // Obtener GPS
         showScreen('screenGPS');
