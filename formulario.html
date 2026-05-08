@@ -755,14 +755,20 @@
       const ventanaMin = eventoData.duracion_total_minutos || 30;
 
       if (eventoData.fecha && eventoData.hora_inicio) {
+        // Normalizar fecha a YYYY-MM-DD
         const partesFecha = String(eventoData.fecha).split(/[-\/]/).map(Number);
-        const partesHora = String(eventoData.hora_inicio).replace(/[+Z].*$/, '').split(':').map(Number);
         let anio, mes, dia;
         if (partesFecha[0] > 31) { [anio, mes, dia] = partesFecha; }
         else { [dia, mes, anio] = partesFecha; }
-        const hora = partesHora[0] || 0;
-        const min = partesHora[1] || 0;
-        const dt = new Date(anio, mes - 1, dia, hora, min, 0, 0);
+        const fechaISO = String(anio).padStart(4,'0') + '-' +
+                         String(mes).padStart(2,'0') + '-' +
+                         String(dia).padStart(2,'0');
+
+        // Normalizar hora a HH:MM (quitar segundos y offset si los hay)
+        const horaLimpia = String(eventoData.hora_inicio).replace(/[+Z].*$/, '').slice(0, 5);
+
+        // "YYYY-MM-DDTHH:MM" sin sufijo Z ni offset = se interpreta como hora local del dispositivo
+        const dt = new Date(fechaISO + 'T' + horaLimpia);
         aperturaMs = isNaN(dt.getTime()) ? Date.now() : dt.getTime();
       } else {
         aperturaMs = Date.now(); // sin datos → abierto ahora mismo
