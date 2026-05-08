@@ -426,6 +426,44 @@
       50% { opacity: 0.4; transform: scale(0.7); }
     }
 
+    /* ── Ciclo chips ─────────────────────────────────────── */
+    .ciclo-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+    }
+
+    .ciclo-chip {
+      background: var(--surface2);
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      color: var(--muted);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.88rem;
+      font-weight: 600;
+      padding: 10px 4px;
+      cursor: pointer;
+      transition: all 0.15s;
+      text-align: center;
+    }
+
+    .ciclo-chip:hover {
+      border-color: var(--accent);
+      color: var(--text);
+      background: rgba(79, 142, 247, 0.06);
+    }
+
+    .ciclo-chip.selected {
+      background: rgba(79, 142, 247, 0.14);
+      border-color: var(--accent);
+      color: var(--accent);
+      box-shadow: 0 0 0 2px rgba(79, 142, 247, 0.2);
+    }
+
+    .ciclo-chip.chip-error {
+      border-color: var(--error);
+    }
+
   </style>
 </head>
 
@@ -502,20 +540,18 @@
 
       <div class="field">
         <label>Ciclo</label>
-        <div class="select-wrap">
-          <select id="ciclo">
-            <option value="">Selecciona tu ciclo</option>
-            <option value="I">I Ciclo</option>
-            <option value="II">II Ciclo</option>
-            <option value="III">III Ciclo</option>
-            <option value="IV">IV Ciclo</option>
-            <option value="V">V Ciclo</option>
-            <option value="VI">VI Ciclo</option>
-            <option value="VII">VII Ciclo</option>
-            <option value="VIII">VIII Ciclo</option>
-            <option value="IX">IX Ciclo</option>
-            <option value="X">X Ciclo</option>
-          </select>
+        <input type="hidden" id="ciclo" value="">
+        <div class="ciclo-grid" id="cicloGrid">
+          <button type="button" class="ciclo-chip" data-value="I"   onclick="seleccionarCiclo(this)">I</button>
+          <button type="button" class="ciclo-chip" data-value="II"  onclick="seleccionarCiclo(this)">II</button>
+          <button type="button" class="ciclo-chip" data-value="III" onclick="seleccionarCiclo(this)">III</button>
+          <button type="button" class="ciclo-chip" data-value="IV"  onclick="seleccionarCiclo(this)">IV</button>
+          <button type="button" class="ciclo-chip" data-value="V"   onclick="seleccionarCiclo(this)">V</button>
+          <button type="button" class="ciclo-chip" data-value="VI"  onclick="seleccionarCiclo(this)">VI</button>
+          <button type="button" class="ciclo-chip" data-value="VII" onclick="seleccionarCiclo(this)">VII</button>
+          <button type="button" class="ciclo-chip" data-value="VIII" onclick="seleccionarCiclo(this)">VIII</button>
+          <button type="button" class="ciclo-chip" data-value="IX"  onclick="seleccionarCiclo(this)">IX</button>
+          <button type="button" class="ciclo-chip" data-value="X"   onclick="seleccionarCiclo(this)">X</button>
         </div>
         <div class="field-error" id="err-ciclo">Selecciona tu ciclo</div>
       </div>
@@ -817,11 +853,11 @@
       // Ciclo
       const ciclo = document.getElementById('ciclo').value;
       if (ciclo === '') {
-        document.getElementById('ciclo').classList.add('error');
+        document.querySelectorAll('.ciclo-chip').forEach(c => c.classList.add('chip-error'));
         document.getElementById('err-ciclo').classList.add('visible');
         ok = false;
       } else {
-        document.getElementById('ciclo').classList.remove('error');
+        document.querySelectorAll('.ciclo-chip').forEach(c => c.classList.remove('chip-error'));
         document.getElementById('err-ciclo').classList.remove('visible');
       }
 
@@ -1273,6 +1309,19 @@
     function reintentar() {
       showScreen('screenForm');
       document.getElementById('btnRegistrar').disabled = false;
+    }
+
+    // ---- SELECTOR DE CICLO ----
+
+    function seleccionarCiclo(chip) {
+      // Deseleccionar todos
+      document.querySelectorAll('.ciclo-chip').forEach(c => {
+        c.classList.remove('selected', 'chip-error');
+      });
+      // Seleccionar el pulsado
+      chip.classList.add('selected');
+      document.getElementById('ciclo').value = chip.dataset.value;
+      document.getElementById('err-ciclo').classList.remove('visible');
     }
 
     // Arranque
