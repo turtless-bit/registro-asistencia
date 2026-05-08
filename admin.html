@@ -827,6 +827,10 @@
           <label>Lugar</label>
           <input type="text" id="evLugar" placeholder="Ej: Auditorio principal UNAJMA">
         </div>
+        <div class="field">
+          <label>Apertura del QR <span style="color:var(--muted);font-size:0.72rem;text-transform:none">(minutos antes del inicio en que los asistentes pueden registrarse)</span></label>
+          <input type="number" id="evApertura" placeholder="Ej: 15" min="0" max="120" value="15">
+        </div>
         <button class="btn-primary" id="btnCrear" onclick="crearEvento()">Crear evento y generar QR</button>
       </div>
 
@@ -1096,7 +1100,8 @@
             fecha: fecha || null,
             hora_inicio: hora || null,
             duracion_total_minutos: parseInt(document.getElementById('evDuracion').value) || null,
-            lugar: lugar || null
+            lugar: lugar || null,
+            minutos_antes_apertura: parseInt(document.getElementById('evApertura').value) ?? 15
           })
         });
 
@@ -1108,6 +1113,7 @@
           document.getElementById('evHoraInicio').value = '';
           document.getElementById('evDuracion').value = '';
           document.getElementById('evLugar').value = '';
+          document.getElementById('evApertura').value = '15';
           _eventosCacheTs = 0; // invalidar cache tras mutación
           cargarListaEventos();
           cargarSelectorRegistros();

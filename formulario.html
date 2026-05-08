@@ -859,13 +859,31 @@
       document.getElementById('eventoMeta').textContent = meta.join(' · ');
 
       // ── Fix 5: Bloquear si el evento ya terminó ─────────────────
-      // Si alguien abre el QR después de que el evento finalizó no debe
-      // poder registrarse: el cronómetro llegaría a 0 de inmediato y
-      // ejecutaría check2 creando un registro incoherente.
       if (eventoFinMs < Date.now()) {
         showScreen('screenNoEvento');
         document.querySelector('#screenNoEvento .result-title').textContent = 'Evento finalizado';
         document.querySelector('#screenNoEvento .result-msg').textContent = 'El período de registro para este evento ya cerró. Contacta al organizador si crees que es un error.';
+        return;
+      }
+
+      // ── Bloquear si el evento aún no ha comenzado ────────────────
+      // MINUTOS_ANTES viene del campo "minutos_antes_apertura" configurado
+      // por el organizador al crear el evento (default 15 si no está definido).
+      const MINUTOS_ANTES = (eventoData.minutos_antes_apertura != null)
+        ? eventoData.minutos_antes_apertura
+        : 15;
+      const eventoInicioMs = eventoFinMs - (eventoData.duracion_total_minutos || 90) * 60 * 1000;
+      const abreMs = eventoInicioMs - MINUTOS_ANTES * 60 * 1000;
+      if (Date.now() < abreMs) {
+        const faltaMs = abreMs - Date.now();
+        const faltaH  = Math.floor(faltaMs / 3600000);
+        const faltaM  = Math.floor((faltaMs % 3600000) / 60000);
+        const faltaStr = faltaH > 0 ? faltaH + ' h ' + faltaM + ' min' : faltaM + ' min';
+        const inicioStr = new Date(eventoInicioMs).toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' });
+        showScreen('screenNoEvento');
+        document.querySelector('#screenNoEvento .result-title').textContent = 'El evento aún no ha comenzado';
+        document.querySelector('#screenNoEvento .result-msg').textContent =
+          'El registro abre a las ' + inicioStr + '. Vuelve en ' + faltaStr + '.';
         return;
       }
 
