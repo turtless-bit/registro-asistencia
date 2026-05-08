@@ -804,7 +804,15 @@
       eventoId = params.get('evento');
       if (!eventoId) { showScreen('screenNoEvento'); return; }
 
-      const rows = await sbFetch('eventos?id=eq.' + eventoId + '&select=*');
+      let rows;
+      try {
+        rows = await sbFetch('eventos?id=eq.' + eventoId + '&select=*');
+      } catch (e) {
+        showScreen('screenNoEvento');
+        document.querySelector('#screenNoEvento .result-title').textContent = 'Error de conexión';
+        document.querySelector('#screenNoEvento .result-msg').textContent = 'No se pudo cargar el evento. Verifica tu conexión a internet e intenta de nuevo.';
+        return;
+      }
       if (!rows || rows.length === 0) { showScreen('screenNoEvento'); return; }
       eventoData = rows[0];
       document.getElementById('eventoNombre').textContent = eventoData.nombre;
@@ -850,7 +858,46 @@
       meta.push('Fin: ' + finStr);
       document.getElementById('eventoMeta').textContent = meta.join(' · ');
 
+      // ── Fix 5: Bloquear si el evento ya terminó ─────────────────
+      // Si alguien abre el QR después de que el evento finalizó no debe
+      // poder registrarse: el cronómetro llegaría a 0 de inmediato y
+      // ejecutaría check2 creando un registro incoherente.
+      if (eventoFinMs < Date.now()) {
+        showScreen('screenNoEvento');
+        document.querySelector('#screenNoEvento .result-title').textContent = 'Evento finalizado';
+        document.querySelector('#screenNoEvento .result-msg').textContent = 'El período de registro para este evento ya cerró. Contacta al organizador si crees que es un error.';
+        return;
+      }
+
       showScreen('screenForm');
+
+      // ── Recuperación automática de sesión (#12) ──────────────────
+      // Si el asistente ya hizo check1 en este dispositivo y cerró la pestaña,
+      // al reabrir el QR retomamos el cronómetro sin que tenga que buscar "Continuar".
+      const sesionGuardada = localStorage.getItem('asistencia_sesion_' + eventoId);
+      if (sesionGuardada) {
+        try {
+          const { id } = JSON.parse(sesionGuardada);
+          const regs = await sbFetch('asistencias?id=eq.' + id + '&select=id,estado,check1_hora,check2_hora');
+          if (regs && regs.length > 0) {
+            const reg = regs[0];
+            if (reg.estado === 'pendiente' && reg.check1_hora && !reg.check2_hora) {
+              asistenciaId = reg.id;
+              check1Timestamp = new Date(reg.check1_hora).getTime();
+              iniciarContador();
+              return;
+            } else {
+              // Sesión ya completada o inválida — limpiar
+              localStorage.removeItem('asistencia_sesion_' + eventoId);
+            }
+          } else {
+            localStorage.removeItem('asistencia_sesion_' + eventoId);
+          }
+        } catch (e) {
+          // Si falla la recuperación, simplemente mostramos el formulario normal
+          localStorage.removeItem('asistencia_sesion_' + eventoId);
+        }
+      }
     }
 
     // ---- CONTINUACIÓN POR DNI ----
@@ -866,7 +913,13 @@
         return;
       }
 
-      const rows = await sbFetch('asistencias?dni=eq.' + dni + '&evento_id=eq.' + eventoId + '&select=*');
+      let rows;
+      try {
+        rows = await sbFetch('asistencias?dni=eq.' + dni + '&evento_id=eq.' + eventoId + '&select=*');
+      } catch (e) {
+        showAlert('alertForm', 'Error de conexión al buscar el registro. Intenta de nuevo.', 'error');
+        return;
+      }
       if (!rows || rows.length === 0) {
         showAlert('alertForm', 'No se encontró ningún registro con ese DNI. Completa el formulario de arriba.', 'error');
         return;
@@ -916,8 +969,11 @@
       }
 
       // Verificar fingerprint duplicado (alerta visible)
-      const existeFP = await sbFetch('asistencias?device_fingerprint=eq.' + fp + '&evento_id=eq.' + eventoId + '&select=id');
-      const alertaFP = existeFP && existeFP.length > 0;
+      let alertaFP = false;
+      try {
+        const existeFP = await sbFetch('asistencias?device_fingerprint=eq.' + fp + '&evento_id=eq.' + eventoId + '&select=id');
+        alertaFP = existeFP && existeFP.length > 0;
+      } catch (e) { /* si falla, simplemente no marcamos alerta */ }
 
       document.getElementById('btnRegistrar').disabled = true;
       showScreen('screenGPS');
@@ -966,12 +1022,20 @@
         alerta_duplicado: alertaFP
       };
 
-      const inserted = await sbFetch('asistencias', {
-        method: 'POST',
-        body: JSON.stringify(payload)
-      });
+      let inserted;
+      try {
+        inserted = await sbFetch('asistencias', {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+      } catch (e) {
+        showScreen('screenForm');
+        showAlert('alertForm', 'Error al guardar el registro: ' + e.message + '. Intenta de nuevo.', 'error');
+        document.getElementById('btnRegistrar').disabled = false;
+        return;
+      }
 
-      if (!inserted || inserted.error) {
+      if (!inserted || inserted.error || !inserted[0]) {
         showScreen('screenForm');
         showAlert('alertForm', 'Error al guardar el registro. Intenta de nuevo.', 'error');
         document.getElementById('btnRegistrar').disabled = false;
@@ -1140,12 +1204,6 @@
         <div class="result-icon ok">🎉</div>
         <div class="result-title">¡Asistencia completa!</div>
         <div class="result-msg">Ambas verificaciones fueron exitosas. Tu participación ha sido registrada correctamente.</div>
-      `;
-      } else if (reg.parcial_tipo === 'tiempo') {
-        container.innerHTML = `
-        <div class="result-icon warn">⚠️</div>
-        <div class="result-title">Asistencia parcial</div>
-        <div class="result-msg">Tu participación ha sido registrada.</div>
       `;
       } else if (reg.parcial_tipo === 'ubicacion') {
         container.innerHTML = `

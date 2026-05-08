@@ -738,6 +738,10 @@
           <div class="stat-sub">verificación incompleta</div>
         </div>
       </div>
+      <!-- Fix 8: aviso de filtro activo -->
+      <div id="statFiltroAviso" style="display:none;font-size:0.78rem;color:var(--warn);margin:-18px 0 18px;padding:6px 12px;background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.2);border-radius:8px">
+        ⚠ Los totales reflejan el filtro activo, no el evento completo.
+      </div>
 
       <div class="table-wrap">
         <div class="loading" id="loadingRegistros">Selecciona un evento para ver los registros</div>
@@ -1031,8 +1035,16 @@
 
     // ── EVENTOS ──────────────────────────────────────────────────
 
-    async function cargarEventos() {
+    // Fix 10: Cache de 30 s — evita peticiones redundantes en cada cambio de pestaña.
+    let _eventosCacheTs = 0;
+    const EVENTOS_CACHE_TTL = 30_000;
+
+    async function cargarEventos({ forzar = false } = {}) {
+      if (!forzar && eventosCache.length > 0 && Date.now() - _eventosCacheTs < EVENTOS_CACHE_TTL) {
+        return eventosCache;
+      }
       eventosCache = await sbFetch('eventos?select=*&order=creado_en.desc');
+      _eventosCacheTs = Date.now();
       return eventosCache;
     }
 
@@ -1096,6 +1108,7 @@
           document.getElementById('evHoraInicio').value = '';
           document.getElementById('evDuracion').value = '';
           document.getElementById('evLugar').value = '';
+          _eventosCacheTs = 0; // invalidar cache tras mutación
           cargarListaEventos();
           cargarSelectorRegistros();
         } else {
@@ -1183,6 +1196,7 @@
       try {
         await sbFetch('eventos?id=eq.' + id, { method: 'DELETE' });
         showAlert('alertEvento', '✓ Evento "' + nombre + '" eliminado correctamente.', 'success');
+        _eventosCacheTs = 0; // invalidar cache tras mutación
         cargarListaEventos();
         cargarSelectorRegistros();
       } catch (e) {
@@ -1212,21 +1226,39 @@
       document.getElementById('statsGrid').style.display = 'grid';
     }
 
-    function actualizarStats() {
-      document.getElementById('statTotal').textContent = todosLosRegistros.length;
-      document.getElementById('statCompleto').textContent = todosLosRegistros.filter(r => r.estado === 'completado').length;
-      document.getElementById('statPendiente').textContent = todosLosRegistros.filter(r => r.estado === 'pendiente').length;
-      document.getElementById('statParcial').textContent = todosLosRegistros.filter(r => r.estado === 'parcial').length;
+    // Fix 8: actualizarStats recibe los registros visibles (filtrados o todos)
+    // para que las tarjetas reflejen siempre lo que se ve en la tabla.
+    function actualizarStats(regs) {
+      regs = regs || todosLosRegistros;
+      document.getElementById('statTotal').textContent = regs.length;
+      document.getElementById('statCompleto').textContent = regs.filter(r => r.estado === 'completado').length;
+      document.getElementById('statPendiente').textContent = regs.filter(r => r.estado === 'pendiente').length;
+      document.getElementById('statParcial').textContent = regs.filter(r => r.estado === 'parcial').length;
     }
 
+    // Fix 11: Paginación — evita renderizar >200 filas de golpe.
+    const PAGINA_SIZE = 50;
+    let _paginaActual = 0;
+    let _regsActuales = [];
+
     function renderTabla(regs) {
+      _regsActuales = regs;
+      _paginaActual = 0;
+      _renderPagina();
+    }
+
+    function _renderPagina() {
+      const regs = _regsActuales;
       const tbody = document.getElementById('tablaBody');
       if (regs.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--muted);padding:32px">No hay registros para este evento</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;color:var(--muted);padding:32px">No hay registros para este evento</td></tr>';
+        _renderPaginacion(0, 0);
         return;
       }
+      const inicio = _paginaActual * PAGINA_SIZE;
+      const pagina = regs.slice(inicio, inicio + PAGINA_SIZE);
       const label = { completado: '✓ Completo', pendiente: '⏳ Pendiente', parcial: '⚠ Parcial' };
-      tbody.innerHTML = regs.map(r => `
+      tbody.innerHTML = pagina.map(r => `
         <tr>
           <td>${escHTML(r.nombre)}</td>
           <td>${escHTML(r.apellidos)}</td>
@@ -1240,16 +1272,46 @@
           <td><button class="btn-del" onclick="eliminarRegistro('${escHTML(r.id)}')">🗑</button></td>
         </tr>
       `).join('');
+      _renderPaginacion(regs.length, Math.ceil(regs.length / PAGINA_SIZE));
+    }
+
+    function _renderPaginacion(total, totalPags) {
+      let el = document.getElementById('paginacionBar');
+      if (!el) {
+        el = document.createElement('div');
+        el.id = 'paginacionBar';
+        el.style.cssText = 'display:flex;align-items:center;justify-content:flex-end;gap:8px;padding:12px 16px;border-top:1px solid var(--border);font-size:0.82rem;color:var(--muted)';
+        document.querySelector('.table-wrap').appendChild(el);
+      }
+      if (totalPags <= 1) { el.innerHTML = ''; return; }
+      const ini = _paginaActual * PAGINA_SIZE + 1;
+      const fin = Math.min((_paginaActual + 1) * PAGINA_SIZE, total);
+      el.innerHTML =
+        '<span>' + ini + '–' + fin + ' de ' + total + '</span>' +
+        '<button onclick="cambiarPagina(-1)" ' + (_paginaActual === 0 ? 'disabled' : '') + ' style="background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:4px 10px;cursor:pointer;font-size:0.8rem">‹ Ant</button>' +
+        '<button onclick="cambiarPagina(1)" ' + (_paginaActual >= totalPags - 1 ? 'disabled' : '') + ' style="background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:4px 10px;cursor:pointer;font-size:0.8rem">Sig ›</button>';
+    }
+
+    function cambiarPagina(delta) {
+      const totalPags = Math.ceil(_regsActuales.length / PAGINA_SIZE);
+      _paginaActual = Math.max(0, Math.min(_paginaActual + delta, totalPags - 1));
+      _renderPagina();
     }
 
     function filtrarTabla() {
       const texto = document.getElementById('filtroNombre').value.toLowerCase();
       const carrera = document.getElementById('filtroCarrera').value;
-      renderTabla(todosLosRegistros.filter(r => {
+      const filtrados = todosLosRegistros.filter(r => {
         const coincideTexto = !texto || (r.nombre + ' ' + r.apellidos + ' ' + r.dni).toLowerCase().includes(texto);
         const coincideCarrera = !carrera || r.carrera === carrera;
         return coincideTexto && coincideCarrera;
-      }));
+      });
+      const hayFiltro = texto || carrera;
+      actualizarStats(hayFiltro ? filtrados : todosLosRegistros);
+      // Indicador visual de que los stats muestran el subconjunto filtrado
+      const sub = document.getElementById('statFiltroAviso');
+      if (sub) sub.style.display = hayFiltro ? 'block' : 'none';
+      renderTabla(filtrados);
     }
 
     async function eliminarRegistro(id) {
@@ -1284,9 +1346,17 @@
       });
       if (!registrosFiltrados.length) { alert('No hay registros visibles para exportar.'); return; }
       const headers = ['Nombre', 'Apellidos', 'DNI', 'Correo', 'Carrera', 'Motivo salida', 'Estado', 'Check 1', 'Check 2'];
+      // Fix 12: fechas en hora local peruana (DD/MM/YYYY HH:MM) en lugar de ISO UTC.
+      const fmtCSV = iso => {
+        if (!iso) return '';
+        const d = new Date(iso);
+        const pad = n => String(n).padStart(2, '0');
+        return pad(d.getDate()) + '/' + pad(d.getMonth() + 1) + '/' + d.getFullYear() +
+               ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+      };
       const rows = registrosFiltrados.map(r => [
         r.nombre, r.apellidos, r.dni, r.correo || '', r.carrera || '', r.razon_salida || '', r.estado,
-        r.check1_hora || '', r.check2_hora || ''
+        fmtCSV(r.check1_hora), fmtCSV(r.check2_hora)
       ]);
       const csv = [headers, ...rows].map(r => r.map(c => '"' + String(c).replace(/"/g, '""') + '"').join(',')).join('\n');
       const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8' });
