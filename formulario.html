@@ -422,10 +422,18 @@
     }
 
     @keyframes pulse {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.4; transform: scale(0.7); }
-    }
 
+      0%,
+      100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+
+      50% {
+        opacity: 0.4;
+        transform: scale(0.7);
+      }
+    }
   </style>
 </head>
 
@@ -500,26 +508,6 @@
         <div class="field-error" id="err-carrera">Selecciona tu carrera</div>
       </div>
 
-      <div class="field">
-        <label>Ciclo</label>
-        <div class="select-wrap">
-          <select id="ciclo">
-            <option value="">Selecciona tu ciclo</option>
-            <option value="I">I Ciclo</option>
-            <option value="II">II Ciclo</option>
-            <option value="III">III Ciclo</option>
-            <option value="IV">IV Ciclo</option>
-            <option value="V">V Ciclo</option>
-            <option value="VI">VI Ciclo</option>
-            <option value="VII">VII Ciclo</option>
-            <option value="VIII">VIII Ciclo</option>
-            <option value="IX">IX Ciclo</option>
-            <option value="X">X Ciclo</option>
-          </select>
-        </div>
-        <div class="field-error" id="err-ciclo">Selecciona tu ciclo</div>
-      </div>
-
       <button class="btn" id="btnRegistrar" onclick="iniciarRegistro()">
         Registrar asistencia
       </button>
@@ -549,10 +537,12 @@
       <div class="result-title">Asistencia registrada</div>
       <div class="result-msg">Tu primer registro fue validado correctamente dentro del área del evento.</div>
 
-      <div style="background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.25);border-radius:10px;padding:14px 16px;margin-bottom:18px;font-size:0.82rem;line-height:1.6;color:var(--warn)">
+      <div
+        style="background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.25);border-radius:10px;padding:14px 16px;margin-bottom:18px;font-size:0.82rem;line-height:1.6;color:var(--warn)">
         ⚠️ <strong>Importante:</strong><br>
         • Debes permanecer en el área del evento para que tu segundo registro sea exitoso.<br>
-        • Mientras esta pestaña esté abierta, el segundo registro se realizará automáticamente cuando el contador llegue a cero.<br>
+        • Mientras esta pestaña esté abierta, el segundo registro se realizará automáticamente cuando el contador llegue
+        a cero.<br>
         • Si cierras esta pestaña, puedes volver a escanear el QR y completar tu registro con tu DNI.
       </div>
 
@@ -564,11 +554,14 @@
         </div>
       </div>
 
-      <button class="btn-outline" onclick="mostrarFormularioSalida()" style="margin-top:0;">Justificar salida anticipada</button>
-      
+      <button class="btn-outline" onclick="mostrarFormularioSalida()" style="margin-top:0;">Justificar salida
+        anticipada</button>
+
       <div id="formSalidaAnticipada" style="display:none; margin-top:16px;">
-        <textarea id="razonSalida" rows="2" placeholder="Opcional: Explica brevemente por qué te retiras antes..."></textarea>
-        <button class="btn" style="margin-top:12px; background: var(--warn);" onclick="ejecutarSalidaAnticipada()">Confirmar
+        <textarea id="razonSalida" rows="2"
+          placeholder="Opcional: Explica brevemente por qué te retiras antes..."></textarea>
+        <button class="btn" style="margin-top:12px; background: var(--warn);"
+          onclick="ejecutarSalidaAnticipada()">Confirmar
           salida anticipada</button>
       </div>
     </div>
@@ -814,17 +807,6 @@
         document.getElementById('err-carrera').classList.remove('visible');
       }
 
-      // Ciclo
-      const ciclo = document.getElementById('ciclo').value;
-      if (ciclo === '') {
-        document.getElementById('ciclo').classList.add('error');
-        document.getElementById('err-ciclo').classList.add('visible');
-        ok = false;
-      } else {
-        document.getElementById('ciclo').classList.remove('error');
-        document.getElementById('err-ciclo').classList.remove('visible');
-      }
-
       return ok;
     }
 
@@ -861,7 +843,7 @@
         // fecha  → "YYYY-MM-DD"  (Supabase date)
         // hora_inicio → "HH:MM", "HH:MM:SS" o "HH:MM:SS+00" (Supabase time / timetz)
         const partesFecha = String(eventoData.fecha).split(/[-\/]/).map(Number);
-        const partesHora  = String(eventoData.hora_inicio).replace(/[+Z].*$/, '').split(':').map(Number);
+        const partesHora = String(eventoData.hora_inicio).replace(/[+Z].*$/, '').split(':').map(Number);
         // Supabase siempre devuelve fecha como YYYY-MM-DD; si acaso viene DD/MM/YYYY lo normalizamos
         let anio, mes, dia;
         if (partesFecha[0] > 31) {          // YYYY-MM-DD
@@ -870,7 +852,7 @@
           [dia, mes, anio] = partesFecha;
         }
         const hora = partesHora[0] || 0;
-        const min  = partesHora[1] || 0;
+        const min = partesHora[1] || 0;
         const inicioLocal = new Date(anio, mes - 1, dia, hora, min, 0, 0);
         eventoFinMs = isNaN(inicioLocal.getTime())
           ? Date.now() + durMin * 60 * 1000   // fallback: desde ahora
@@ -882,7 +864,7 @@
 
       // Mostrar hora de fin en el banner para que el asistente sepa hasta cuándo
       const finDate = new Date(eventoFinMs);
-      const finStr  = finDate.toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' });
+      const finStr = finDate.toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' });
       const meta = [];
       if (eventoData.fecha) meta.push(eventoData.fecha);
       if (eventoData.lugar) meta.push(eventoData.lugar);
@@ -1052,7 +1034,6 @@
         dni: dni,
         correo: document.getElementById('correo').value.trim().toLowerCase(),
         carrera: document.getElementById('carrera').value,
-        ciclo: document.getElementById('ciclo').value,
         device_fingerprint: fp,
         check1_lat: gps.lat,
         check1_lng: gps.lng,

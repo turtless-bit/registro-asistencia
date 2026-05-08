@@ -550,7 +550,7 @@
       display: none;
       position: fixed;
       inset: 0;
-      background: rgba(0,0,0,0.6);
+      background: rgba(0, 0, 0, 0.6);
       z-index: 200;
       align-items: center;
       justify-content: center;
@@ -595,9 +595,13 @@
       border-radius: 6px;
     }
 
-    .modal-close:hover { color: var(--text); background: var(--surface2); }
+    .modal-close:hover {
+      color: var(--text);
+      background: var(--surface2);
+    }
 
-    .modal input, .modal select {
+    .modal input,
+    .modal select {
       width: 100%;
       background: var(--surface2);
       border: 1px solid var(--border);
@@ -611,7 +615,10 @@
       appearance: none;
     }
 
-    .modal input:focus, .modal select:focus { border-color: var(--accent); }
+    .modal input:focus,
+    .modal select:focus {
+      border-color: var(--accent);
+    }
 
     .modal label {
       display: block;
@@ -622,7 +629,9 @@
       margin-bottom: 7px;
     }
 
-    .modal .field { margin-bottom: 16px; }
+    .modal .field {
+      margin-bottom: 16px;
+    }
 
     .modal-footer {
       display: flex;
@@ -739,7 +748,8 @@
         </div>
       </div>
       <!-- Fix 8: aviso de filtro activo -->
-      <div id="statFiltroAviso" style="display:none;font-size:0.78rem;color:var(--warn);margin:-18px 0 18px;padding:6px 12px;background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.2);border-radius:8px">
+      <div id="statFiltroAviso"
+        style="display:none;font-size:0.78rem;color:var(--warn);margin:-18px 0 18px;padding:6px 12px;background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.2);border-radius:8px">
         ⚠ Los totales reflejan el filtro activo, no el evento completo.
       </div>
 
@@ -769,21 +779,8 @@
                 <option>Matemáticas y Estadística Aplicadas</option>
               </optgroup>
             </select>
-            <select class="filter-select" id="filtroCiclo" onchange="filtrarTabla()">
-              <option value="">Todos los ciclos</option>
-              <option value="I">I Ciclo</option>
-              <option value="II">II Ciclo</option>
-              <option value="III">III Ciclo</option>
-              <option value="IV">IV Ciclo</option>
-              <option value="V">V Ciclo</option>
-              <option value="VI">VI Ciclo</option>
-              <option value="VII">VII Ciclo</option>
-              <option value="VIII">VIII Ciclo</option>
-              <option value="IX">IX Ciclo</option>
-              <option value="X">X Ciclo</option>
-            </select>
-            <div id="filtrosActivos" style="display:flex;gap:6px;flex-wrap:wrap;align-items:center"></div>
-            <button class="btn-export" style="border-color:var(--accent);color:var(--accent)" onclick="abrirModalAgregar()">＋ Agregar registro</button>
+            <button class="btn-export" style="border-color:var(--accent);color:var(--accent)"
+              onclick="abrirModalAgregar()">＋ Agregar registro</button>
             <button class="btn-export" onclick="exportarCSV()">⬇ Exportar CSV</button>
           </div>
           <div style="overflow-x:auto">
@@ -795,7 +792,6 @@
                   <th>DNI</th>
                   <th>Correo</th>
                   <th>Carrera</th>
-                  <th>Ciclo</th>
                   <th>Motivo salida</th>
                   <th>Estado</th>
                   <th>Check 1</th>
@@ -841,10 +837,6 @@
         <div class="field">
           <label>Lugar</label>
           <input type="text" id="evLugar" placeholder="Ej: Auditorio principal UNAJMA">
-        </div>
-        <div class="field">
-          <label>Apertura del QR (minutos antes del inicio)</label>
-          <input type="number" id="evApertura" placeholder="Ej: 15" min="0" max="120" value="15">
         </div>
         <button class="btn-primary" id="btnCrear" onclick="crearEvento()">Crear evento y generar QR</button>
       </div>
@@ -969,24 +961,6 @@
         </div>
       </div>
       <div class="field">
-        <label>Ciclo</label>
-        <div class="select-wrap-modal">
-          <select id="mCiclo">
-            <option value="">Selecciona un ciclo</option>
-            <option value="I">I Ciclo</option>
-            <option value="II">II Ciclo</option>
-            <option value="III">III Ciclo</option>
-            <option value="IV">IV Ciclo</option>
-            <option value="V">V Ciclo</option>
-            <option value="VI">VI Ciclo</option>
-            <option value="VII">VII Ciclo</option>
-            <option value="VIII">VIII Ciclo</option>
-            <option value="IX">IX Ciclo</option>
-            <option value="X">X Ciclo</option>
-          </select>
-        </div>
-      </div>
-      <div class="field">
         <label>Estado</label>
         <div class="select-wrap-modal">
           <select id="mEstado" onchange="toggleCamposEstado()">
@@ -1005,7 +979,8 @@
         <input type="datetime-local" id="mCheck2">
       </div>
       <div class="field" id="campoMotivo">
-        <label>Motivo de salida <span style="color:var(--muted);font-size:0.72rem;text-transform:none">(opcional)</span></label>
+        <label>Motivo de salida <span
+            style="color:var(--muted);font-size:0.72rem;text-transform:none">(opcional)</span></label>
         <input type="text" id="mMotivo" placeholder="Ej: Compromiso académico, cita médica...">
       </div>
       <div class="modal-footer">
@@ -1133,8 +1108,7 @@
             fecha: fecha || null,
             hora_inicio: hora || null,
             duracion_total_minutos: parseInt(document.getElementById('evDuracion').value) || null,
-            lugar: lugar || null,
-            minutos_antes_apertura: parseInt(document.getElementById('evApertura').value) ?? 15
+            lugar: lugar || null
           })
         });
 
@@ -1146,7 +1120,6 @@
           document.getElementById('evHoraInicio').value = '';
           document.getElementById('evDuracion').value = '';
           document.getElementById('evLugar').value = '';
-          document.getElementById('evApertura').value = '15';
           _eventosCacheTs = 0; // invalidar cache tras mutación
           cargarListaEventos();
           cargarSelectorRegistros();
@@ -1178,7 +1151,7 @@
       // Crear canvas con fondo blanco y margen para que los lectores lo reconozcan bien
       const margen = 24;
       const out = document.createElement('canvas');
-      out.width  = canvas.width  + margen * 2;
+      out.width = canvas.width + margen * 2;
       out.height = canvas.height + margen * 2;
       const ctx = out.getContext('2d');
       ctx.fillStyle = '#ffffff';
@@ -1290,7 +1263,7 @@
       const regs = _regsActuales;
       const tbody = document.getElementById('tablaBody');
       if (regs.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="11" style="text-align:center;color:var(--muted);padding:32px">No hay registros para este evento</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;color:var(--muted);padding:32px">No hay registros para este evento</td></tr>';
         _renderPaginacion(0, 0);
         return;
       }
@@ -1304,7 +1277,6 @@
           <td style="font-family:monospace">${escHTML(r.dni)}</td>
           <td style="font-size:0.8rem">${escHTML(r.correo)}</td>
           <td style="font-size:0.8rem">${escHTML(r.carrera)}</td>
-          <td style="font-size:0.8rem">${escHTML(r.ciclo)}</td>
           <td style="font-size:0.78rem;max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${escHTML(r.razon_salida)}">${escHTML(r.razon_salida)}</td>
           <td><span class="badge ${escHTML(r.estado)}">${label[r.estado] || r.estado}</span></td>
           <td style="font-size:0.78rem">${formatHora(r.check1_hora)}</td>
@@ -1339,46 +1311,18 @@
     }
 
     function filtrarTabla() {
-      const texto   = document.getElementById('filtroNombre').value.toLowerCase();
+      const texto = document.getElementById('filtroNombre').value.toLowerCase();
       const carrera = document.getElementById('filtroCarrera').value;
-      const ciclo   = document.getElementById('filtroCiclo').value;
       const filtrados = todosLosRegistros.filter(r => {
-        const coincideTexto   = !texto   || (r.nombre + ' ' + r.apellidos + ' ' + r.dni).toLowerCase().includes(texto);
+        const coincideTexto = !texto || (r.nombre + ' ' + r.apellidos + ' ' + r.dni).toLowerCase().includes(texto);
         const coincideCarrera = !carrera || r.carrera === carrera;
-        const coincideCiclo   = !ciclo   || r.ciclo === ciclo;
-        return coincideTexto && coincideCarrera && coincideCiclo;
+        return coincideTexto && coincideCarrera;
       });
-      const hayFiltro = texto || carrera || ciclo;
+      const hayFiltro = texto || carrera;
       actualizarStats(hayFiltro ? filtrados : todosLosRegistros);
+      // Indicador visual de que los stats muestran el subconjunto filtrado
       const sub = document.getElementById('statFiltroAviso');
       if (sub) sub.style.display = hayFiltro ? 'block' : 'none';
-      // Etiquetas combinadas de filtros activos
-      const tags = document.getElementById('filtrosActivos');
-      if (tags) {
-        tags.innerHTML = '';
-        if (carrera) {
-          const t = document.createElement('span');
-          t.style.cssText = 'display:inline-flex;align-items:center;gap:4px;background:rgba(79,142,247,0.12);border:1px solid rgba(79,142,247,0.3);color:var(--accent);border-radius:20px;padding:3px 10px;font-size:0.75rem;font-weight:600';
-          t.textContent = carrera + ' ';
-          const b = document.createElement('button');
-          b.textContent = '✕';
-          b.style.cssText = 'background:none;border:none;color:var(--accent);cursor:pointer;font-size:0.85rem;padding:0;line-height:1';
-          b.onclick = () => { document.getElementById('filtroCarrera').value = ''; filtrarTabla(); };
-          t.appendChild(b);
-          tags.appendChild(t);
-        }
-        if (ciclo) {
-          const t = document.createElement('span');
-          t.style.cssText = 'display:inline-flex;align-items:center;gap:4px;background:rgba(124,58,237,0.12);border:1px solid rgba(124,58,237,0.3);color:var(--accent2);border-radius:20px;padding:3px 10px;font-size:0.75rem;font-weight:600';
-          t.textContent = ciclo + ' Ciclo ';
-          const b = document.createElement('button');
-          b.textContent = '✕';
-          b.style.cssText = 'background:none;border:none;color:var(--accent2);cursor:pointer;font-size:0.85rem;padding:0;line-height:1';
-          b.onclick = () => { document.getElementById('filtroCiclo').value = ''; filtrarTabla(); };
-          t.appendChild(b);
-          tags.appendChild(t);
-        }
-      }
       renderTabla(filtrados);
     }
 
@@ -1405,27 +1349,25 @@
 
     function exportarCSV() {
       // Exporta exactamente lo que está visible en la tabla (respeta filtros activos)
-      const texto   = document.getElementById('filtroNombre').value.toLowerCase();
+      const texto = document.getElementById('filtroNombre').value.toLowerCase();
       const carrera = document.getElementById('filtroCarrera').value;
-      const ciclo   = document.getElementById('filtroCiclo').value;
       const registrosFiltrados = todosLosRegistros.filter(r => {
-        const coincideTexto   = !texto   || (r.nombre + ' ' + r.apellidos + ' ' + r.dni).toLowerCase().includes(texto);
+        const coincideTexto = !texto || (r.nombre + ' ' + r.apellidos + ' ' + r.dni).toLowerCase().includes(texto);
         const coincideCarrera = !carrera || r.carrera === carrera;
-        const coincideCiclo   = !ciclo   || r.ciclo === ciclo;
-        return coincideTexto && coincideCarrera && coincideCiclo;
+        return coincideTexto && coincideCarrera;
       });
       if (!registrosFiltrados.length) { alert('No hay registros visibles para exportar.'); return; }
-      const headers = ['Nombre', 'Apellidos', 'DNI', 'Correo', 'Carrera', 'Ciclo', 'Motivo salida', 'Estado', 'Check 1', 'Check 2'];
+      const headers = ['Nombre', 'Apellidos', 'DNI', 'Correo', 'Carrera', 'Motivo salida', 'Estado', 'Check 1', 'Check 2'];
       // Fix 12: fechas en hora local peruana (DD/MM/YYYY HH:MM) en lugar de ISO UTC.
       const fmtCSV = iso => {
         if (!iso) return '';
         const d = new Date(iso);
         const pad = n => String(n).padStart(2, '0');
         return pad(d.getDate()) + '/' + pad(d.getMonth() + 1) + '/' + d.getFullYear() +
-               ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+          ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes());
       };
       const rows = registrosFiltrados.map(r => [
-        r.nombre, r.apellidos, r.dni, r.correo || '', r.carrera || '', r.ciclo || '', r.razon_salida || '', r.estado,
+        r.nombre, r.apellidos, r.dni, r.correo || '', r.carrera || '', r.razon_salida || '', r.estado,
         fmtCSV(r.check1_hora), fmtCSV(r.check2_hora)
       ]);
       const csv = [headers, ...rows].map(r => r.map(c => '"' + String(c).replace(/"/g, '""') + '"').join(',')).join('\n');
@@ -1585,8 +1527,8 @@
     function toLocalDatetimeValue(date) {
       // Convierte un Date a string "YYYY-MM-DDTHH:MM" en hora LOCAL para input datetime-local
       const pad = n => String(n).padStart(2, '0');
-      return date.getFullYear() + '-' + pad(date.getMonth()+1) + '-' + pad(date.getDate()) +
-             'T' + pad(date.getHours()) + ':' + pad(date.getMinutes());
+      return date.getFullYear() + '-' + pad(date.getMonth() + 1) + '-' + pad(date.getDate()) +
+        'T' + pad(date.getHours()) + ':' + pad(date.getMinutes());
     }
 
     function toggleCamposEstado() {
@@ -1603,9 +1545,8 @@
         return;
       }
       // Limpiar campos de texto
-      ['mNombres','mApellidos','mDni','mCorreo','mMotivo'].forEach(id => document.getElementById(id).value = '');
+      ['mNombres', 'mApellidos', 'mDni', 'mCorreo', 'mMotivo'].forEach(id => document.getElementById(id).value = '');
       document.getElementById('mCarrera').value = '';
-      document.getElementById('mCiclo').value = '';
       document.getElementById('mEstado').value = 'completado';
       // Poner hora actual como valor por defecto para check1 y check2
       const ahora = toLocalDatetimeValue(new Date());
@@ -1623,15 +1564,14 @@
     }
 
     async function guardarRegistroManual() {
-      const eventoId  = document.getElementById('selectorEventoRegistros').value;
-      const nombres   = document.getElementById('mNombres').value.trim();
+      const eventoId = document.getElementById('selectorEventoRegistros').value;
+      const nombres = document.getElementById('mNombres').value.trim();
       const apellidos = document.getElementById('mApellidos').value.trim();
-      const dni       = document.getElementById('mDni').value.trim();
-      const correo    = document.getElementById('mCorreo').value.trim();
-      const carrera   = document.getElementById('mCarrera').value;
-      const ciclo     = document.getElementById('mCiclo').value;
-      const estado    = document.getElementById('mEstado').value;
-      const motivo    = document.getElementById('mMotivo').value.trim();
+      const dni = document.getElementById('mDni').value.trim();
+      const correo = document.getElementById('mCorreo').value.trim();
+      const carrera = document.getElementById('mCarrera').value;
+      const estado = document.getElementById('mEstado').value;
+      const motivo = document.getElementById('mMotivo').value.trim();
       const check1Val = document.getElementById('mCheck1').value;
       const check2Val = document.getElementById('mCheck2').value;
 
@@ -1641,11 +1581,11 @@
         alerta.className = 'alert visible error';
       };
 
-      if (!nombres)              return mostrarError('⚠ Ingresa los nombres.');
-      if (!apellidos)            return mostrarError('⚠ Ingresa los apellidos.');
-      if (!/^\d{8}$/.test(dni))  return mostrarError('⚠ El DNI debe tener 8 dígitos.');
-      if (!carrera)              return mostrarError('⚠ Selecciona una carrera.');
-      if (!check1Val)            return mostrarError('⚠ Ingresa la hora del Check 1.');
+      if (!nombres) return mostrarError('⚠ Ingresa los nombres.');
+      if (!apellidos) return mostrarError('⚠ Ingresa los apellidos.');
+      if (!/^\d{8}$/.test(dni)) return mostrarError('⚠ El DNI debe tener 8 dígitos.');
+      if (!carrera) return mostrarError('⚠ Selecciona una carrera.');
+      if (!check1Val) return mostrarError('⚠ Ingresa la hora del Check 1.');
       if (estado !== 'pendiente' && !check2Val) return mostrarError('⚠ Ingresa la hora del Check 2.');
 
       // #9 — Check 2 no puede ser anterior a Check 1
@@ -1659,7 +1599,7 @@
       try {
         const existe = await sbFetch('asistencias?dni=eq.' + dni + '&evento_id=eq.' + eventoId + '&select=id');
         if (existe && existe.length > 0) return mostrarError('⚠ Ya existe un registro con ese DNI en este evento.');
-      } catch(e) { return mostrarError('✗ Error al verificar DNI: ' + e.message); }
+      } catch (e) { return mostrarError('✗ Error al verificar DNI: ' + e.message); }
 
       const btn = document.getElementById('btnGuardarRegistro');
       btn.disabled = true;
@@ -1670,15 +1610,14 @@
       const check2ISO = (estado !== 'pendiente' && check2Val) ? new Date(check2Val).toISOString() : null;
 
       const payload = {
-        evento_id:     eventoId,
-        nombre:        nombres,
-        apellidos:     apellidos,
-        dni:           dni,
-        correo:        correo || null,
-        carrera:       carrera,
-        ciclo:         ciclo || null,
-        estado:        estado,
-        check1_hora:   check1ISO,
+        evento_id: eventoId,
+        nombre: nombres,
+        apellidos: apellidos,
+        dni: dni,
+        correo: correo || null,
+        carrera: carrera,
+        estado: estado,
+        check1_hora: check1ISO,
         check1_valido: true,
         ...(check2ISO ? { check2_hora: check2ISO, check2_valido: true } : {}),
         ...(motivo ? { razon_salida: motivo } : {})
@@ -1688,7 +1627,7 @@
         await sbFetch('asistencias', { method: 'POST', body: JSON.stringify(payload) });
         cerrarModalAgregar();
         cargarRegistros();
-      } catch(e) {
+      } catch (e) {
         mostrarError('✗ Error al guardar: ' + e.message);
       }
 
@@ -1697,7 +1636,7 @@
     }
 
     // Cerrar modal al hacer clic fuera
-    document.getElementById('modalAgregar').addEventListener('click', function(e) {
+    document.getElementById('modalAgregar').addEventListener('click', function (e) {
       if (e.target === this) cerrarModalAgregar();
     });
 
