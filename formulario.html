@@ -945,6 +945,12 @@
     async function iniciarRegistro() {
       if (!validarCampos()) return;
 
+      // Deshabilitar el botón INMEDIATAMENTE antes de cualquier await,
+      // para evitar doble-tap en móvil que genera registros duplicados.
+      const btnReg = document.getElementById('btnRegistrar');
+      if (btnReg.disabled) return; // ya hay una llamada en vuelo
+      btnReg.disabled = true;
+
       const dni = document.getElementById('dni').value.trim();
       const fp = getFingerprint();
 
@@ -954,16 +960,19 @@
         existeDNI = await sbFetch('asistencias?dni=eq.' + dni + '&evento_id=eq.' + eventoId + '&select=id,estado,check1_hora,check2_hora');
       } catch (e) {
         showAlert('alertForm', 'Error al verificar el DNI. Intenta de nuevo.', 'error');
+        btnReg.disabled = false;
         return;
       }
       if (existeDNI && existeDNI.length > 0) {
         const reg = existeDNI[0];
         if (reg.estado === 'completado' || reg.estado === 'parcial') {
           showAlert('alertForm', 'Este DNI ya completó su registro en este evento.', 'error');
+          btnReg.disabled = false;
           return;
         }
         if (reg.estado === 'pendiente') {
           showAlert('alertForm', 'Este DNI ya tiene un registro en curso. Si eres tú, usa la sección "Continuar registro" con tu DNI.', 'error');
+          btnReg.disabled = false;
           return;
         }
       }
@@ -975,7 +984,6 @@
         alertaFP = existeFP && existeFP.length > 0;
       } catch (e) { /* si falla, simplemente no marcamos alerta */ }
 
-      document.getElementById('btnRegistrar').disabled = true;
       showScreen('screenGPS');
 
       let gps;
