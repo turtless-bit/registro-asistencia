@@ -395,11 +395,7 @@
         </div>
       </div>
 
-      <div
-        style="background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.25);border-radius:10px;padding:14px 16px;font-size:0.82rem;line-height:1.7;color:var(--warn)">
-        ⚠️ <strong>No cierres esta página.</strong><br>
-        El formulario aparecerá automáticamente cuando llegue la hora de apertura.
-      </div>
+
     </div>
 
     <div class="screen" id="screenForm">
@@ -529,6 +525,7 @@
     let eventoData = null;
     let aperturaMs = null;   // timestamp en que el QR abre
     let cierreMs = null;   // timestamp en que el QR cierra
+    let scanMs = Date.now(); // timestamp exacto en que el usuario escaneó/abrió el QR
     let esperaTotalMs = null;
     let esperaInterval = null;
 
@@ -656,7 +653,8 @@
 
     function iniciarEspera() {
       showScreen('screenEspera');
-      esperaTotalMs = aperturaMs - Date.now();
+      // La espera total se calcula desde el momento en que se escaneó el QR
+      esperaTotalMs = aperturaMs - scanMs;
 
       const fmt = d => d.toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' });
 
@@ -677,9 +675,10 @@
         document.getElementById('esperaDisplay').textContent =
           h > 0 ? pad(h) + ':' + pad(m) + ':' + pad(s) : pad(m) + ':' + pad(s);
 
-        // Barra progresa de 0% → 100% conforme se acerca la apertura
+        // Barra progresa de 0% (hora de escaneo) → 100% (hora de apertura)
+        const transcurrido = aperturaMs - Date.now();
         const progreso = Math.max(0, Math.min(100,
-          ((esperaTotalMs - restante) / esperaTotalMs) * 100));
+          ((esperaTotalMs - transcurrido) / esperaTotalMs) * 100));
         document.getElementById('esperaFill').style.width = progreso + '%';
 
         document.getElementById('esperaSub').textContent =
