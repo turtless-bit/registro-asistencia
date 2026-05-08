@@ -740,7 +740,7 @@
         <div class="loading" id="loadingRegistros">Selecciona un evento para ver los registros</div>
         <div style="display:none" id="tableContent">
           <div class="table-toolbar">
-            <input type="text" id="filtroNombre" placeholder="Buscar por nombre o DNI..." oninput="filtrarTabla()">
+            <input type="text" id="filtroNombre" placeholder="Buscar por nombre o DNI..." oninput="filtrarTablaDebounced()">
             <select class="filter-select" id="filtroCarrera" onchange="filtrarTabla()">
               <option value="">Todas las carreras</option>
               <optgroup label="Ciencias de la Salud y Sociales">
@@ -832,6 +832,9 @@
           <input type="text" id="evLugar" placeholder="Ej: Auditorio principal UNAJMA">
         </div>
         <button class="btn-primary" id="btnCrear" onclick="crearEvento()">Crear evento y generar QR</button>
+        <div id="cargandoEvento" style="display:none;margin-top:14px;height:3px;border-radius:2px;background:var(--border);overflow:hidden">
+          <div id="cargandoBar" style="height:100%;width:0%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:2px;transition:width 0.4s ease"></div>
+        </div>
       </div>
 
       <div class="qr-section" id="qrSection" style="display:none">
@@ -986,6 +989,8 @@
     let todosLosRegistros = [], eventosCache = [];
     let map = null, puntos = [], marcadores = [], poligonoLayer = null;
     let eventoPerimetroId = null, miUbicacionMarker = null;
+    let _perimetroRetries = 0;
+    const PERIMETRO_MAX_RETRIES = 20; // 20 × 300ms = 6 segundos máximo
 
     async function sbFetch(path, opts = {}) {
       const res = await fetch(SUPABASE_URL + '/rest/v1/' + path, {
@@ -1020,6 +1025,13 @@
       if (s == null) return '—';
       return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
     }
+
+    // Debounce: evita que filtrarTabla se ejecute en cada keystroke
+    function debounce(fn, ms) {
+      let t;
+      return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), ms); };
+    }
+    const filtrarTablaDebounced = debounce(filtrarTabla, 200);
 
     function showPage(id) {
       document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -1085,6 +1097,12 @@
       const btn = document.getElementById('btnCrear');
       btn.disabled = true;
       btn.textContent = 'Creando...';
+      // Mostrar barra de progreso indeterminada
+      const barWrap = document.getElementById('cargandoEvento');
+      const bar = document.getElementById('cargandoBar');
+      barWrap.style.display = 'block';
+      bar.style.width = '0%';
+      requestAnimationFrame(() => { bar.style.width = '75%'; });
 
       try {
         const data = await sbFetch('eventos', {
@@ -1118,6 +1136,9 @@
 
       btn.disabled = false;
       btn.textContent = 'Crear evento y generar QR';
+      // Completar y ocultar barra
+      bar.style.width = '100%';
+      setTimeout(() => { barWrap.style.display = 'none'; bar.style.width = '0%'; }, 400);
     }
 
     function generarQR(id, nombre) {
@@ -1198,6 +1219,17 @@
         await sbFetch('eventos?id=eq.' + id, { method: 'DELETE' });
         showAlert('alertEvento', '✓ Evento "' + nombre + '" eliminado correctamente.', 'success');
         _eventosCacheTs = 0; // invalidar cache tras mutación
+        // Si el evento eliminado era el seleccionado en Registros, limpiar esa vista
+        const selReg = document.getElementById('selectorEventoRegistros');
+        if (selReg.value === id) {
+          selReg.value = '';
+          todosLosRegistros = [];
+          _regsActuales = [];
+          document.getElementById('loadingRegistros').textContent = 'Selecciona un evento para ver los registros';
+          document.getElementById('loadingRegistros').style.display = 'block';
+          document.getElementById('tableContent').style.display = 'none';
+          document.getElementById('statsGrid').style.display = 'none';
+        }
         cargarListaEventos();
         cargarSelectorRegistros();
       } catch (e) {
@@ -1215,7 +1247,7 @@
       document.getElementById('tableContent').style.display = 'none';
       document.getElementById('statsGrid').style.display = 'none';
       try {
-        todosLosRegistros = await sbFetch('asistencias?evento_id=eq.' + id + '&select=*&order=creado_en.desc');
+        todosLosRegistros = await sbFetch('asistencias?evento_id=eq.' + id + '&select=id,nombre,apellidos,dni,correo,carrera,ciclo,check1_hora,estado,alerta_duplicado&order=creado_en.desc');
       } catch (e) {
         document.getElementById('loadingRegistros').textContent = 'Error al cargar registros.';
         return;
@@ -1332,16 +1364,9 @@
     }
 
     function exportarCSV() {
-      // Exporta exactamente lo que está visible en la tabla (respeta filtros activos)
-      const texto = document.getElementById('filtroNombre').value.toLowerCase();
-      const carrera = document.getElementById('filtroCarrera').value;
-      const ciclo = document.getElementById('filtroCiclo').value;
-      const registrosFiltrados = todosLosRegistros.filter(r => {
-        const coincideTexto = !texto || (r.nombre + ' ' + r.apellidos + ' ' + r.dni).toLowerCase().includes(texto);
-        const coincideCarrera = !carrera || r.carrera === carrera;
-        const coincideCiclo = !ciclo || r.ciclo === ciclo;
-        return coincideTexto && coincideCarrera && coincideCiclo;
-      });
+      // Exporta exactamente lo que está visible en la tabla — reutiliza _regsActuales
+      // que ya contiene los registros filtrados activos, sin duplicar la lógica de filtrado
+      const registrosFiltrados = _regsActuales;
       if (!registrosFiltrados.length) { alert('No hay registros visibles para exportar.'); return; }
       const headers = ['Nombre', 'Apellidos', 'DNI', 'Correo', 'Carrera', 'Ciclo', 'Hora registro'];
       // Fix 12: fechas en hora local peruana (DD/MM/YYYY HH:MM) en lugar de ISO UTC.
@@ -1359,46 +1384,72 @@
       const csv = [headers, ...rows].map(r => r.map(c => '"' + String(c).replace(/"/g, '""') + '"').join(',')).join('\n');
       const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8' });
       const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
+      const blobUrl = URL.createObjectURL(blob);
+      a.href = blobUrl;
       a.download = 'asistencia_' + new Date().toISOString().slice(0, 10) + '.csv';
       a.click();
+      // Liberar el blob de memoria tras el click
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
     }
 
     // ── MAPA ─────────────────────────────────────────────────────
 
     function iniciarMapa() {
       if (map) return;
-      const link = document.createElement('link');
-      link.rel = 'stylesheet';
-      link.href = 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css';
-      document.head.appendChild(link);
+      // Agregar CSS solo si no está ya en el DOM
+      const LEAFLET_CSS = 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css';
+      const LEAFLET_JS  = 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js';
+      if (!document.querySelector('link[href="' + LEAFLET_CSS + '"]')) {
+        const link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = LEAFLET_CSS;
+        document.head.appendChild(link);
+      }
+      // Si el script ya existe (y Leaflet ya cargó), inicializar directamente
+      if (window.L) {
+        _initLeaflet();
+        return;
+      }
+      if (document.querySelector('script[src="' + LEAFLET_JS + '"]')) return; // ya se está cargando
       const script = document.createElement('script');
-      script.src = 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js';
-      script.onload = () => {
-        map = L.map('map').setView([-13.65, -73.33], 15);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }).addTo(map);
-        map.on('click', e => {
-          if (!eventoPerimetroId) {
-            showAlert('alertPerimetro', '⚠ Selecciona un evento primero.', 'warn');
-            return;
-          }
-          agregarPunto(e.latlng.lat, e.latlng.lng);
-        });
-        if (navigator.geolocation) {
-          navigator.geolocation.getCurrentPosition(
-            pos => map.setView([pos.coords.latitude, pos.coords.longitude], 17),
-            () => { }
-          );
-        }
-      };
+      script.src = LEAFLET_JS;
+      script.onload = _initLeaflet;
       document.head.appendChild(script);
+    }
+
+    function _initLeaflet() {
+      map = L.map('map').setView([-13.65, -73.33], 15);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }).addTo(map);
+      map.on('click', e => {
+        if (!eventoPerimetroId) {
+          showAlert('alertPerimetro', '⚠ Selecciona un evento primero.', 'warn');
+          return;
+        }
+        agregarPunto(e.latlng.lat, e.latlng.lng);
+      });
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          pos => map.setView([pos.coords.latitude, pos.coords.longitude], 17),
+          () => { }
+        );
+      }
     }
 
     function cargarEventoPerimetro() {
       const id = document.getElementById('selectorEventoPerimetro').value;
       if (!id) return;
       eventoPerimetroId = id;
-      if (!map) { setTimeout(cargarEventoPerimetro, 300); return; }
+      if (!map) {
+        if (_perimetroRetries >= PERIMETRO_MAX_RETRIES) {
+          _perimetroRetries = 0;
+          showAlert('alertPerimetro', '✗ El mapa tardó demasiado en cargar. Recarga la página.', 'error');
+          return;
+        }
+        _perimetroRetries++;
+        setTimeout(cargarEventoPerimetro, 300);
+        return;
+      }
+      _perimetroRetries = 0; // resetear al tener éxito
       limpiarPuntos();
       const ev = eventosCache.find(e => e.id === id);
       if (ev && ev.perimetro && ev.perimetro.length > 0) {
@@ -1447,12 +1498,25 @@
     }
 
     function eliminarPunto(idx) {
+      // Quitar el punto del array y limpiar todos los marcadores del mapa
       puntos.splice(idx, 1);
       marcadores.forEach(m => map.removeLayer(m));
       marcadores = [];
       if (poligonoLayer) { map.removeLayer(poligonoLayer); poligonoLayer = null; }
-      const tmp = [...puntos]; puntos = [];
-      tmp.forEach(p => agregarPunto(p.lat, p.lng, false));
+
+      // Reconstruir marcadores con índices correctos (1, 2, 3…) sin redibujar en cada paso
+      const tmp = [...puntos];
+      puntos = [];
+      tmp.forEach(p => {
+        puntos.push({ lat: p.lat, lng: p.lng });
+        const n = puntos.length;
+        const m = L.circleMarker([p.lat, p.lng], {
+          radius: 7, fillColor: '#4f8ef7', color: '#fff', weight: 2, fillOpacity: 1
+        }).addTo(map).bindPopup('Punto ' + n + '<br>' + p.lat.toFixed(6) + ', ' + p.lng.toFixed(6));
+        marcadores.push(m);
+      });
+
+      // Un solo redibujado al final
       dibujarPoligono();
       actualizarListaPuntos();
     }
@@ -1548,6 +1612,11 @@
       if (!nombres) return mostrarError('⚠ Ingresa los nombres.');
       if (!apellidos) return mostrarError('⚠ Ingresa los apellidos.');
       if (!/^\d{8}$/.test(dni)) return mostrarError('⚠ El DNI debe tener 8 dígitos.');
+      if (correo) {
+        const c = correo.toLowerCase();
+        if (!c.endsWith('@unajma.edu.pe') && !c.endsWith('@gmail.com'))
+          return mostrarError('⚠ El correo debe ser @unajma.edu.pe o @gmail.com.');
+      }
       if (!carrera) return mostrarError('⚠ Selecciona una carrera.');
       if (!ciclo) return mostrarError('⚠ Selecciona un ciclo.');
 
@@ -1580,10 +1649,11 @@
         cargarRegistros();
       } catch (e) {
         mostrarError('✗ Error al guardar: ' + e.message);
+      } finally {
+        // Siempre restaurar el botón, tanto en éxito como en error
+        btn.disabled = false;
+        btn.textContent = 'Guardar registro';
       }
-
-      btn.disabled = false;
-      btn.textContent = 'Guardar registro';
     }
 
     // Cerrar modal al hacer clic fuera

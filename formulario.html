@@ -549,6 +549,8 @@
     }
 
     function showScreen(id) {
+      // Limpiar el interval de espera si existe antes de cambiar de pantalla
+      if (esperaInterval) { clearInterval(esperaInterval); esperaInterval = null; }
       document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
       document.getElementById(id).classList.add('active');
     }
@@ -823,97 +825,102 @@
       if (btnReg.disabled) return;
       btnReg.disabled = true;
 
-      // Verificar que la ventana siga abierta al momento de enviar
-      if (Date.now() >= cierreMs) {
-        showScreen('screenNoEvento');
-        document.getElementById('noEventoTitulo').textContent = 'Registro cerrado';
-        document.getElementById('noEventoMsg').textContent =
-          'El tiempo de registro se cerró mientras completabas el formulario. Contacta al organizador.';
-        return;
-      }
-
-      const dni = document.getElementById('dni').value.trim();
-      const fp = getFingerprint();
-
-      // Verificar DNI duplicado
-      let existeDNI;
+      // try/finally garantiza que el botón siempre se reactive si algo falla
       try {
-        existeDNI = await sbFetch('asistencias?dni=eq.' + dni + '&evento_id=eq.' + eventoId + '&select=id');
-      } catch (e) {
-        showAlert('alertForm', 'Error al verificar el DNI. Intenta de nuevo.', 'error');
-        btnReg.disabled = false;
-        return;
+        // Verificar que la ventana siga abierta al momento de enviar
+        if (Date.now() >= cierreMs) {
+          showScreen('screenNoEvento');
+          document.getElementById('noEventoTitulo').textContent = 'Registro cerrado';
+          document.getElementById('noEventoMsg').textContent =
+            'El tiempo de registro se cerró mientras completabas el formulario. Contacta al organizador.';
+          return;
+        }
+
+        const dni = document.getElementById('dni').value.trim();
+        const fp = getFingerprint();
+
+        // Verificar DNI duplicado
+        let existeDNI;
+        try {
+          existeDNI = await sbFetch('asistencias?dni=eq.' + dni + '&evento_id=eq.' + eventoId + '&select=id');
+        } catch (e) {
+          showAlert('alertForm', 'Error al verificar el DNI. Intenta de nuevo.', 'error');
+          return;
+        }
+        if (existeDNI && existeDNI.length > 0) {
+          showAlert('alertForm', 'Este DNI ya fue registrado en este evento.', 'error');
+          return;
+        }
+
+        // Detectar fingerprint duplicado (alerta interna para el admin)
+        let alertaFP = false;
+        try {
+          const existeFP = await sbFetch(
+            'asistencias?device_fingerprint=eq.' + fp + '&evento_id=eq.' + eventoId + '&select=id');
+          alertaFP = existeFP && existeFP.length > 0;
+        } catch (e) { /* no bloquea el registro */ }
+
+        // Obtener GPS
+        showScreen('screenGPS');
+
+        let gps;
+        try {
+          gps = await obtenerGPS();
+        } catch (e) {
+          showScreen('screenForm');
+          showAlert('alertForm', 'No se pudo obtener tu ubicación. Activa el GPS e intenta de nuevo.', 'error');
+          return;
+        }
+
+        const perimetro = eventoData?.perimetro || null;
+        const tolerancia = eventoData?.tolerancia_metros || 10;
+        const resultado = validarUbicacion(gps.lat, gps.lng, perimetro, tolerancia);
+
+        if (!resultado.valido) {
+          const dist = resultado.distancia ? Math.round(resultado.distancia) + ' m del área' : '';
+          document.getElementById('fueraMsg').textContent =
+            'Tu ubicación está fuera del área del evento' +
+            (dist ? ' (' + dist + ')' : '') +
+            '. Acércate al lugar y vuelve a intentarlo.';
+          showScreen('screenFuera');
+          return;
+        }
+
+        // Guardar registro — estado 'completado' de una sola vez
+        const payload = {
+          evento_id: eventoId,
+          nombre: document.getElementById('nombres').value.trim(),
+          apellidos: document.getElementById('apellidos').value.trim(),
+          dni: dni,
+          correo: document.getElementById('correo').value.trim().toLowerCase(),
+          carrera: document.getElementById('carrera').value,
+          ciclo: document.getElementById('ciclo').value,
+          device_fingerprint: fp,
+          check1_lat: gps.lat,
+          check1_lng: gps.lng,
+          check1_hora: new Date().toISOString(),
+          check1_valido: true,
+          estado: 'completado',
+          alerta_duplicado: alertaFP
+        };
+
+        try {
+          await sbFetch('asistencias', { method: 'POST', body: JSON.stringify(payload) });
+        } catch (e) {
+          showScreen('screenForm');
+          showAlert('alertForm', 'Error al guardar el registro: ' + e.message + '. Intenta de nuevo.', 'error');
+          return;
+        }
+
+        showScreen('screenFinal');
+      } finally {
+        // Siempre restaurar el botón excepto si el registro fue exitoso
+        // (en ese caso la pantalla final no muestra el formulario)
+        const activa = document.querySelector('.screen.active');
+        if (!activa || activa.id !== 'screenFinal') {
+          btnReg.disabled = false;
+        }
       }
-      if (existeDNI && existeDNI.length > 0) {
-        showAlert('alertForm', 'Este DNI ya fue registrado en este evento.', 'error');
-        btnReg.disabled = false;
-        return;
-      }
-
-      // Detectar fingerprint duplicado (alerta interna para el admin)
-      let alertaFP = false;
-      try {
-        const existeFP = await sbFetch(
-          'asistencias?device_fingerprint=eq.' + fp + '&evento_id=eq.' + eventoId + '&select=id');
-        alertaFP = existeFP && existeFP.length > 0;
-      } catch (e) { /* no bloquea el registro */ }
-
-      // Obtener GPS
-      showScreen('screenGPS');
-
-      let gps;
-      try {
-        gps = await obtenerGPS();
-      } catch (e) {
-        showScreen('screenForm');
-        showAlert('alertForm', 'No se pudo obtener tu ubicación. Activa el GPS e intenta de nuevo.', 'error');
-        btnReg.disabled = false;
-        return;
-      }
-
-      const perimetro = eventoData?.perimetro || null;
-      const tolerancia = eventoData?.tolerancia_metros || 10;
-      const resultado = validarUbicacion(gps.lat, gps.lng, perimetro, tolerancia);
-
-      if (!resultado.valido) {
-        const dist = resultado.distancia ? Math.round(resultado.distancia) + ' m del área' : '';
-        document.getElementById('fueraMsg').textContent =
-          'Tu ubicación está fuera del área del evento' +
-          (dist ? ' (' + dist + ')' : '') +
-          '. Acércate al lugar y vuelve a intentarlo.';
-        showScreen('screenFuera');
-        btnReg.disabled = false;
-        return;
-      }
-
-      // Guardar registro — estado 'completado' de una sola vez
-      const payload = {
-        evento_id: eventoId,
-        nombre: document.getElementById('nombres').value.trim(),
-        apellidos: document.getElementById('apellidos').value.trim(),
-        dni: dni,
-        correo: document.getElementById('correo').value.trim().toLowerCase(),
-        carrera: document.getElementById('carrera').value,
-        ciclo: document.getElementById('ciclo').value,
-        device_fingerprint: fp,
-        check1_lat: gps.lat,
-        check1_lng: gps.lng,
-        check1_hora: new Date().toISOString(),
-        check1_valido: true,
-        estado: 'completado',
-        alerta_duplicado: alertaFP
-      };
-
-      try {
-        await sbFetch('asistencias', { method: 'POST', body: JSON.stringify(payload) });
-      } catch (e) {
-        showScreen('screenForm');
-        showAlert('alertForm', 'Error al guardar el registro: ' + e.message + '. Intenta de nuevo.', 'error');
-        btnReg.disabled = false;
-        return;
-      }
-
-      showScreen('screenFinal');
     }
 
     function reintentar() {
