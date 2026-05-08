@@ -4,11 +4,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Registro de asistencia verificado por GPS · UNAJMA">
   <meta name="theme-color" content="#0f1117">
-  <meta property="og:title" content="Asistencia UNAJMA · Pensamiento Arguediano">
-  <meta property="og:description" content="Escanea el QR, permite tu ubicación y registra tu asistencia.">
-  <title>Asistencia UNAJMA · Pensamiento Arguediano</title>
+  <meta name="description" content="Registro de asistencia verificado por GPS · UNAJMA">
+  <title>Asistencia UNAJMA</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Serif+Display&display=swap');
 
@@ -375,7 +373,7 @@
   <div class="header">
     <div class="logo">🎓</div>
     <h1>Asistencia UNAJMA</h1>
-    <p>Registro seguro · Pensamiento Arguediano</p>
+    <p id="headerSubtitle">Registro seguro · Verificación GPS</p>
   </div>
 
   <div class="evento-banner" id="eventoBanner">
@@ -387,8 +385,8 @@
 
     <div class="screen" id="screenEspera">
       <div class="result-icon warn">⏳</div>
-      <div class="result-title">El registro abrirá pronto</div>
-      <div class="result-msg">Estás en el lugar correcto. El formulario se habilitará automáticamente en:</div>
+      <div class="result-title">El registro aún no está disponible</div>
+      <div class="result-msg">El formulario de registro abrirá en:</div>
 
       <div class="countdown-box">
         <div class="countdown-label">Tiempo hasta apertura</div>
@@ -457,25 +455,7 @@
         <div class="field-error" id="err-carrera">Selecciona tu carrera</div>
       </div>
 
-      <div class="field">
-        <label>Ciclo</label>
-        <div class="select-wrap">
-          <select id="ciclo">
-            <option value="">Selecciona tu ciclo</option>
-            <option value="I">I Ciclo</option>
-            <option value="II">II Ciclo</option>
-            <option value="III">III Ciclo</option>
-            <option value="IV">IV Ciclo</option>
-            <option value="V">V Ciclo</option>
-            <option value="VI">VI Ciclo</option>
-            <option value="VII">VII Ciclo</option>
-            <option value="VIII">VIII Ciclo</option>
-            <option value="IX">IX Ciclo</option>
-            <option value="X">X Ciclo</option>
-          </select>
-        </div>
-        <div class="field-error" id="err-ciclo">Selecciona tu ciclo</div>
-      </div>
+
 
       <button class="btn" id="btnRegistrar" onclick="iniciarRegistro()">
         Registrar asistencia
@@ -483,45 +463,44 @@
     </div>
 
     <div class="screen" id="screenGPS">
-      <div class="gps-status">
+      <!-- Estado 1: explicación antes de pedir permiso -->
+      <div id="gpsExplicacion" class="gps-status">
         <div style="font-size:3rem;margin-bottom:16px;line-height:1">📍</div>
-        <h2 style="font-size:1.15rem;font-weight:600;margin-bottom:10px">Verificando tu ubicación</h2>
-        <p style="color:var(--muted);font-size:0.875rem;line-height:1.6;margin-bottom:20px">
-          Tu navegador te pedirá permiso para acceder a tu ubicación.<br>
-          <strong style="color:var(--text)">Toca "Permitir"</strong> para continuar con el registro.
+        <h2 style="font-size:1.15rem;font-weight:600;margin-bottom:10px">Necesitamos tu ubicación</h2>
+        <p style="color:var(--muted);font-size:0.875rem;line-height:1.6;margin-bottom:16px">
+          En un momento el navegador te preguntará si permites el acceso a tu ubicación.<br><br>
+          <strong style="color:var(--text)">Toca "Permitir"</strong> cuando aparezca — es necesario para verificar que estás en el lugar del evento.
         </p>
-        <!-- Instrucción visual del diálogo del sistema -->
         <div style="background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:14px 16px;text-align:left;font-size:0.8rem;line-height:1.7;color:var(--muted);margin-bottom:20px">
-          <div style="font-weight:600;color:var(--text);margin-bottom:6px;font-size:0.85rem">¿Por qué necesitamos tu ubicación?</div>
-          El sistema verifica que estés físicamente en el lugar del evento antes de registrar tu asistencia. Tu ubicación <strong style="color:var(--text)">no se comparte con nadie</strong> ni se usa fuera de esta verificación.
+          <div style="font-weight:600;color:var(--text);margin-bottom:4px;font-size:0.85rem">🔒 Tu privacidad está protegida</div>
+          Solo verificamos que estés en el lugar del evento. Tu ubicación <strong style="color:var(--text)">no se almacena ni se comparte</strong> con terceros.
         </div>
+        <div style="font-size:0.78rem;color:var(--muted)">Continuando en <strong id="gpsSeg" style="color:var(--accent)">4</strong> segundos...</div>
+      </div>
+      <!-- Estado 2: esperando respuesta del GPS -->
+      <div id="gpsEsperando" class="gps-status" style="display:none">
         <div class="spinner"></div>
+        <h2 style="font-size:1.1rem;margin-top:16px;margin-bottom:8px">Verificando ubicación...</h2>
+        <p style="color:var(--muted);font-size:0.82rem">Acepta el permiso si aún no lo has hecho</p>
       </div>
     </div>
 
     <div class="screen" id="screenFuera">
       <div class="result-icon error">📍</div>
-      <div class="result-title">Fuera del área</div>
+      <div class="result-title">Fuera del área del evento</div>
       <div class="result-msg" id="fueraMsg">
         Tu ubicación no está dentro del área del evento. Acércate al lugar y vuelve a intentarlo.
       </div>
-      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;font-size:0.8rem;color:var(--muted);line-height:1.7;margin-top:12px;margin-bottom:16px;text-align:left">
-        <strong style="color:var(--text)">Consejos:</strong><br>
-        · Sal al exterior si estás en un pasillo cerrado<br>
-        · Asegúrate de estar dentro del auditorio o zona indicada<br>
-        · Espera 5 segundos y vuelve a intentar
-      </div>
-      <button class="btn" onclick="reintentar()">
+      <button class="btn" onclick="reintentar()" style="margin-top:4px">
         Volver a intentar
       </button>
     </div>
 
     <div class="screen" id="screenFinal">
-      <div class="result-icon ok">✅</div>
+      <div class="result-icon ok">🎉</div>
       <div class="result-title">¡Asistencia registrada!</div>
       <div class="result-msg">
         Tu participación fue verificada y guardada correctamente.<br><br>
-        <span style="color:var(--success);font-weight:500">📚 Esta asistencia cuenta como parte de tu nota actitudinal en Pensamiento Arguediano.</span><br><br>
         Ya puedes cerrar esta página.
       </div>
     </div>
@@ -737,7 +716,7 @@
       const dni = document.getElementById('dni').value.trim();
       const correo = document.getElementById('correo').value.trim();
       const carrera = document.getElementById('carrera').value;
-      const ciclo = document.getElementById('ciclo').value;
+      const ciclo = '';
 
       function marcar(id, errId, msg, fallo) {
         const el = document.getElementById(id);
@@ -762,7 +741,7 @@
         !correoLower.endsWith('@unajma.edu.pe') && !correoLower.endsWith('@gmail.com'));
 
       marcar('carrera', 'err-carrera', null, !carrera);
-      marcar('ciclo', 'err-ciclo', null, !ciclo);
+
 
       return ok;
     }
@@ -788,6 +767,7 @@
       if (!rows || rows.length === 0) { showScreen('screenNoEvento'); return; }
       eventoData = rows[0];
       document.getElementById('eventoNombre').textContent = eventoData.nombre;
+      document.getElementById('headerSubtitle').textContent = 'Registro seguro · ' + eventoData.nombre;
 
       // ── Calcular apertura y cierre del QR ───────────────────────
       const ventanaMin = eventoData.duracion_total_minutos || 30;
@@ -899,8 +879,23 @@
         } catch (e) { /* si falla la consulta, permitir continuar */ }
         const alertaFP = false; // ya no se usa como alerta, se bloquea directamente
 
-        // Obtener GPS
+        // Mostrar pantalla explicativa 4s antes de solicitar el permiso
         showScreen('screenGPS');
+        document.getElementById('gpsExplicacion').style.display = '';
+        document.getElementById('gpsEsperando').style.display = 'none';
+
+        await new Promise(resolve => {
+          let seg = 4;
+          const cnt = setInterval(() => {
+            seg--;
+            const el = document.getElementById('gpsSeg');
+            if (el) el.textContent = seg;
+            if (seg <= 0) { clearInterval(cnt); resolve(); }
+          }, 1000);
+        });
+
+        document.getElementById('gpsExplicacion').style.display = 'none';
+        document.getElementById('gpsEsperando').style.display = '';
 
         let gps;
         try {
