@@ -764,11 +764,19 @@
                          String(mes).padStart(2,'0') + '-' +
                          String(dia).padStart(2,'0');
 
-        // Normalizar hora a HH:MM (quitar segundos y offset si los hay)
-        const horaLimpia = String(eventoData.hora_inicio).replace(/[+Z].*$/, '').slice(0, 5);
-
-        // "YYYY-MM-DDTHH:MM" sin sufijo Z ni offset = se interpreta como hora local del dispositivo
-        const dt = new Date(fechaISO + 'T' + horaLimpia);
+        // Detectar si hora_inicio viene con offset UTC (ej: "12:20:00+00" de Supabase)
+        // o como hora local simple (ej: "12:20")
+        const horaRaw = String(eventoData.hora_inicio);
+        const tieneOffset = /[+\-]\d{2}/.test(horaRaw.slice(5)) || horaRaw.endsWith('Z');
+        let dt;
+        if (tieneOffset) {
+          // Preservar el offset para que Date() convierta correctamente a hora local
+          // Ej: "2026-05-08T12:20:00+00:00" → JS lo convierte a 07:20 en UTC-5
+          dt = new Date(fechaISO + 'T' + horaRaw);
+        } else {
+          // Sin offset: el admin ingresó hora local (ej: "12:20") → tratar como local
+          dt = new Date(fechaISO + 'T' + horaRaw.slice(0, 5));
+        }
         aperturaMs = isNaN(dt.getTime()) ? Date.now() : dt.getTime();
       } else {
         aperturaMs = Date.now(); // sin datos → abierto ahora mismo
