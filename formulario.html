@@ -563,16 +563,33 @@
     }
 
     function getFingerprint() {
-      const nav = navigator;
-      const raw = [nav.userAgent, screen.width, screen.height, screen.colorDepth,
-      Intl.DateTimeFormat().resolvedOptions().timeZone, nav.language,
-      nav.hardwareConcurrency || 0].join('|');
-      let hash = 0;
-      for (let i = 0; i < raw.length; i++) {
-        hash = ((hash << 5) - hash) + raw.charCodeAt(i);
-        hash |= 0;
+      // Intenta recuperar el UUID persistente guardado en este dispositivo
+      const KEY = 'unajma_device_id';
+      try {
+        let id = localStorage.getItem(KEY);
+        if (!id) {
+          // Primera vez en este dispositivo: generar UUID v4 aleatorio y guardarlo
+          id = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+            const r = Math.random() * 16 | 0;
+            return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+          });
+          localStorage.setItem(KEY, id);
+        }
+        return id;
+      } catch (e) {
+        // localStorage bloqueado (modo incógnito estricto, iframe, etc.)
+        // Caer en el hash de hardware como respaldo — no bloquea el registro
+        const nav = navigator;
+        const raw = [nav.userAgent, screen.width, screen.height, screen.colorDepth,
+          Intl.DateTimeFormat().resolvedOptions().timeZone, nav.language,
+          nav.hardwareConcurrency || 0].join('|');
+        let hash = 0;
+        for (let i = 0; i < raw.length; i++) {
+          hash = ((hash << 5) - hash) + raw.charCodeAt(i);
+          hash |= 0;
+        }
+        return 'fallback_' + Math.abs(hash).toString(36);
       }
-      return Math.abs(hash).toString(36);
     }
 
     // ── VALIDACIÓN DE NOMBRES ────────────────────────────────────
