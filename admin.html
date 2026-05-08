@@ -731,21 +731,6 @@
           <div class="stat-value accent" id="statTotal">0</div>
           <div class="stat-sub">inscritos</div>
         </div>
-        <div class="stat-card">
-          <div class="stat-label">Completos</div>
-          <div class="stat-value ok" id="statCompleto">0</div>
-          <div class="stat-sub">ambos checks ✓</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-label">Pendientes</div>
-          <div class="stat-value accent" id="statPendiente">0</div>
-          <div class="stat-sub">esperando check 2</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-label">Parciales</div>
-          <div class="stat-value warn" id="statParcial">0</div>
-          <div class="stat-sub">verificación incompleta</div>
-        </div>
       </div>
       <!-- Fix 8: aviso de filtro activo -->
       <div id="statFiltroAviso"
@@ -806,10 +791,7 @@
                   <th>Correo</th>
                   <th>Carrera</th>
                   <th>Ciclo</th>
-                  <th>Motivo salida</th>
-                  <th>Estado</th>
-                  <th>Check 1</th>
-                  <th>Check 2</th>
+                  <th>Hora registro</th>
                   <th></th>
                 </tr>
               </thead>
@@ -840,13 +822,13 @@
             <input type="date" id="evFecha" min="2020-01-01" max="2099-12-31">
           </div>
           <div class="field">
-            <label>Hora de inicio</label>
-            <input type="time" id="evHoraInicio">
+            <label>Hora de apertura del QR</label>
+            <input type="time" id="evHoraApertura">
           </div>
         </div>
         <div class="field">
-          <label>Duración del evento (minutos)</label>
-          <input type="number" id="evDuracion" placeholder="Ej: 90" min="1" max="1440">
+          <label>Ventana de registro (minutos)</label>
+          <input type="number" id="evVentana" placeholder="Ej: 30" min="1" max="720">
         </div>
         <div class="field">
           <label>Lugar</label>
@@ -877,7 +859,7 @@
               <tr>
                 <th>Nombre</th>
                 <th>Fecha</th>
-                <th>Hora inicio</th>
+                <th>Apertura QR</th>
                 <th>Lugar</th>
                 <th>Perímetro</th>
                 <th>Acciones</th>
@@ -975,27 +957,15 @@
         </div>
       </div>
       <div class="field">
-        <label>Estado</label>
+        <label>Ciclo</label>
         <div class="select-wrap-modal">
-          <select id="mEstado" onchange="toggleCamposEstado()">
-            <option value="completado">✓ Completo</option>
-            <option value="pendiente">⏳ Pendiente</option>
-            <option value="parcial">⚠ Parcial</option>
+          <select id="mCiclo">
+            <option value="">Selecciona un ciclo</option>
+            <option>I</option><option>II</option><option>III</option>
+            <option>IV</option><option>V</option><option>VI</option>
+            <option>VII</option><option>VIII</option><option>IX</option><option>X</option>
           </select>
         </div>
-      </div>
-      <div class="field">
-        <label>Check 1 — Hora de entrada</label>
-        <input type="datetime-local" id="mCheck1">
-      </div>
-      <div class="field" id="campoCheck2">
-        <label>Check 2 — Hora de salida</label>
-        <input type="datetime-local" id="mCheck2">
-      </div>
-      <div class="field" id="campoMotivo">
-        <label>Motivo de salida <span
-            style="color:var(--muted);font-size:0.72rem;text-transform:none">(opcional)</span></label>
-        <input type="text" id="mMotivo" placeholder="Ej: Compromiso académico, cita médica...">
       </div>
       <div class="modal-footer">
         <button class="btn-secondary" onclick="cerrarModalAgregar()">Cancelar</button>
@@ -1105,7 +1075,7 @@
     async function crearEvento() {
       const nombre = document.getElementById('evNombre').value.trim();
       const fecha = document.getElementById('evFecha').value;
-      const hora = document.getElementById('evHoraInicio').value;
+      const hora = document.getElementById('evHoraApertura').value;
       const lugar = document.getElementById('evLugar').value.trim();
 
       if (!nombre) { showAlert('alertEvento', '⚠ Ingresa el nombre del evento.', 'error'); return; }
@@ -1120,8 +1090,8 @@
           body: JSON.stringify({
             nombre,
             fecha: fecha || null,
-            hora_inicio: hora || null,
-            duracion_total_minutos: parseInt(document.getElementById('evDuracion').value) || null,
+            hora_apertura: hora || null,
+            ventana_minutos: parseInt(document.getElementById('evVentana').value) || null,
             lugar: lugar || null
           })
         });
@@ -1131,8 +1101,8 @@
           generarQR(data[0].id, nombre);
           document.getElementById('evNombre').value = '';
           document.getElementById('evFecha').value = '';
-          document.getElementById('evHoraInicio').value = '';
-          document.getElementById('evDuracion').value = '';
+          document.getElementById('evHoraApertura').value = '';
+          document.getElementById('evVentana').value = '';
           document.getElementById('evLugar').value = '';
           _eventosCacheTs = 0; // invalidar cache tras mutación
           cargarListaEventos();
@@ -1197,9 +1167,9 @@
       }
       tbody.innerHTML = eventosCache.map(ev => `
         <tr>
-          <td><strong>${escHTML(ev.nombre)}</strong><br><span style="font-size:0.75rem;color:var(--muted)">${ev.duracion_total_minutos ? ev.duracion_total_minutos + ' min' : '—'}</span></td>
+          <td><strong>${escHTML(ev.nombre)}</strong><br><span style="font-size:0.75rem;color:var(--muted)">${ev.ventana_minutos ? ev.ventana_minutos + ' min de ventana' : '—'}</span></td>
           <td>${ev.fecha || '—'}</td>
-          <td>${ev.hora_inicio ? ev.hora_inicio.slice(0, 5) : '—'}</td>
+          <td>${ev.hora_apertura ? ev.hora_apertura.slice(0, 5) : '—'}</td>
           <td>${escHTML(ev.lugar)}</td>
           <td>${ev.perimetro && ev.perimetro.length >= 3
           ? '<span style="color:var(--success);font-size:0.82rem">✓ Definido (' + ev.perimetro.length + ' pts)</span>'
@@ -1255,14 +1225,9 @@
       document.getElementById('statsGrid').style.display = 'grid';
     }
 
-    // Fix 8: actualizarStats recibe los registros visibles (filtrados o todos)
-    // para que las tarjetas reflejen siempre lo que se ve en la tabla.
     function actualizarStats(regs) {
       regs = regs || todosLosRegistros;
       document.getElementById('statTotal').textContent = regs.length;
-      document.getElementById('statCompleto').textContent = regs.filter(r => r.estado === 'completado').length;
-      document.getElementById('statPendiente').textContent = regs.filter(r => r.estado === 'pendiente').length;
-      document.getElementById('statParcial').textContent = regs.filter(r => r.estado === 'parcial').length;
     }
 
     // Fix 11: Paginación — evita renderizar >200 filas de golpe.
@@ -1280,7 +1245,7 @@
       const regs = _regsActuales;
       const tbody = document.getElementById('tablaBody');
       if (regs.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="11" style="text-align:center;color:var(--muted);padding:32px">No hay registros para este evento</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:32px">No hay registros para este evento</td></tr>';
         _renderPaginacion(0, 0);
         return;
       }
@@ -1295,10 +1260,7 @@
           <td style="font-size:0.8rem">${escHTML(r.correo)}</td>
           <td style="font-size:0.8rem">${escHTML(r.carrera)}</td>
           <td style="font-size:0.8rem;text-align:center">${escHTML(r.ciclo)}</td>
-          <td style="font-size:0.78rem;max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${escHTML(r.razon_salida)}">${escHTML(r.razon_salida)}</td>
-          <td><span class="badge ${escHTML(r.estado)}">${label[r.estado] || r.estado}</span></td>
           <td style="font-size:0.78rem">${formatHora(r.check1_hora)}</td>
-          <td style="font-size:0.78rem">${formatHora(r.check2_hora)}</td>
           <td><button class="btn-del" onclick="eliminarRegistro('${escHTML(r.id)}')">🗑</button></td>
         </tr>
       `).join('');
@@ -1379,7 +1341,7 @@
         return coincideTexto && coincideCarrera && coincideCiclo;
       });
       if (!registrosFiltrados.length) { alert('No hay registros visibles para exportar.'); return; }
-      const headers = ['Nombre', 'Apellidos', 'DNI', 'Correo', 'Carrera', 'Ciclo', 'Motivo salida', 'Estado', 'Check 1', 'Check 2'];
+      const headers = ['Nombre', 'Apellidos', 'DNI', 'Correo', 'Carrera', 'Ciclo', 'Hora registro'];
       // Fix 12: fechas en hora local peruana (DD/MM/YYYY HH:MM) en lugar de ISO UTC.
       const fmtCSV = iso => {
         if (!iso) return '';
@@ -1389,8 +1351,8 @@
           ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes());
       };
       const rows = registrosFiltrados.map(r => [
-        r.nombre, r.apellidos, r.dni, r.correo || '', r.carrera || '', r.ciclo || '', r.razon_salida || '', r.estado,
-        fmtCSV(r.check1_hora), fmtCSV(r.check2_hora)
+        r.nombre, r.apellidos, r.dni, r.correo || '', r.carrera || '', r.ciclo || '',
+        fmtCSV(r.check1_hora)
       ]);
       const csv = [headers, ...rows].map(r => r.map(c => '"' + String(c).replace(/"/g, '""') + '"').join(',')).join('\n');
       const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8' });
@@ -1546,19 +1508,6 @@
 
     // ── MODAL AGREGAR REGISTRO ────────────────────────────────────
 
-    function toLocalDatetimeValue(date) {
-      // Convierte un Date a string "YYYY-MM-DDTHH:MM" en hora LOCAL para input datetime-local
-      const pad = n => String(n).padStart(2, '0');
-      return date.getFullYear() + '-' + pad(date.getMonth() + 1) + '-' + pad(date.getDate()) +
-        'T' + pad(date.getHours()) + ':' + pad(date.getMinutes());
-    }
-
-    function toggleCamposEstado() {
-      const estado = document.getElementById('mEstado').value;
-      document.getElementById('campoCheck2').style.display = estado === 'pendiente' ? 'none' : '';
-      document.getElementById('campoMotivo').style.display = estado === 'completado' ? 'none' : '';
-    }
-
     function abrirModalAgregar() {
       const eventoId = document.getElementById('selectorEventoRegistros').value;
       if (!eventoId) {
@@ -1566,15 +1515,9 @@
         showPage('pageEventos');
         return;
       }
-      // Limpiar campos de texto
-      ['mNombres', 'mApellidos', 'mDni', 'mCorreo', 'mMotivo'].forEach(id => document.getElementById(id).value = '');
+      ['mNombres', 'mApellidos', 'mDni', 'mCorreo'].forEach(id => document.getElementById(id).value = '');
       document.getElementById('mCarrera').value = '';
-      document.getElementById('mEstado').value = 'completado';
-      // Poner hora actual como valor por defecto para check1 y check2
-      const ahora = toLocalDatetimeValue(new Date());
-      document.getElementById('mCheck1').value = ahora;
-      document.getElementById('mCheck2').value = ahora;
-      toggleCamposEstado();
+      document.getElementById('mCiclo').value = '';
       const alerta = document.getElementById('alertModal');
       alerta.className = 'alert';
       alerta.textContent = '';
@@ -1592,10 +1535,7 @@
       const dni = document.getElementById('mDni').value.trim();
       const correo = document.getElementById('mCorreo').value.trim();
       const carrera = document.getElementById('mCarrera').value;
-      const estado = document.getElementById('mEstado').value;
-      const motivo = document.getElementById('mMotivo').value.trim();
-      const check1Val = document.getElementById('mCheck1').value;
-      const check2Val = document.getElementById('mCheck2').value;
+      const ciclo = document.getElementById('mCiclo').value;
 
       const alerta = document.getElementById('alertModal');
       const mostrarError = msg => {
@@ -1603,19 +1543,11 @@
         alerta.className = 'alert visible error';
       };
 
-      if (!nombres) return mostrarError('⚠ Ingresa los nombres.');
+      if (!nombres)  return mostrarError('⚠ Ingresa los nombres.');
       if (!apellidos) return mostrarError('⚠ Ingresa los apellidos.');
       if (!/^\d{8}$/.test(dni)) return mostrarError('⚠ El DNI debe tener 8 dígitos.');
-      if (!carrera) return mostrarError('⚠ Selecciona una carrera.');
-      if (!check1Val) return mostrarError('⚠ Ingresa la hora del Check 1.');
-      if (estado !== 'pendiente' && !check2Val) return mostrarError('⚠ Ingresa la hora del Check 2.');
-
-      // #9 — Check 2 no puede ser anterior a Check 1
-      if (estado !== 'pendiente' && check2Val && check1Val) {
-        if (new Date(check2Val) < new Date(check1Val)) {
-          return mostrarError('⚠ La hora de Check 2 no puede ser anterior a la de Check 1.');
-        }
-      }
+      if (!carrera)  return mostrarError('⚠ Selecciona una carrera.');
+      if (!ciclo)    return mostrarError('⚠ Selecciona un ciclo.');
 
       // Verificar DNI duplicado
       try {
@@ -1627,22 +1559,17 @@
       btn.disabled = true;
       btn.textContent = 'Guardando...';
 
-      // datetime-local devuelve "YYYY-MM-DDTHH:MM" en hora local — lo convertimos a ISO UTC
-      const check1ISO = check1Val ? new Date(check1Val).toISOString() : null;
-      const check2ISO = (estado !== 'pendiente' && check2Val) ? new Date(check2Val).toISOString() : null;
-
       const payload = {
-        evento_id: eventoId,
-        nombre: nombres,
-        apellidos: apellidos,
-        dni: dni,
-        correo: correo || null,
-        carrera: carrera,
-        estado: estado,
-        check1_hora: check1ISO,
+        evento_id:   eventoId,
+        nombre:      nombres,
+        apellidos:   apellidos,
+        dni:         dni,
+        correo:      correo || null,
+        carrera:     carrera,
+        ciclo:       ciclo,
+        check1_hora: new Date().toISOString(),
         check1_valido: true,
-        ...(check2ISO ? { check2_hora: check2ISO, check2_valido: true } : {}),
-        ...(motivo ? { razon_salida: motivo } : {})
+        estado:      'completado'
       };
 
       try {
